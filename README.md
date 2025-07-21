@@ -1,2 +1,2 @@
 # Portfolia
-SMART INTERNSHIP PORTFOLIO BUILDER AUTOMATED PROFESSIONAL SHOWCASE PLATFORM
+## Smart internship portfolio builder automated professional showcase platform 
