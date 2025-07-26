@@ -1,9 +1,12 @@
-import requests
 from fastapi import APIRouter, Query
 from urllib.parse import urlparse
+import requests, os
+from dotenv import load_dotenv
 
+load_dotenv()
 router = APIRouter()
 
+GITHUB_API_TOKEN = os.getenv("GITHUB_API_TOKEN")
 
 headers = {
     "Authorization": f"Bearer {GITHUB_API_TOKEN}",
@@ -16,20 +19,18 @@ def get_repo_info(repo_url: str = Query(...)):
         path = urlparse(repo_url).path.strip("/")
         owner, repo = path.split("/")[:2]
 
-        # Basic repo info
         repo_resp = requests.get(
             f"https://api.github.com/repos/{owner}/{repo}",
             headers=headers
         )
         repo_data = repo_resp.json()
 
-        # README (optional)
         readme_resp = requests.get(
             f"https://api.github.com/repos/{owner}/{repo}/readme",
             headers=headers
         )
-        readme = readme_resp.json()
-        readme_content = readme.get("content")
+        readme_data = readme_resp.json()
+        readme_content = readme_data.get("content")
 
         return {
             "name": repo_data.get("name"),
@@ -40,6 +41,5 @@ def get_repo_info(repo_url: str = Query(...)):
             "html_url": repo_data.get("html_url"),
             "readme_content_base64": readme_content
         }
-
     except Exception as e:
         return {"error": str(e)}
