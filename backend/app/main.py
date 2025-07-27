@@ -1,7 +1,6 @@
 from fastapi import FastAPI
-from app.api.v1.routes import github  # import your routers properly
+from app.api.v1.routes import github  
 
-app = FastAPI()  # THIS LINE IS MISSING in your error
+app = FastAPI()  
 
-# Register routes
 app.include_router(github.router, prefix="/api/v1/github", tags=["GitHub"])
