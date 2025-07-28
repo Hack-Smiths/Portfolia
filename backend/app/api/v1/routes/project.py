@@ -39,8 +39,8 @@ Extract the following JSON from the README below. Be concise and accurate. If an
 {{
   "title": "",
   "description": "",
-  "tech_stack": "", 
-  "deployed_link": "",
+  "tech stack": "", 
+  "deployed link": "",
   "features": []
 }}
 
