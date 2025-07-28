@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+env/
+venv/
+ENV/
+env.bak/
+*.sqlite3
+*.log
+
+# FastAPI/General
+.env
+.DS_Store
+.idea/
+.vscode/
