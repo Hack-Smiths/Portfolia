@@ -142,7 +142,7 @@ const Dashboard = () => {
                 Resume Upload & Auto-Categorization
               </h2>
               <p className="text-foreground-muted text-sm">
-                Upload your resume and we'll automatically extract achievements, skills, and experiences using AI to update all portfolio sections.
+                Upload your resume & we'll automatically extract projects, achievements, skills, and experiences using AI to update all portfolio sections.
               </p>
             </div>
             <div className="flex space-x-3">
