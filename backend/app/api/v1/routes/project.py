@@ -1,9 +1,6 @@
-from fastapi import APIRouter, Query
-from urllib.parse import urlparse
-import requests
-import openai
-import base64
 import os
+import requests
+from fastapi import APIRouter, Query
 from dotenv import load_dotenv
 import json
 
@@ -11,79 +8,85 @@ load_dotenv()
 
 router = APIRouter()
 
+API_KEY = os.getenv("OPENROUTER_API_KEY")
+MODEL = os.getenv("MODEL", "mistralai/mistral-7b-instruct:free")
+OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
+
 @router.get("/smart-summary")
-def smart_summary(repo_url: str = Query(..., description="GitHub repo URL")):
+def github_summary(repo_url: str = Query(..., description="GitHub repo URL")):
     try:
-        # Load API keys from .env
-        github_token = os.getenv("GITHUB_TOKEN")
-        openai.api_key = os.getenv("OPENAI_API_KEY")
+        if "github.com" not in repo_url:
+            return {"error": "Invalid GitHub URL"}
 
-        headers = {
-            "Authorization": f"token {github_token}",
-            "Accept": "application/vnd.github.v3+json"
-        }
+        # Extract GitHub owner/repo
+        parts = repo_url.strip('/').split('/')
+        if len(parts) < 2:
+            return {"error": "Could not parse GitHub repo URL"}
+        owner, repo = parts[-2], parts[-1]
 
-        # Parse GitHub URL
-        parsed = urlparse(repo_url)
-        path = parsed.path.strip("/")
-        owner, repo = path.replace(".git", "").split("/")[:2]
+        # Construct raw README URL
+        raw_url = f"https://raw.githubusercontent.com/{owner}/{repo}/main/README.md"
+        resp = requests.get(raw_url)
+        if resp.status_code != 200:
+            return {"error": f"README.md not found at {raw_url}"}
 
-        # === Get repo metadata ===
-        repo_resp = requests.get(f"https://api.github.com/repos/{owner}/{repo}", headers=headers)
-        repo_data = repo_resp.json()
+        readme = resp.text[:2000].replace("\n", " ").strip()
 
-        # === Get README content ===
-        readme_resp = requests.get(f"https://api.github.com/repos/{owner}/{repo}/readme", headers=headers)
-        readme_data = readme_resp.json()
-        content_base64 = readme_data.get("content")
-
-        if not content_base64:
-            return {"error": "README not found in the repo."}
-
-        readme = base64.b64decode(content_base64).decode("utf-8")
-
-        # === Build Prompt for OpenAI ===
+        # Define prompt
         prompt = f"""
-From the following GitHub README, extract and return a JSON object with the following keys only:
+Extract the following JSON from the README below. Be concise and accurate. If any field is missing, infer it cautiously if possible, otherwise leave it empty or say "Not explicitly mentioned". Use bullet points for features.
 
-- title: project name
-- description: 1–2 line description
-- tech_stack: list of technologies
-- deployed_link: deployment URL if any (else null)
-- features: list of main features (optional)
+{{
+  "title": "",
+  "description": "",
+  "tech stack": "", 
+  "deployed link": "",
+  "features": []
+}}
 
 README:
 {readme}
-
-Respond ONLY in valid JSON.
 """
 
-        # === Call OpenAI ===
-        llm_response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[{"role": "user", "content": prompt}]
-        )
 
-        # === Extract and parse the JSON from LLM ===
-        llm_text = llm_response['choices'][0]['message']['content']
+        # Prepare request to OpenRouter
+        headers = {
+            "Authorization": f"Bearer {API_KEY}",
+            "Content-Type": "application/json",
+            "HTTP-Referer": "https://openrouter.ai"
+        }
+
+        payload = {
+            "model": MODEL,
+            "messages": [
+                {"role": "system", "content": "You are a helpful assistant that extracts structured data from project READMEs."},
+                {"role": "user", "content": prompt}
+            ],
+            "max_tokens": 500,
+            "temperature": 0.2
+        }
+
+        response = requests.post(OPENROUTER_URL, json=payload, headers=headers)
+
+        if response.status_code != 200:
+            return {"error": f"OpenRouter error: {response.text}"}
+
+        content = response.json()["choices"][0]["message"]["content"].strip()
 
         try:
-            summary = json.loads(llm_text)
-        except json.JSONDecodeError:
-            return {
-                "error": "LLM response is not valid JSON. Try improving prompt or check README format.",
-                "raw_output": llm_text
-            }
+            data = json.loads(content)
 
-        # === Final JSON Response ===
-        return {
-            "name": repo_data.get("name"),
-            "owner": repo_data.get("owner", {}).get("login"),
-            "stars": repo_data.get("stargazers_count"),
-            "forks": repo_data.get("forks_count"),
-            "repo_url": repo_data.get("html_url"),
-            "summary": summary
-        }
+            # Normalize structure (optional enhancement)
+            data["tech_stack"] = data.get("tech_stack", "").strip()
+            data["features"] = data.get("features", [])
+            data["title"] = data.get("title", "").strip()
+            data["description"] = data.get("description", "").strip()
+            data["deployed_link"] = data.get("deployed_link", "").strip()
+
+            return data
+
+        except json.JSONDecodeError:
+            return {"error": "LLM output not in valid JSON", "raw": content}
 
     except Exception as e:
         return {"error": str(e)}
