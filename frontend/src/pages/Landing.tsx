@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Github, FileText, Award, Brain, ArrowRight, Play, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import ResumeUploadDialog from '@/components/ResumeUploadDialog';
 
 const Landing = () => {
   const [typewriterText, setTypewriterText] = useState('');
@@ -49,7 +50,8 @@ const Landing = () => {
     {
       icon: FileText,
       title: 'Resume Integration',
-      description: 'Upload your resume and extract achievements automatically'
+      description: 'Upload your resume and extract achievements automatically',
+      interactive: true
     },
     {
       icon: Award,
@@ -67,60 +69,91 @@ const Landing = () => {
   return (
     <div className="min-h-screen pt-16">
       {/* Hero Section */}
-      <section className="relative overflow-hidden py-20 lg:py-32">
-        <div className="container mx-auto px-4 text-center">
-          {/* Orbiting Icons */}
-          <div className="orbit-container mx-auto mb-12">
-            <div className="orbit-icon">
-              <Github className="w-5 h-5" />
+      <section className="relative overflow-hidden min-h-screen flex items-center justify-center">
+        {/* Simplified Background Effects */}
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/30 via-purple-50/20 to-pink-50/30 dark:from-slate-900 dark:via-purple-900/10 dark:to-slate-900" />
+          <div className="absolute top-1/3 left-1/3 w-64 h-64 bg-purple-400/8 rounded-full blur-3xl animate-pulse-slow" />
+          <div className="absolute bottom-1/3 right-1/3 w-64 h-64 bg-indigo-400/8 rounded-full blur-3xl animate-pulse-slow" style={{ animationDelay: '3s' }} />
+        </div>
+        
+        <div className="container mx-auto px-4 text-center relative z-10">
+          {/* Enhanced Orbiting Icons with Centered Heading */}
+          <div className="relative mb-8">
+            {/* Orbit Container with Enhanced Effects */}
+            <div className="orbit-container mx-auto relative">
+              {/* Inner Glow Ring */}
+              <div className="absolute inset-0 rounded-full bg-gradient-to-r from-indigo-500/20 via-purple-500/20 to-pink-500/20 blur-xl animate-pulse-slow" />
+              
+              {/* Orbiting Icons with Enhanced Styling */}
+              <div className="orbit-icon bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-white/50 dark:border-slate-700/50 shadow-lg hover:shadow-xl transition-all duration-300">
+                <Github className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+              </div>
+              <div className="orbit-icon bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-white/50 dark:border-slate-700/50 shadow-lg hover:shadow-xl transition-all duration-300">
+                <FileText className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+              </div>
+              <div className="orbit-icon bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-white/50 dark:border-slate-700/50 shadow-lg hover:shadow-xl transition-all duration-300">
+                <Brain className="w-6 h-6 text-pink-600 dark:text-pink-400" />
+              </div>
+              <div className="orbit-icon bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-white/50 dark:border-slate-700/50 shadow-lg hover:shadow-xl transition-all duration-300">
+                <Award className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+              </div>
             </div>
-            <div className="orbit-icon">
-              <FileText className="w-5 h-5" />
-            </div>
-            <div className="orbit-icon">
-              <Brain className="w-5 h-5" />
-            </div>
-            <div className="orbit-icon">
-              <Award className="w-5 h-5" />
+            
+            {/* Enhanced Centered Heading */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="text-center">
+                <h1 className="text-5xl lg:text-7xl font-black leading-tight animate-fade-in">
+                  <span className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 dark:from-white dark:via-gray-200 dark:to-white bg-clip-text text-transparent drop-shadow-sm font-black tracking-tight">
+                    AI-Powered
+                  </span>
+                  <br />
+                  <span className="text-3xl lg:text-5xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mt-2 block tracking-wide">
+                    Internship Portfolio Builder
+                  </span>
+                </h1>
+              </div>
             </div>
           </div>
 
-          <h1 className="text-4xl lg:text-6xl font-space font-bold mb-6 animate-fade-in">
-            <span className="text-gradient-primary">AI-Powered</span><br />
-            Internship Portfolio Builder
-          </h1>
+            {/* Enhanced Typewriter Effect */}
+            <div className="h-8 mb-4 flex items-center justify-center">
+              <div className="bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm px-6 py-2 rounded-full border border-white/30 dark:border-slate-700/30">
+                <span className="text-lg text-foreground-muted typewriter font-mono bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent font-semibold">
+                  {typewriterText}
+                </span>
+              </div>
+            </div>
 
-          <div className="h-8 mb-6 flex items-center justify-center">
-            <span className="text-xl text-foreground-muted typewriter font-mono">
-              {typewriterText}
-            </span>
-          </div>
+            {/* Enhanced Tagline */}
+            <p className="text-xl lg:text-2xl text-foreground-muted max-w-3xl mx-auto mb-6 animate-slide-in-up font-medium leading-relaxed">
+              One platform. <span className="text-gradient-primary font-semibold">Infinite potential.</span> Build your professional identity — smarter.
+            </p>
 
-          <p className="text-xl text-foreground-muted max-w-2xl mx-auto mb-10 animate-slide-in-up">
-            One platform. Infinite potential. Build your professional identity — smarter.
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16 animate-slide-in-up">
+          {/* Enhanced CTA Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12 animate-slide-in-up">
             <Link to="/auth">
-              <Button className="btn-primary text-lg px-8 py-4 glow-primary">
-                Get Started
-                <ArrowRight className="w-5 h-5 ml-2" />
+              <Button className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold px-8 py-3 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 border-0">
+                Get Started Free
+                <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </Link>
-            <Link to="/portfolio">
-              <Button className="btn-ghost text-lg px-8 py-4">
-                <Play className="w-5 h-5 mr-2" />
-                View Demo
+            <Link to="/dummy-portfolio">
+              <Button variant="outline" className="border-2 border-indigo-300 dark:border-indigo-600 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 font-semibold px-8 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300">
+                <Play className="w-4 h-4 mr-2" />
+                View Live Demo
               </Button>
             </Link>
           </div>
 
-          {/* Stats */}
-          <div className="flex flex-col sm:flex-row gap-8 justify-center items-center animate-slide-in-up">
+          {/* Enhanced Stats */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-3xl mx-auto animate-slide-in-up">
             {stats.map((stat, index) => (
-              <div key={index} className="text-center">
-                <div className="text-3xl font-bold text-gradient-primary">{stat.value}</div>
-                <div className="text-sm text-foreground-muted">{stat.label}</div>
+              <div key={index} className="text-center bg-white/30 dark:bg-slate-800/30 backdrop-blur-sm p-4 rounded-xl border border-white/30 dark:border-slate-700/30">
+                <div className="text-3xl lg:text-4xl font-black bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-1">
+                  {stat.value}
+                </div>
+                <div className="text-sm text-foreground-muted font-medium">{stat.label}</div>
               </div>
             ))}
           </div>
@@ -140,15 +173,108 @@ const Landing = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {features.map((feature, index) => (
-              <Card key={index} className="glass-card interactive group animate-slide-in-up" style={{ animationDelay: `${index * 100}ms` }}>
-                <div className="w-12 h-12 bg-gradient-primary rounded-lg flex items-center justify-center mb-4 group-hover:glow-primary transition-all">
-                  <feature.icon className="w-6 h-6 text-white" />
+            {features.map((feature, index) => {
+              const FeatureCard = (
+                <Card key={index} className="glass-card interactive group animate-slide-in-up cursor-pointer" style={{ animationDelay: `${index * 100}ms` }}>
+                  <div className="w-12 h-12 bg-gradient-primary rounded-lg flex items-center justify-center mb-4 group-hover:glow-primary transition-all">
+                    <feature.icon className="w-6 h-6 text-white" />
+                  </div>
+                  <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
+                  <p className="text-foreground-muted text-sm">{feature.description}</p>
+                </Card>
+              );
+
+              return feature.interactive ? (
+                <ResumeUploadDialog key={index}>
+                  {FeatureCard}
+                </ResumeUploadDialog>
+              ) : (
+                FeatureCard
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* About Section */}
+      <section className="py-20 bg-gradient-soft">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl lg:text-4xl font-space font-bold mb-6 text-gradient-primary">
+              About PortFolia
+            </h2>
+            <p className="text-xl text-foreground-muted max-w-3xl mx-auto mb-12">
+              We believe every student deserves to showcase their potential. PortFolia combines cutting-edge AI with beautiful design to help you create portfolios that truly represent your skills and achievements.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+            <Card className="glass-card text-center group">
+              <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4 group-hover:glow-primary transition-all">
+                <Brain className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-xl font-semibold mb-3">AI-Enhanced</h3>
+              <p className="text-foreground-muted">
+                Our AI analyzes your projects and achievements to craft compelling descriptions that highlight your unique impact and potential.
+              </p>
+            </Card>
+
+            <Card className="glass-card text-center group">
+              <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4 group-hover:glow-primary transition-all">
+                <Github className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-xl font-semibold mb-3">Seamless Integration</h3>
+              <p className="text-foreground-muted">
+                Connect your GitHub, upload your resume, and watch as we automatically import and enhance your professional profile.
+              </p>
+            </Card>
+
+            <Card className="glass-card text-center group">
+              <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4 group-hover:glow-primary transition-all">
+                <Award className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-xl font-semibold mb-3">Professional Results</h3>
+              <p className="text-foreground-muted">
+                Create stunning, professional portfolios that stand out to recruiters and help you land your dream internship or job.
+              </p>
+            </Card>
+          </div>
+
+          <div className="bg-white/50 backdrop-blur-sm rounded-2xl p-8 border border-white/20 text-center">
+            <div className="max-w-4xl mx-auto">
+              <h3 className="text-3xl font-bold mb-6 text-gradient-primary">Join thousands of successful students</h3>
+              <p className="text-foreground-muted mb-8 text-lg max-w-2xl mx-auto">
+                Our AI-powered platform has helped students from top universities secure internships at leading tech companies, startups, and organizations worldwide.
+              </p>
+              <div className="flex flex-wrap justify-center gap-8 mb-8">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-gradient-primary">95%</div>
+                  <div className="text-sm text-foreground-muted">Interview Success Rate</div>
                 </div>
-                <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
-                <p className="text-foreground-muted text-sm">{feature.description}</p>
-              </Card>
-            ))}
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-gradient-primary">2.5x</div>
+                  <div className="text-sm text-foreground-muted">Faster Hiring Process</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-gradient-primary">10K+</div>
+                  <div className="text-sm text-foreground-muted">Portfolios Created</div>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-md mx-auto opacity-60">
+                <div className="text-center p-3 bg-white/30 rounded-lg">
+                  <div className="text-xs font-medium">Google</div>
+                </div>
+                <div className="text-center p-3 bg-white/30 rounded-lg">
+                  <div className="text-xs font-medium">Microsoft</div>
+                </div>
+                <div className="text-center p-3 bg-white/30 rounded-lg">
+                  <div className="text-xs font-medium">Meta</div>
+                </div>
+                <div className="text-center p-3 bg-white/30 rounded-lg">
+                  <div className="text-xs font-medium">Apple</div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -170,10 +296,6 @@ const Landing = () => {
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
               </Link>
-              <Button className="btn-ghost text-lg px-8 py-4">
-                <Star className="w-5 h-5 mr-2" />
-                View Examples
-              </Button>
             </div>
           </Card>
         </div>

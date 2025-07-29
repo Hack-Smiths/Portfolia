@@ -261,13 +261,64 @@
   .orbit-icon {
     @apply absolute w-12 h-12 rounded-full bg-glass border border-white/20;
     @apply flex items-center justify-center text-primary;
-    animation: orbit 20s linear infinite;
+    animation: orbit 120s linear infinite;
   }
 
   .orbit-icon:nth-child(1) { animation-delay: 0s; }
   .orbit-icon:nth-child(2) { animation-delay: -5s; }
   .orbit-icon:nth-child(3) { animation-delay: -10s; }
   .orbit-icon:nth-child(4) { animation-delay: -15s; }
+
+  /* Portfolio Templates */
+  .template-minimal {
+    @apply bg-gradient-to-br from-slate-50 via-white to-gray-100;
+  }
+
+  .template-neon {
+    @apply bg-gradient-to-br from-black via-gray-900 to-purple-900;
+  }
+
+  .template-glass {
+    @apply bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50;
+  }
+
+  /* Advanced Animations */
+  .float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .tilt {
+    transition: transform 0.3s ease;
+  }
+
+  .tilt:hover {
+    transform: perspective(1000px) rotateX(5deg) rotateY(5deg) rotateZ(2deg);
+  }
+
+  /* Mesh Background */
+  .mesh-bg {
+    background-image: 
+      radial-gradient(at 40% 20%, hsl(var(--primary)) 0px, transparent 50%),
+      radial-gradient(at 80% 0%, hsl(var(--accent)) 0px, transparent 50%),
+      radial-gradient(at 0% 50%, hsl(var(--electric)) 0px, transparent 50%),
+      radial-gradient(at 80% 50%, hsl(var(--pulse)) 0px, transparent 50%);
+    opacity: 0.15;
+  }
+
+  /* Skills Progress Bars */
+  .skill-bar {
+    @apply relative h-3 bg-muted rounded-full overflow-hidden;
+  }
+
+  .skill-fill {
+    @apply h-full bg-gradient-primary rounded-full transition-all duration-1000 ease-out;
+    animation: fillBar 2s ease-out;
+  }
+
+  /* Portfolio Header Styles */
+  .portfolio-header {
+    @apply fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-white/70 border-b border-white/20;
+  }
 }
 
 @layer utilities {
@@ -350,4 +401,19 @@
     opacity: 1;
     transform: scale(1);
   }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+
+@keyframes fillBar {
+  from { width: 0%; }
+  to { width: var(--width); }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
 }

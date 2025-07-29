@@ -7,12 +7,21 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
+import EditAchievementDialog, { Achievement } from '@/components/EditAchievementDialog';
 import AIAssistant from '@/components/AIAssistant';
 
 const Achievements = () => {
-  const [uploadStatus, setUploadStatus] = useState(null);
-
-  const achievements = {
+  const [editDialog, setEditDialog] = useState<{
+    isOpen: boolean;
+    achievement: Achievement | null;
+    type: 'internship' | 'certificate' | 'award';
+  }>({
+    isOpen: false,
+    achievement: null,
+    type: 'internship'
+  });
+  
+  const [achievements, setAchievements] = useState({
     internships: [
       {
         id: 1,
@@ -73,15 +82,67 @@ const Achievements = () => {
         category: 'Academic'
       }
     ]
+  });
+
+  const handleDeleteInternship = (internshipId: number) => {
+    setAchievements(prev => ({
+      ...prev,
+      internships: prev.internships.filter(item => item.id !== internshipId)
+    }));
   };
 
-  const handleResumeUpload = () => {
-    setUploadStatus('uploading');
-    setTimeout(() => {
-      setUploadStatus('success');
-      setTimeout(() => setUploadStatus(null), 3000);
-    }, 2000);
+  const handleDeleteCertificate = (certId: number) => {
+    setAchievements(prev => ({
+      ...prev,
+      certificates: prev.certificates.filter(item => item.id !== certId)
+    }));
   };
+
+  const handleDeleteAward = (awardId: number) => {
+    setAchievements(prev => ({
+      ...prev,
+      awards: prev.awards.filter(item => item.id !== awardId)
+    }));
+  };
+
+  const handleEditInternship = (internship: any) => {
+    setEditDialog({
+      isOpen: true,
+      achievement: internship,
+      type: 'internship'
+    });
+  };
+
+  const handleEditCertificate = (certificate: any) => {
+    setEditDialog({
+      isOpen: true,
+      achievement: certificate,
+      type: 'certificate'
+    });
+  };
+
+  const handleEditAward = (award: any) => {
+    setEditDialog({
+      isOpen: true,
+      achievement: award,
+      type: 'award'
+    });
+  };
+
+  const handleSaveEdit = (updatedAchievement: Achievement) => {
+    const { type } = editDialog;
+    
+    setAchievements(prev => ({
+      ...prev,
+      [type === 'internship' ? 'internships' : 
+        type === 'certificate' ? 'certificates' : 'awards']: 
+        prev[type === 'internship' ? 'internships' : 
+            type === 'certificate' ? 'certificates' : 'awards'].map((item: any) =>
+          item.id === updatedAchievement.id ? updatedAchievement : item
+        )
+    }));
+  };
+
 
   return (
     <div className="min-h-screen pt-16 bg-gradient-soft">
@@ -96,50 +157,6 @@ const Achievements = () => {
           </p>
         </div>
 
-        {/* Resume Upload Section */}
-        <Card className="glass-card mb-8 animate-slide-in-up">
-          <div className="flex flex-col md:flex-row items-center justify-between">
-            <div className="flex-1 mb-4 md:mb-0">
-              <h2 className="text-xl font-semibold mb-2 flex items-center">
-                <FileText className="w-5 h-5 mr-2 text-primary" />
-                Resume Upload
-              </h2>
-              <p className="text-foreground-muted text-sm">
-                Upload your resume and we'll automatically extract achievements, skills, and experiences using AI.
-              </p>
-            </div>
-            <div className="flex space-x-3">
-              <Button 
-                onClick={handleResumeUpload} 
-                className="btn-primary"
-                disabled={uploadStatus === 'uploading'}
-              >
-                <Upload className="w-4 h-4 mr-2" />
-                {uploadStatus === 'uploading' ? 'Processing...' : 'Upload Resume'}
-              </Button>
-            </div>
-          </div>
-          
-          {uploadStatus && (
-            <div className={`mt-4 p-4 rounded-lg border ${
-              uploadStatus === 'success' 
-                ? 'bg-success/10 border-success/20 text-success' 
-                : 'bg-warning/10 border-warning/20 text-warning'
-            }`}>
-              <div className="flex items-center">
-                {uploadStatus === 'success' ? (
-                  <CheckCircle className="w-4 h-4 mr-2" />
-                ) : (
-                  <Clock className="w-4 h-4 mr-2 animate-spin" />
-                )}
-                {uploadStatus === 'success' 
-                  ? 'Resume parsed successfully! 3 new achievements added.'
-                  : 'Analyzing your resume with AI...'
-                }
-              </div>
-            </div>
-          )}
-        </Card>
 
         {/* Internships Section */}
         <div className="mb-8">
@@ -186,10 +203,20 @@ const Achievements = () => {
                     </div>
                   </div>
                   <div className="flex space-x-1">
-                    <Button size="sm" variant="ghost" className="w-8 h-8 p-0">
+                    <Button 
+                      size="sm" 
+                      variant="ghost" 
+                      className="w-8 h-8 p-0"
+                      onClick={() => handleEditInternship(internship)}
+                    >
                       <Edit3 className="w-4 h-4" />
                     </Button>
-                    <Button size="sm" variant="ghost" className="w-8 h-8 p-0 text-destructive">
+                    <Button 
+                      size="sm" 
+                      variant="ghost" 
+                      className="w-8 h-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                      onClick={() => handleDeleteInternship(internship.id)}
+                    >
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
@@ -242,10 +269,20 @@ const Achievements = () => {
                       <p className="text-foreground-muted text-sm">{cert.issuer} • {cert.year}</p>
                     </div>
                     <div className="flex space-x-1">
-                      <Button size="sm" variant="ghost" className="w-8 h-8 p-0">
+                      <Button 
+                        size="sm" 
+                        variant="ghost" 
+                        className="w-8 h-8 p-0"
+                        onClick={() => handleEditCertificate(cert)}
+                      >
                         <Edit3 className="w-4 h-4" />
                       </Button>
-                      <Button size="sm" variant="ghost" className="w-8 h-8 p-0 text-destructive">
+                      <Button 
+                        size="sm" 
+                        variant="ghost" 
+                        className="w-8 h-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                        onClick={() => handleDeleteCertificate(cert.id)}
+                      >
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
@@ -296,10 +333,20 @@ const Achievements = () => {
                       <p className="text-foreground-muted text-sm">{award.organization} • {award.year}</p>
                     </div>
                     <div className="flex space-x-1">
-                      <Button size="sm" variant="ghost" className="w-8 h-8 p-0">
+                      <Button 
+                        size="sm" 
+                        variant="ghost" 
+                        className="w-8 h-8 p-0"
+                        onClick={() => handleEditAward(award)}
+                      >
                         <Edit3 className="w-4 h-4" />
                       </Button>
-                      <Button size="sm" variant="ghost" className="w-8 h-8 p-0 text-destructive">
+                      <Button 
+                        size="sm" 
+                        variant="ghost" 
+                        className="w-8 h-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                        onClick={() => handleDeleteAward(award.id)}
+                      >
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
@@ -315,6 +362,14 @@ const Achievements = () => {
         </div>
       </div>
 
+      <EditAchievementDialog
+        isOpen={editDialog.isOpen}
+        onClose={() => setEditDialog({ ...editDialog, isOpen: false })}
+        achievement={editDialog.achievement}
+        onSave={handleSaveEdit}
+        type={editDialog.type}
+      />
+      
       <AIAssistant />
     </div>
   );

@@ -1,13 +1,17 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Github, FileText, Eye, TrendingUp, Clock, CheckCircle, ArrowRight } from 'lucide-react';
+import { Plus, Github, FileText, Eye, TrendingUp, Clock, CheckCircle, ArrowRight, Upload, Award } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import AIAssistant from '@/components/AIAssistant';
+import ResumeUploadDialog from '@/components/ResumeUploadDialog';
 
 const Dashboard = () => {
   const [completionProgress] = useState(75);
+  const [uploadStatus, setUploadStatus] = useState(null);
+  const [showAllActivities, setShowAllActivities] = useState(false);
 
   const stats = [
     { 
@@ -42,10 +46,10 @@ const Dashboard = () => {
       link: '/projects'
     },
     {
-      title: 'Upload Resume',
-      description: 'Extract achievements automatically',
-      icon: FileText,
-      color: 'pulse',
+      title: 'Add Achievement',
+      description: 'Add awards, internships & milestones',
+      icon: Award,
+      color: 'warning',
       link: '/achievements'
     },
     {
@@ -81,8 +85,40 @@ const Dashboard = () => {
       time: '3 days ago',
       icon: Eye,
       status: 'completed'
+    },
+    {
+      action: 'Uploaded resume and extracted skills',
+      time: '4 days ago',
+      icon: FileText,
+      status: 'completed'
+    },
+    {
+      action: 'Added new certificate "React Fundamentals"',
+      time: '5 days ago',
+      icon: CheckCircle,
+      status: 'completed'
+    },
+    {
+      action: 'Updated project descriptions with AI',
+      time: '1 week ago',
+      icon: TrendingUp,
+      status: 'completed'
+    },
+    {
+      action: 'Shared portfolio with 5 recruiters',
+      time: '1 week ago',
+      icon: Eye,
+      status: 'completed'
     }
   ];
+
+  const handleResumeUpload = () => {
+    setUploadStatus('uploading');
+    setTimeout(() => {
+      setUploadStatus('success');
+      setTimeout(() => setUploadStatus(null), 3000);
+    }, 2000);
+  };
 
   return (
     <div className="min-h-screen pt-16 bg-gradient-soft">
@@ -96,6 +132,52 @@ const Dashboard = () => {
             Let's continue building your amazing portfolio
           </p>
         </div>
+
+        {/* Resume Upload Section */}
+        <Card className="glass-card mb-8 animate-slide-in-up">
+          <div className="flex flex-col md:flex-row items-center justify-between">
+            <div className="flex-1 mb-4 md:mb-0">
+              <h2 className="text-xl font-semibold mb-2 flex items-center">
+                <FileText className="w-5 h-5 mr-2 text-primary" />
+                Resume Upload & Auto-Categorization
+              </h2>
+              <p className="text-foreground-muted text-sm">
+                Upload your resume and we'll automatically extract achievements, skills, and experiences using AI to update all portfolio sections.
+              </p>
+            </div>
+            <div className="flex space-x-3">
+              <ResumeUploadDialog>
+                <Button 
+                  className="btn-primary"
+                  disabled={uploadStatus === 'uploading'}
+                >
+                  <Upload className="w-4 h-4 mr-2" />
+                  {uploadStatus === 'uploading' ? 'Processing...' : 'Upload Resume'}
+                </Button>
+              </ResumeUploadDialog>
+            </div>
+          </div>
+          
+          {uploadStatus && (
+            <div className={`mt-4 p-4 rounded-lg border ${
+              uploadStatus === 'success' 
+                ? 'bg-success/10 border-success/20 text-success' 
+                : 'bg-warning/10 border-warning/20 text-warning'
+            }`}>
+              <div className="flex items-center">
+                {uploadStatus === 'success' ? (
+                  <CheckCircle className="w-4 h-4 mr-2" />
+                ) : (
+                  <Clock className="w-4 h-4 mr-2 animate-spin" />
+                )}
+                {uploadStatus === 'success' 
+                  ? 'Resume parsed successfully! Auto-categorized 3 achievements, 5 skills, and 2 projects across portfolio sections.'
+                  : 'Analyzing your resume with AI and auto-categorizing content...'
+                }
+              </div>
+            </div>
+          )}
+        </Card>
 
         {/* Profile Completion */}
         <Card className="glass-card mb-8 animate-slide-in-up">
@@ -123,12 +205,12 @@ const Dashboard = () => {
               <CheckCircle className="w-3 h-3 mr-1" />
               Projects Added
             </div>
-            <div className="flex items-center text-warning">
-              <Clock className="w-3 h-3 mr-1" />
+            <div className="flex items-center text-success">
+              <CheckCircle className="w-3 h-3 mr-1" />
               Skills Section
             </div>
-            <div className="flex items-center text-foreground-muted">
-              <Clock className="w-3 h-3 mr-1" />
+            <div className="flex items-center text-success">
+              <CheckCircle className="w-3 h-3 mr-1" />
               Resume Upload
             </div>
           </div>
@@ -183,22 +265,44 @@ const Dashboard = () => {
               Recent Activity
             </h2>
             <Card className="glass-card animate-slide-in-right">
-              <div className="space-y-4">
-                {recentActivity.map((activity, index) => (
-                  <div key={index} className="flex items-start space-x-3 p-3 rounded-lg hover:bg-muted/50 transition-colors">
-                    <div className="w-8 h-8 rounded-full bg-success/10 flex items-center justify-center mt-1">
-                      <activity.icon className="w-4 h-4 text-success" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">{activity.action}</p>
-                      <p className="text-xs text-foreground-muted">{activity.time}</p>
-                    </div>
+              {showAllActivities ? (
+                <ScrollArea className="h-80">
+                  <div className="space-y-4 pr-4">
+                    {recentActivity.map((activity, index) => (
+                      <div key={index} className="flex items-start space-x-3 p-3 rounded-lg hover:bg-muted/50 transition-colors">
+                        <div className="w-8 h-8 rounded-full bg-success/10 flex items-center justify-center mt-1">
+                          <activity.icon className="w-4 h-4 text-success" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium">{activity.action}</p>
+                          <p className="text-xs text-foreground-muted">{activity.time}</p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                </ScrollArea>
+              ) : (
+                <div className="space-y-4">
+                  {recentActivity.slice(0, 4).map((activity, index) => (
+                    <div key={index} className="flex items-start space-x-3 p-3 rounded-lg hover:bg-muted/50 transition-colors">
+                      <div className="w-8 h-8 rounded-full bg-success/10 flex items-center justify-center mt-1">
+                        <activity.icon className="w-4 h-4 text-success" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">{activity.action}</p>
+                        <p className="text-xs text-foreground-muted">{activity.time}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
               <div className="mt-6 pt-4 border-t border-border">
-                <Button variant="outline" className="w-full">
-                  View All Activity
+                <Button 
+                  variant="outline" 
+                  className="w-full" 
+                  onClick={() => setShowAllActivities(!showAllActivities)}
+                >
+                  {showAllActivities ? 'Show Less' : 'View All Activity'}
                 </Button>
               </div>
             </Card>

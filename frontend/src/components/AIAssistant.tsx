@@ -7,6 +7,12 @@ import { Input } from '@/components/ui/input';
 const AIAssistant = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [message, setMessage] = useState('');
+  const [chatHistory, setChatHistory] = useState([
+    {
+      type: 'ai',
+      message: "Hi! I'm your AI Assistant 🤖 I can help you optimize your portfolio, suggest improvements, and write compelling descriptions. What would you like to work on?",
+    },
+  ]);
 
   const suggestions = [
     "Help me write a better project description",
@@ -15,12 +21,15 @@ const AIAssistant = () => {
     "What achievements should I highlight?",
   ];
 
-  const chatHistory = [
-    {
-      type: 'ai',
-      message: "Hi! I'm your AI Assistant 🤖 I can help you optimize your portfolio, suggest improvements, and write compelling descriptions. What would you like to work on?",
-    },
-  ];
+  const handleSendMessage = () => {
+    if (message.trim()) {
+      setChatHistory([...chatHistory, 
+        { type: 'user', message },
+        { type: 'ai', message: 'This feature is currently under development. We\'re working hard to bring you AI-powered assistance soon! 🚧' }
+      ]);
+      setMessage('');
+    }
+  };
 
   return (
     <>
@@ -105,12 +114,11 @@ const AIAssistant = () => {
                     className="flex-1"
                     onKeyPress={(e) => {
                       if (e.key === 'Enter') {
-                        // Handle send message
-                        setMessage('');
+                        handleSendMessage();
                       }
                     }}
                   />
-                  <Button size="sm" className="btn-primary">
+                  <Button size="sm" className="btn-primary" onClick={handleSendMessage}>
                     <Send className="w-4 h-4" />
                   </Button>
                 </div>
