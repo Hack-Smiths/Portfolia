@@ -13,13 +13,13 @@ import AIAssistant from '@/components/AIAssistant';
 const Projects = () => {
   const [selectedTab, setSelectedTab] = useState('all');
   const [projects, setProjects] = useState([
-
     {
       id: 1,
       title: 'E-commerce React App',
       description: 'Full-stack e-commerce platform with React, Node.js, and Stripe integration',
       type: 'github',
       stack: ['React', 'Node.js', 'MongoDB', 'Stripe'],
+      features: ['User Authentication', 'Payment Processing', 'Admin Dashboard', 'Real-time Inventory'],
       status: { imported: true, aiSummary: true, saved: true },
       stars: 24,
       forks: 8,
@@ -32,6 +32,7 @@ const Projects = () => {
       description: 'Real-time chat app with AI-powered responses using OpenAI API',
       type: 'github',
       stack: ['Next.js', 'OpenAI', 'Socket.io', 'PostgreSQL'],
+      features: ['AI-Powered Responses', 'Real-time Messaging', 'Message History', 'Multi-user Support'],
       status: { imported: true, aiSummary: false, saved: true },
       stars: 16,
       forks: 3,
@@ -64,6 +65,28 @@ const Projects = () => {
     setProjects(projects.filter(p => p.id !== projectId));
   };
 
+  const handleAddProject = (newProject: any) => {
+    const project = {
+      id: Date.now(),
+      ...newProject,
+      type: 'manual',
+      status: { imported: false, aiSummary: false, saved: true },
+      lastUpdated: 'Just now'
+    };
+    setProjects([...projects, project]);
+  };
+
+  const handleImportFromGitHub = (projectData: any) => {
+    const project = {
+      id: Date.now(),
+      ...projectData,
+      type: 'github',
+      status: { imported: true, aiSummary: false, saved: true },
+      lastUpdated: 'Just now'
+    };
+    setProjects([...projects, project]);
+  };
+
   const filteredProjects = projects.filter(project => {
     if (selectedTab === 'all') return true;
     if (selectedTab === 'github') return project.type === 'github';
@@ -93,7 +116,7 @@ const Projects = () => {
                 <DialogHeader>
                   <DialogTitle>Edit Project</DialogTitle>
                 </DialogHeader>
-                <EditProjectForm project={project} />
+                <EditProjectForm project={project} setProjects={setProjects} projects={projects} />
               </DialogContent>
             </Dialog>
             <Button 
@@ -111,13 +134,26 @@ const Projects = () => {
           {project.description}
         </p>
 
-        <div className="flex flex-wrap gap-1">
+        <div className="flex flex-wrap gap-1 mb-3">
           {project.stack.map((tech, index) => (
             <Badge key={index} variant="secondary" className="text-xs">
               {tech}
             </Badge>
           ))}
         </div>
+
+        {project.features && project.features.length > 0 && (
+          <div className="mb-3">
+            <h4 className="text-sm font-medium text-foreground mb-2">Key Features:</h4>
+            <div className="flex flex-wrap gap-1">
+              {project.features.map((feature, index) => (
+                <Badge key={index} variant="outline" className="text-xs">
+                  {feature}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        )}
 
         {project.type === 'github' && (
           <div className="flex items-center space-x-4 text-xs text-foreground-muted">
@@ -180,21 +216,35 @@ const Projects = () => {
                 <DialogHeader>
                   <DialogTitle>Import from GitHub</DialogTitle>
                 </DialogHeader>
-                <GitHubImportForm />
+                <GitHubImportForm 
+                  onImport={handleImportFromGitHub} 
+                  onClose={() => {
+                    const dialog = document.querySelector('[role="dialog"]');
+                    const closeButton = dialog?.querySelector('[aria-label="Close"]') as HTMLButtonElement;
+                    closeButton?.click();
+                  }}
+                />
               </DialogContent>
             </Dialog>
             <Dialog>
               <DialogTrigger asChild>
                 <Button variant="outline">
                   <Plus className="w-4 h-4 mr-2" />
-                  Add Manual
+                  Add Project
                 </Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Add Project Manually</DialogTitle>
                 </DialogHeader>
-                <ManualProjectForm />
+                <ManualProjectForm 
+                  onAdd={handleAddProject} 
+                  onClose={() => {
+                    const dialog = document.querySelector('[role="dialog"]');
+                    const closeButton = dialog?.querySelector('[aria-label="Close"]') as HTMLButtonElement;
+                    closeButton?.click();
+                  }}
+                />
               </DialogContent>
             </Dialog>
           </div>
@@ -205,17 +255,17 @@ const Projects = () => {
           <TabsList className="grid w-full grid-cols-3 max-w-md">
             <TabsTrigger value="all">All Projects</TabsTrigger>
             <TabsTrigger value="github">GitHub</TabsTrigger>
-            <TabsTrigger value="manual">Others</TabsTrigger>
+            <TabsTrigger value="manual">Manual</TabsTrigger>
           </TabsList>
 
           <TabsContent value="all" className="mt-6">
             <ProjectGrid projects={filteredProjects} />
           </TabsContent>
           <TabsContent value="github" className="mt-6">
-            <ProjectGrid projects={filteredProjects} />
+            <ProjectGrid projects={projects.filter(p => p.type === 'github')} />
           </TabsContent>
           <TabsContent value="manual" className="mt-6">
-            <ProjectGrid projects={filteredProjects} />
+            <ProjectGrid projects={projects.filter(p => p.type === 'manual')} />
           </TabsContent>
         </Tabs>
       </div>
@@ -236,7 +286,30 @@ const Projects = () => {
     );
   }
 
-  function GitHubImportForm() {
+  function GitHubImportForm({ onImport, onClose }) {
+    const [url, setUrl] = useState('');
+    const [loading, setLoading] = useState(false);
+
+    const handleImport = async () => {
+      setLoading(true);
+      // Simulate GitHub import
+      const projectData = {
+        title: 'Imported GitHub Project',
+        description: 'Project imported from GitHub repository',
+        stack: ['React', 'TypeScript', 'Node.js'],
+        stars: Math.floor(Math.random() * 100),
+        forks: Math.floor(Math.random() * 20),
+        image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&h=200&fit=crop'
+      };
+      
+      setTimeout(() => {
+        onImport(projectData);
+        setLoading(false);
+        setUrl('');
+        onClose?.();
+      }, 1000);
+    };
+
     return (
       <div className="space-y-4">
         <div className="space-y-2">
@@ -244,6 +317,8 @@ const Projects = () => {
           <Input
             id="github-url"
             placeholder="https://github.com/username/repository"
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
           />
         </div>
         <div className="bg-muted/50 p-4 rounded-lg">
@@ -252,22 +327,55 @@ const Projects = () => {
           </p>
         </div>
         <div className="flex space-x-3">
-          <Button className="btn-primary flex-1">
+          <Button 
+            className="btn-primary flex-1" 
+            onClick={handleImport}
+            disabled={!url || loading}
+          >
             <Code className="w-4 h-4 mr-2" />
-            Import Project
+            {loading ? 'Importing...' : 'Import Project'}
           </Button>
-          <Button variant="outline">Cancel</Button>
+          <Button variant="outline" onClick={onClose}>Cancel</Button>
         </div>
       </div>
     );
   }
 
-  function ManualProjectForm() {
+  function ManualProjectForm({ onAdd, onClose }) {
+    const [title, setTitle] = useState('');
+    const [description, setDescription] = useState('');
+    const [stack, setStack] = useState('');
+    const [url, setUrl] = useState('');
+    const [features, setFeatures] = useState('');
+
+    const handleSubmit = () => {
+      if (title && description) {
+        onAdd({
+          title,
+          description,
+          stack: stack.split(',').map(s => s.trim()).filter(s => s),
+          features: features.split(',').map(s => s.trim()).filter(s => s),
+          url
+        });
+        setTitle('');
+        setDescription('');
+        setStack('');
+        setFeatures('');
+        setUrl('');
+        onClose?.();
+      }
+    };
+
     return (
       <div className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="project-title">Project Title</Label>
-          <Input id="project-title" placeholder="My Awesome Project" />
+          <Input 
+            id="project-title" 
+            placeholder="My Awesome Project" 
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
         </div>
         <div className="space-y-2">
           <Label htmlFor="project-description">Description</Label>
@@ -275,28 +383,53 @@ const Projects = () => {
             id="project-description" 
             placeholder="Describe your project..."
             rows={3}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
           />
         </div>
         <div className="space-y-2">
           <Label htmlFor="project-stack">Tech Stack (comma-separated)</Label>
-          <Input id="project-stack" placeholder="React, Node.js, MongoDB" />
+          <Input 
+            id="project-stack" 
+            placeholder="React, Node.js, MongoDB" 
+            value={stack}
+            onChange={(e) => setStack(e.target.value)}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="project-features">Key Features (comma-separated)</Label>
+          <Input 
+            id="project-features" 
+            placeholder="User Authentication, Real-time Updates, Payment Integration" 
+            value={features}
+            onChange={(e) => setFeatures(e.target.value)}
+          />
         </div>
         <div className="space-y-2">
           <Label htmlFor="project-url">Project URL (optional)</Label>
-          <Input id="project-url" placeholder="https://myproject.com" />
+          <Input 
+            id="project-url" 
+            placeholder="https://myproject.com" 
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+          />
         </div>
         <div className="flex space-x-3">
-          <Button className="btn-primary flex-1">
+          <Button 
+            className="btn-primary flex-1"
+            onClick={handleSubmit}
+            disabled={!title || !description}
+          >
             <Plus className="w-4 h-4 mr-2" />
             Add Project
           </Button>
-          <Button variant="outline">Cancel</Button>
+          <Button variant="outline" onClick={onClose}>Cancel</Button>
         </div>
       </div>
     );
   }
 
-  function EditProjectForm({ project }) {
+  function EditProjectForm({ project, setProjects, projects }) {
     const [title, setTitle] = useState(project.title);
     const [description, setDescription] = useState(project.description);
     const [stack, setStack] = useState(project.stack.join(', '));
@@ -345,7 +478,11 @@ const Projects = () => {
             Enhance with AI
           </Button>
           <Button className="btn-primary" onClick={handleSave}>Save</Button>
-          <Button variant="outline">Cancel</Button>
+          <Button variant="outline" onClick={() => {
+            const dialog = document.querySelector('[role="dialog"]');
+            const closeButton = dialog?.querySelector('[aria-label="Close"]') as HTMLButtonElement;
+            closeButton?.click();
+          }}>Cancel</Button>
         </div>
       </div>
     );

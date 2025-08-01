@@ -52,6 +52,7 @@ const DummyPortfolio = () => {
         title: "E-commerce API",
         description: "Full-stack e-commerce platform with Django REST Framework, JWT authentication, and payment integration",
         tech: ["Django", "PostgreSQL", "Redis", "Docker"],
+        features: ["User Authentication", "Payment Processing", "Admin Dashboard", "Real-time Inventory"],
         stars: 123,
         demo: "https://demo.example.com",
         repo: "https://github.com/alex-dev/ecommerce-api",
@@ -62,6 +63,7 @@ const DummyPortfolio = () => {
         title: "AI Chat Application",
         description: "Real-time chat app with AI assistant integration using OpenAI API and WebSockets",
         tech: ["Node.js", "Socket.io", "OpenAI", "Express"],
+        features: ["AI-Powered Responses", "Real-time Messaging", "Message History", "Multi-user Support"],
         stars: 234,
         demo: "https://chat.example.com",
         repo: "https://github.com/alex-dev/ai-chat",
@@ -72,6 +74,7 @@ const DummyPortfolio = () => {
         title: "Portfolio Dashboard",
         description: "Modern React dashboard with TypeScript, TailwindCSS, and responsive design",
         tech: ["React", "TypeScript", "TailwindCSS", "Vite"],
+        features: ["Responsive Design", "Dark Mode", "Performance Optimized", "Modern UI"],
         stars: 87,
         demo: "https://portfolio.example.com",
         repo: "https://github.com/alex-dev/portfolio",
@@ -172,6 +175,19 @@ const DummyPortfolio = () => {
             </Badge>
           ))}
         </div>
+
+        {project.features && project.features.length > 0 && (
+          <div className="mb-4">
+            <h4 className="text-sm font-medium text-foreground mb-2">Key Features:</h4>
+            <div className="flex flex-wrap gap-1">
+              {project.features.map((feature: string, index: number) => (
+                <Badge key={index} variant="outline" className="text-xs">
+                  {feature}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="flex space-x-2">
           <Button size="sm" className="flex-1 bg-white/20 backdrop-blur-md text-slate-700 dark:text-slate-300 border-white/30 hover:bg-white/30 transition-all duration-300" asChild>

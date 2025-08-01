@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Github, FileText, Eye, TrendingUp, Clock, CheckCircle, ArrowRight, Upload, Award } from 'lucide-react';
+import { Plus, Github, FileText, Eye, TrendingUp, Clock, CheckCircle, ArrowRight, Upload, Award, Brain } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -44,6 +44,13 @@ const Dashboard = () => {
       icon: Plus,
       color: 'electric',
       link: '/projects'
+    },
+    {
+      title: 'Add Skills',
+      description: 'Manage your technical skills',
+      icon: Brain,
+      color: 'primary',
+      link: '/skills'
     },
     {
       title: 'Add Achievement',
@@ -142,7 +149,7 @@ const Dashboard = () => {
                 Resume Upload & Auto-Categorization
               </h2>
               <p className="text-foreground-muted text-sm">
-                Upload your resume & we'll automatically extract projects, achievements, skills, and experiences using AI to update all portfolio sections.
+                Upload your resume and we'll automatically extract achievements, skills, and experiences using AI to update all portfolio sections.
               </p>
             </div>
             <div className="flex space-x-3">

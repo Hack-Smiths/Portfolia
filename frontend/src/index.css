@@ -261,7 +261,7 @@
   .orbit-icon {
     @apply absolute w-12 h-12 rounded-full bg-glass border border-white/20;
     @apply flex items-center justify-center text-primary;
-    animation: orbit 120s linear infinite;
+    animation: orbit 600s linear infinite;
   }
 
   .orbit-icon:nth-child(1) { animation-delay: 0s; }

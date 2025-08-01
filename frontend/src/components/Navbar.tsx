@@ -39,6 +39,12 @@ const Navbar = () => {
                   Projects
                 </Link>
                 <Link 
+                  to="/skills" 
+                  className="text-foreground-muted hover:text-foreground transition-colors"
+                >
+                  Skills
+                </Link>
+                <Link 
                   to="/achievements" 
                   className="text-foreground-muted hover:text-foreground transition-colors"
                 >
@@ -103,6 +109,13 @@ const Navbar = () => {
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Projects
+                  </Link>
+                  <Link 
+                    to="/skills" 
+                    className="text-foreground-muted hover:text-foreground transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Skills
                   </Link>
                   <Link 
                     to="/achievements" 

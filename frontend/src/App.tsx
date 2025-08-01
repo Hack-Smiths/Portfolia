@@ -22,10 +22,11 @@ const queryClient = new QueryClient();
 const AppContent = () => {
   const location = useLocation();
   const isDummyPortfolio = location.pathname === '/dummy-portfolio';
+  const isAuthPage = location.pathname === '/auth';
 
   return (
     <>
-      {!isDummyPortfolio && <Navbar />}
+      {!isDummyPortfolio && !isAuthPage && <Navbar />}
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/auth" element={<Auth />} />
@@ -39,7 +40,7 @@ const AppContent = () => {
         <Route path="/profile" element={<Profile />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
-      {!isDummyPortfolio && <AIAssistant />}
+      {!isDummyPortfolio && !isAuthPage && <AIAssistant />}
     </>
   );
 };

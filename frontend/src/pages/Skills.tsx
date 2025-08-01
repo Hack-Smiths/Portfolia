@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Brain, Edit3, Trash2, Filter, Star } from 'lucide-react';
+import { Plus, Brain, Edit3, Trash2, Filter, Star, Code, Server, Palette, Cloud, Settings, Database, Lightbulb, Users, Smartphone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -12,39 +12,50 @@ import AIAssistant from '@/components/AIAssistant';
 
 const Skills = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [skills, setSkills] = useState([
+    { id: 1, name: 'React', category: 'Frontend', level: 'Expert', experience: '3+ years' },
+    { id: 2, name: 'Node.js', category: 'Backend', level: 'Expert', experience: '2+ years' },
+    { id: 3, name: 'Python', category: 'Programming', level: 'Expert', experience: '4+ years' },
+    { id: 4, name: 'AWS', category: 'Cloud', level: 'Intermediate', experience: '1+ year' },
+    { id: 5, name: 'Docker', category: 'DevOps', level: 'Intermediate', experience: '1 year' },
+    { id: 6, name: 'MongoDB', category: 'Database', level: 'Intermediate', experience: '2 years' },
+    { id: 7, name: 'GraphQL', category: 'Backend', level: 'Beginner', experience: '6 months' },
+    { id: 8, name: 'TypeScript', category: 'Programming', level: 'Expert', experience: '2+ years' },
+    { id: 9, name: 'Leadership', category: 'Soft Skills', level: 'Expert', experience: '3+ years' },
+    { id: 10, name: 'Project Management', category: 'Soft Skills', level: 'Intermediate', experience: '2+ years' },
+    { id: 11, name: 'UI/UX Design', category: 'Design', level: 'Intermediate', experience: '1+ year' },
+    { id: 12, name: 'Machine Learning', category: 'AI/ML', level: 'Beginner', experience: '6 months' }
+  ]);
 
-  const aiParsedSkills = [
-    { name: 'React', category: 'Frontend', level: 'Expert', confidence: 95, experience: '3+ years' },
-    { name: 'Node.js', category: 'Backend', level: 'Expert', confidence: 90, experience: '2+ years' },
-    { name: 'Python', category: 'Programming', level: 'Expert', confidence: 88, experience: '4+ years' },
-    { name: 'AWS', category: 'Cloud', level: 'Intermediate', confidence: 82, experience: '1+ year' },
-    { name: 'Docker', category: 'DevOps', level: 'Intermediate', confidence: 75, experience: '1 year' },
-    { name: 'MongoDB', category: 'Database', level: 'Intermediate', confidence: 78, experience: '2 years' },
-    { name: 'GraphQL', category: 'Backend', level: 'Beginner', confidence: 65, experience: '6 months' },
-    { name: 'TypeScript', category: 'Programming', level: 'Expert', confidence: 92, experience: '2+ years' }
-  ];
+  const handleDeleteSkill = (skillId: number) => {
+    setSkills(skills.filter(s => s.id !== skillId));
+  };
 
-  const manualSkills = [
-    { name: 'Leadership', category: 'Soft Skills', level: 'Expert' },
-    { name: 'Project Management', category: 'Soft Skills', level: 'Intermediate' },
-    { name: 'UI/UX Design', category: 'Design', level: 'Intermediate' },
-    { name: 'Machine Learning', category: 'AI/ML', level: 'Beginner' },
-    { name: 'Public Speaking', category: 'Soft Skills', level: 'Intermediate' }
-  ];
+  const handleAddSkill = (newSkill: any) => {
+    const skill = {
+      id: Date.now(),
+      ...newSkill
+    };
+    setSkills([...skills, skill]);
+  };
+
+  const handleEditSkill = (updatedSkill: any) => {
+    setSkills(skills.map(s => s.id === updatedSkill.id ? updatedSkill : s));
+  };
 
   const categories = ['all', 'Frontend', 'Backend', 'Programming', 'Cloud', 'DevOps', 'Database', 'Design', 'AI/ML', 'Soft Skills'];
 
-  const allSkills = [...aiParsedSkills, ...manualSkills];
+  const allSkills = skills;
   const filteredSkills = selectedCategory === 'all' 
     ? allSkills 
     : allSkills.filter(skill => skill.category === selectedCategory);
 
   const getSkillLevelColor = (level) => {
     switch (level) {
-      case 'Expert': return 'skill-tag expert';
-      case 'Intermediate': return 'skill-tag intermediate';
-      case 'Beginner': return 'skill-tag beginner';
-      default: return 'skill-tag';
+      case 'Expert': return 'bg-purple-100 text-purple-800 border-purple-200';
+      case 'Intermediate': return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'Beginner': return 'bg-green-100 text-green-800 border-green-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
 
@@ -54,6 +65,81 @@ const Skills = () => {
       case 'Intermediate': return 2;
       case 'Beginner': return 1;
       default: return 0;
+    }
+  };
+
+  const getCategoryIcon = (category) => {
+    switch (category) {
+      case 'Frontend': 
+        return { 
+          icon: Code, 
+          bgColor: 'bg-slate-500', 
+          iconColor: 'text-white',
+          borderColor: 'border-slate-200'
+        };
+      case 'Backend': 
+        return { 
+          icon: Server, 
+          bgColor: 'bg-gray-600', 
+          iconColor: 'text-white',
+          borderColor: 'border-gray-200'
+        };
+      case 'Programming': 
+        return { 
+          icon: Code, 
+          bgColor: 'bg-indigo-600', 
+          iconColor: 'text-white',
+          borderColor: 'border-indigo-200'
+        };
+      case 'Cloud': 
+        return { 
+          icon: Cloud, 
+          bgColor: 'bg-blue-600', 
+          iconColor: 'text-white',
+          borderColor: 'border-blue-200'
+        };
+      case 'DevOps': 
+        return { 
+          icon: Settings, 
+          bgColor: 'bg-orange-600', 
+          iconColor: 'text-white',
+          borderColor: 'border-orange-200'
+        };
+      case 'Database': 
+        return { 
+          icon: Database, 
+          bgColor: 'bg-green-600', 
+          iconColor: 'text-white',
+          borderColor: 'border-green-200'
+        };
+      case 'Design': 
+        return { 
+          icon: Palette, 
+          bgColor: 'bg-pink-600', 
+          iconColor: 'text-white',
+          borderColor: 'border-pink-200'
+        };
+      case 'AI/ML': 
+        return { 
+          icon: Brain, 
+          bgColor: 'bg-purple-600', 
+          iconColor: 'text-white',
+          borderColor: 'border-purple-200'
+        };
+      case 'Soft Skills': 
+        return { 
+          icon: Users, 
+          bgColor: 'bg-teal-600', 
+          iconColor: 'text-white',
+          borderColor: 'border-teal-200'
+        };
+      default: 
+        return { 
+          icon: Lightbulb, 
+          bgColor: 'bg-gray-600', 
+          iconColor: 'text-white',
+          borderColor: 'border-gray-200'
+        };
     }
   };
 
@@ -77,12 +163,19 @@ const Skills = () => {
                 Add Skill
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle>Add New Skill</DialogTitle>
-              </DialogHeader>
-              <SkillForm />
-            </DialogContent>
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Add New Skill</DialogTitle>
+                </DialogHeader>
+                <SkillForm 
+                  onAdd={handleAddSkill} 
+                  onClose={() => {
+                    const dialog = document.querySelector('[role="dialog"]');
+                    const closeButton = dialog?.querySelector('[aria-label="Close"]') as HTMLButtonElement;
+                    closeButton?.click();
+                  }}
+                />
+              </DialogContent>
           </Dialog>
         </div>
 
@@ -107,136 +200,76 @@ const Skills = () => {
           </div>
         </Card>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* AI-Parsed Skills */}
-          <div>
-            <div className="flex items-center mb-6">
-              <Brain className="w-6 h-6 mr-2 text-electric" />
-              <h2 className="text-2xl font-space font-bold text-gradient-primary">
-                AI-Parsed Skills
-              </h2>
-            </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {categories.filter(cat => cat !== 'all').map((category, index) => {
+            const categorySkills = skills.filter(skill => skill.category === category);
+            if (categorySkills.length === 0) return null;
             
-            <div className="space-y-4">
-              {aiParsedSkills.filter(skill => 
-                selectedCategory === 'all' || skill.category === selectedCategory
-              ).map((skill, index) => (
-                <Card key={skill.name} className="glass-card interactive animate-slide-in-right" style={{ animationDelay: `${index * 100}ms` }}>
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center space-x-3">
-                      <h3 className="text-lg font-semibold">{skill.name}</h3>
-                      <Badge variant="outline" className="text-xs">
-                        {skill.category}
-                      </Badge>
-                    </div>
-                    <div className="flex space-x-1">
-                      <Button size="sm" variant="ghost" className="w-8 h-8 p-0">
-                        <Edit3 className="w-4 h-4" />
-                      </Button>
-                      <Button size="sm" variant="ghost" className="w-8 h-8 p-0 text-destructive">
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
+            const categoryData = getCategoryIcon(category);
+            const IconComponent = categoryData.icon;
+            
+            return (
+              <Card key={category} className={`glass-card p-6 hover:glow-primary transition-all duration-500 transform hover:-translate-y-2 animate-slide-in-up border ${categoryData.borderColor}`} style={{ animationDelay: `${index * 150}ms` }}>
+                <div className="text-center mb-6">
+                  <div className={`w-16 h-16 rounded-xl ${categoryData.bgColor} flex items-center justify-center mx-auto mb-4 shadow-lg`}>
+                    <IconComponent className={`w-8 h-8 ${categoryData.iconColor}`} />
                   </div>
-
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center space-x-1">
-                      {Array.from({ length: getStars(skill.level) }).map((_, i) => (
-                        <Star key={i} className="w-4 h-4 fill-current text-warning" />
-                      ))}
-                      {Array.from({ length: 3 - getStars(skill.level) }).map((_, i) => (
-                        <Star key={i} className="w-4 h-4 text-muted" />
-                      ))}
-                      <span className="text-sm text-foreground-muted ml-2">{skill.level}</span>
+                  <h3 className="text-xl font-bold text-foreground">{category}</h3>
+                  <div className="w-12 h-1 bg-gradient-to-r from-purple-500 to-pink-500 mx-auto mt-2 rounded-full"></div>
+                </div>
+                
+                <div className="space-y-3">
+                  {categorySkills.map((skill, skillIndex) => (
+                    <div key={skill.id} className="group">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center space-x-2">
+                          <span className="font-medium text-foreground">{skill.name}</span>
+                          <div className="flex items-center space-x-1">
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button size="sm" variant="ghost" className="w-6 h-6 p-0 opacity-0 group-hover:opacity-100 transition-all">
+                                  <Edit3 className="w-3 h-3" />
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="sm:max-w-md">
+                                <DialogHeader>
+                                  <DialogTitle>Edit Skill</DialogTitle>
+                                </DialogHeader>
+                                <EditSkillForm skill={skill} onEdit={handleEditSkill} />
+                              </DialogContent>
+                            </Dialog>
+                            <Button 
+                              size="sm" 
+                              variant="ghost" 
+                              className="w-6 h-6 p-0 text-destructive opacity-0 group-hover:opacity-100 transition-all"
+                              onClick={() => handleDeleteSkill(skill.id)}
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </Button>
+                          </div>
+                        </div>
+                        <Badge className={getSkillLevelColor(skill.level)} variant="secondary">
+                          {skill.level}
+                        </Badge>
+                      </div>
+                      
+                      <div className="flex items-center justify-between text-xs text-foreground-muted">
+                        <div className="flex items-center space-x-1">
+                          {Array.from({ length: getStars(skill.level) }).map((_, i) => (
+                            <Star key={i} className="w-3 h-3 fill-current text-yellow-500" />
+                          ))}
+                          {Array.from({ length: 3 - getStars(skill.level) }).map((_, i) => (
+                            <Star key={i} className="w-3 h-3 text-muted" />
+                          ))}
+                        </div>
+                        <span>{skill.experience}</span>
+                      </div>
                     </div>
-                    <div className="text-xs text-foreground-muted">
-                      {skill.experience}
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-foreground-muted">AI Confidence</span>
-                      <span className="font-medium">{skill.confidence}%</span>
-                    </div>
-                    <div className="w-full bg-muted rounded-full h-2">
-                      <div 
-                        className="bg-gradient-primary h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${skill.confidence}%` }}
-                      />
-                    </div>
-                  </div>
-
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full mt-3 text-xs"
-                  >
-                    <Brain className="w-3 h-3 mr-1" />
-                    Enhance with AI
-                  </Button>
-                </Card>
-              ))}
-            </div>
-          </div>
-
-          {/* Manual Skills */}
-          <div>
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-space font-bold text-gradient-primary">
-                Manual Skills
-              </h2>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button variant="outline" size="sm">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-md">
-                  <DialogHeader>
-                    <DialogTitle>Add Manual Skill</DialogTitle>
-                  </DialogHeader>
-                  <SkillForm />
-                </DialogContent>
-              </Dialog>
-            </div>
-
-            <div className="space-y-4">
-              {manualSkills.filter(skill => 
-                selectedCategory === 'all' || skill.category === selectedCategory
-              ).map((skill, index) => (
-                <Card key={skill.name} className="glass-card interactive animate-slide-in-up" style={{ animationDelay: `${index * 100}ms` }}>
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center space-x-3">
-                      <h3 className="text-lg font-semibold">{skill.name}</h3>
-                      <Badge variant="outline" className="text-xs">
-                        {skill.category}
-                      </Badge>
-                    </div>
-                    <div className="flex space-x-1">
-                      <Button size="sm" variant="ghost" className="w-8 h-8 p-0">
-                        <Edit3 className="w-4 h-4" />
-                      </Button>
-                      <Button size="sm" variant="ghost" className="w-8 h-8 p-0 text-destructive">
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center space-x-1 mb-3">
-                    {Array.from({ length: getStars(skill.level) }).map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-current text-warning" />
-                    ))}
-                    {Array.from({ length: 3 - getStars(skill.level) }).map((_, i) => (
-                      <Star key={i} className="w-4 h-4 text-muted" />
-                    ))}
-                    <span className="text-sm text-foreground-muted ml-2">{skill.level}</span>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          </div>
+                  ))}
+                </div>
+              </Card>
+            );
+          })}
         </div>
 
         {/* Skills Cloud Visualization */}
@@ -248,7 +281,7 @@ const Skills = () => {
             {allSkills.map((skill, index) => (
               <div
                 key={skill.name}
-                className={`${getSkillLevelColor(skill.level)} interactive animate-scale-in hover:glow-primary`}
+                className={`${getSkillLevelColor(skill.level)} px-4 py-2 rounded-full border font-medium cursor-pointer hover:shadow-md transition-all duration-200 animate-scale-in hover:glow-primary`}
                 style={{ 
                   animationDelay: `${index * 50}ms`,
                   fontSize: skill.level === 'Expert' ? '1.2rem' : skill.level === 'Intermediate' ? '1rem' : '0.875rem'
@@ -265,34 +298,58 @@ const Skills = () => {
     </div>
   );
 
-  function SkillForm() {
+  function SkillForm({ onAdd, onClose }) {
     const [skillLevel, setSkillLevel] = useState([2]);
+    const [name, setName] = useState('');
+    const [category, setCategory] = useState('');
+    const [experience, setExperience] = useState('');
     
     const levelLabels = ['Beginner', 'Intermediate', 'Expert'];
+
+    const handleSubmit = () => {
+      if (name && category) {
+        onAdd({
+          name,
+          category,
+          level: levelLabels[skillLevel[0]],
+          experience: experience || '1 year'
+        });
+        setName('');
+        setCategory('');
+        setExperience('');
+        setSkillLevel([2]);
+        onClose?.();
+      }
+    };
     
     return (
       <div className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="skill-name">Skill Name</Label>
-          <Input id="skill-name" placeholder="e.g., React, Leadership" />
+          <Input 
+            id="skill-name" 
+            placeholder="e.g., React, Leadership" 
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
         </div>
         
         <div className="space-y-2">
           <Label htmlFor="skill-category">Category</Label>
-          <Select>
+          <Select value={category} onValueChange={setCategory}>
             <SelectTrigger>
               <SelectValue placeholder="Select category" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="frontend">Frontend</SelectItem>
-              <SelectItem value="backend">Backend</SelectItem>
-              <SelectItem value="programming">Programming</SelectItem>
-              <SelectItem value="cloud">Cloud</SelectItem>
-              <SelectItem value="devops">DevOps</SelectItem>
-              <SelectItem value="database">Database</SelectItem>
-              <SelectItem value="design">Design</SelectItem>
-              <SelectItem value="ai-ml">AI/ML</SelectItem>
-              <SelectItem value="soft-skills">Soft Skills</SelectItem>
+              <SelectItem value="Frontend">Frontend</SelectItem>
+              <SelectItem value="Backend">Backend</SelectItem>
+              <SelectItem value="Programming">Programming</SelectItem>
+              <SelectItem value="Cloud">Cloud</SelectItem>
+              <SelectItem value="DevOps">DevOps</SelectItem>
+              <SelectItem value="Database">Database</SelectItem>
+              <SelectItem value="Design">Design</SelectItem>
+              <SelectItem value="AI/ML">AI/ML</SelectItem>
+              <SelectItem value="Soft Skills">Soft Skills</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -321,9 +378,109 @@ const Skills = () => {
           </div>
         </div>
 
+        <div className="space-y-2">
+          <Label htmlFor="skill-experience">Experience</Label>
+          <Input 
+            id="skill-experience" 
+            placeholder="e.g., 2+ years, 6 months" 
+            value={experience}
+            onChange={(e) => setExperience(e.target.value)}
+          />
+        </div>
+
         <div className="flex space-x-3">
-          <Button className="btn-primary flex-1">Add Skill</Button>
-          <Button variant="outline">Cancel</Button>
+          <Button 
+            className="btn-primary flex-1"
+            onClick={handleSubmit}
+            disabled={!name || !category}
+          >
+            Add Skill
+          </Button>
+          <Button variant="outline" onClick={onClose}>Cancel</Button>
+        </div>
+      </div>
+    );
+  }
+
+  function EditSkillForm({ skill, onEdit }) {
+    const [name, setName] = useState(skill.name);
+    const [category, setCategory] = useState(skill.category);
+    const [level, setLevel] = useState(skill.level);
+    const [experience, setExperience] = useState(skill.experience);
+
+    const handleSubmit = () => {
+      onEdit({
+        ...skill,
+        name,
+        category,
+        level,
+        experience
+      });
+    };
+
+    return (
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="edit-skill-name">Skill Name</Label>
+          <Input 
+            id="edit-skill-name" 
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="edit-skill-category">Category</Label>
+          <Select value={category} onValueChange={setCategory}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Frontend">Frontend</SelectItem>
+              <SelectItem value="Backend">Backend</SelectItem>
+              <SelectItem value="Programming">Programming</SelectItem>
+              <SelectItem value="Cloud">Cloud</SelectItem>
+              <SelectItem value="DevOps">DevOps</SelectItem>
+              <SelectItem value="Database">Database</SelectItem>
+              <SelectItem value="Design">Design</SelectItem>
+              <SelectItem value="AI/ML">AI/ML</SelectItem>
+              <SelectItem value="Soft Skills">Soft Skills</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="edit-skill-level">Level</Label>
+          <Select value={level} onValueChange={setLevel}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Beginner">Beginner</SelectItem>
+              <SelectItem value="Intermediate">Intermediate</SelectItem>
+              <SelectItem value="Expert">Expert</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="edit-skill-experience">Experience</Label>
+          <Input 
+            id="edit-skill-experience" 
+            value={experience}
+            onChange={(e) => setExperience(e.target.value)}
+          />
+        </div>
+
+        <div className="flex space-x-3">
+          <Button className="btn-primary flex-1" onClick={handleSubmit}>
+            Save Changes
+          </Button>
+          <Button variant="outline" onClick={() => {
+            const dialog = document.querySelector('[role="dialog"]');
+            const closeButton = dialog?.querySelector('[aria-label="Close"]') as HTMLButtonElement;
+            closeButton?.click();
+          }}>Cancel</Button>
         </div>
       </div>
     );

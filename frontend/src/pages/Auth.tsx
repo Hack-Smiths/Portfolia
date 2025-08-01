@@ -33,7 +33,7 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen pt-16 flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-md animate-scale-in">
         <Card className="glass-card">
           <div className="text-center mb-8">

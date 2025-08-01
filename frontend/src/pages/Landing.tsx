@@ -108,7 +108,7 @@ const Landing = () => {
                     AI-Powered
                   </span>
                   <br />
-                  <span className="text-3xl lg:text-5xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mt-2 block tracking-wide">
+                  <span className="text-3xl lg:text-5xl font-bold bg-gradient-to-r from-purple-600 via-purple-500 to-purple-700 bg-clip-text text-transparent mt-2 block tracking-wide">
                     Internship Portfolio Builder
                   </span>
                 </h1>
@@ -133,13 +133,13 @@ const Landing = () => {
           {/* Enhanced CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12 animate-slide-in-up">
             <Link to="/auth">
-              <Button className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold px-8 py-3 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 border-0">
+              <Button className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold px-8 py-3 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 border-0">
                 Get Started Free
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </Link>
             <Link to="/dummy-portfolio">
-              <Button variant="outline" className="border-2 border-indigo-300 dark:border-indigo-600 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 font-semibold px-8 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300">
+              <Button variant="outline" className="border-2 border-purple-300 dark:border-purple-600 text-purple-700 dark:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-900/20 font-semibold px-8 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300">
                 <Play className="w-4 h-4 mr-2" />
                 View Live Demo
               </Button>
@@ -150,7 +150,7 @@ const Landing = () => {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-3xl mx-auto animate-slide-in-up">
             {stats.map((stat, index) => (
               <div key={index} className="text-center bg-white/30 dark:bg-slate-800/30 backdrop-blur-sm p-4 rounded-xl border border-white/30 dark:border-slate-700/30">
-                <div className="text-3xl lg:text-4xl font-black bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-1">
+                <div className="text-3xl lg:text-4xl font-black bg-gradient-to-r from-purple-600 to-purple-700 bg-clip-text text-transparent mb-1">
                   {stat.value}
                 </div>
                 <div className="text-sm text-foreground-muted font-medium">{stat.label}</div>
@@ -296,6 +296,10 @@ const Landing = () => {
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
               </Link>
+              <Button className="btn-ghost text-lg px-8 py-4">
+                <Star className="w-5 h-5 mr-2" />
+                View Examples
+              </Button>
             </div>
           </Card>
         </div>

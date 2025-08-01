@@ -163,20 +163,27 @@ const Achievements = () => {
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-space font-bold flex items-center">
               <Briefcase className="w-6 h-6 mr-2 text-primary" />
-              Internships
+              Work Experience
             </h2>
             <Dialog>
               <DialogTrigger asChild>
                 <Button variant="outline">
                   <Plus className="w-4 h-4 mr-2" />
-                  Add Internship
+                  Add Work Experience
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                  <DialogTitle>Add Internship</DialogTitle>
+                  <DialogTitle>Add Work Experience</DialogTitle>
                 </DialogHeader>
-                <InternshipForm />
+                <InternshipForm 
+                  onAdd={(data) => setAchievements(prev => ({...prev, internships: [...prev.internships, {id: Date.now(), ...data}]}))} 
+                  onClose={() => {
+                    const dialog = document.querySelector('[role="dialog"]');
+                    const closeButton = dialog?.querySelector('[aria-label="Close"]') as HTMLButtonElement;
+                    closeButton?.click();
+                  }}
+                />
               </DialogContent>
             </Dialog>
           </div>
@@ -255,7 +262,14 @@ const Achievements = () => {
                   <DialogHeader>
                     <DialogTitle>Add Certificate</DialogTitle>
                   </DialogHeader>
-                  <CertificateForm />
+                  <CertificateForm 
+                    onAdd={(data) => setAchievements(prev => ({...prev, certificates: [...prev.certificates, {id: Date.now(), ...data}]}))} 
+                    onClose={() => {
+                      const dialog = document.querySelector('[role="dialog"]');
+                      const closeButton = dialog?.querySelector('[aria-label="Close"]') as HTMLButtonElement;
+                      closeButton?.click();
+                    }}
+                  />
                 </DialogContent>
               </Dialog>
             </div>
@@ -306,7 +320,7 @@ const Achievements = () => {
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-space font-bold flex items-center">
                 <Award className="w-6 h-6 mr-2 text-pulse" />
-                Awards
+                Highlights
               </h2>
               <Dialog>
                 <DialogTrigger asChild>
@@ -317,9 +331,16 @@ const Achievements = () => {
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-md">
                   <DialogHeader>
-                    <DialogTitle>Add Award</DialogTitle>
+                    <DialogTitle>Add Highlight</DialogTitle>
                   </DialogHeader>
-                  <AwardForm />
+                  <AwardForm 
+                    onAdd={(data) => setAchievements(prev => ({...prev, awards: [...prev.awards, {id: Date.now(), ...data}]}))} 
+                    onClose={() => {
+                      const dialog = document.querySelector('[role="dialog"]');
+                      const closeButton = dialog?.querySelector('[aria-label="Close"]') as HTMLButtonElement;
+                      closeButton?.click();
+                    }}
+                  />
                 </DialogContent>
               </Dialog>
             </div>
@@ -374,106 +395,170 @@ const Achievements = () => {
     </div>
   );
 
-  function InternshipForm() {
+  function InternshipForm({ onAdd, onClose }) {
+    const [title, setTitle] = useState('');
+    const [organization, setOrganization] = useState('');
+    const [duration, setDuration] = useState('');
+    const [location, setLocation] = useState('');
+    const [description, setDescription] = useState('');
+    const [skills, setSkills] = useState('');
+
+    const handleSubmit = () => {
+      if (title && organization) {
+        onAdd({
+          title,
+          organization,
+          duration,
+          location,
+          description,
+          skills: skills.split(',').map(s => s.trim()).filter(s => s),
+          status: 'completed'
+        });
+        setTitle('');
+        setOrganization('');
+        setDuration('');
+        setLocation('');
+        setDescription('');
+        setSkills('');
+        onClose?.();
+      }
+    };
+
     return (
       <div className="space-y-4">
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-2">
             <Label htmlFor="int-title">Job Title</Label>
-            <Input id="int-title" placeholder="Software Engineer Intern" />
+            <Input id="int-title" placeholder="Software Engineer Intern" value={title} onChange={(e) => setTitle(e.target.value)} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="int-company">Company</Label>
-            <Input id="int-company" placeholder="TechCorp Inc." />
+            <Input id="int-company" placeholder="TechCorp Inc." value={organization} onChange={(e) => setOrganization(e.target.value)} />
           </div>
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-2">
             <Label htmlFor="int-duration">Duration</Label>
-            <Input id="int-duration" placeholder="Jun 2024 - Aug 2024" />
+            <Input id="int-duration" placeholder="Jun 2024 - Aug 2024" value={duration} onChange={(e) => setDuration(e.target.value)} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="int-location">Location</Label>
-            <Input id="int-location" placeholder="San Francisco, CA" />
+            <Input id="int-location" placeholder="San Francisco, CA" value={location} onChange={(e) => setLocation(e.target.value)} />
           </div>
         </div>
         <div className="space-y-2">
           <Label htmlFor="int-description">Description</Label>
-          <Textarea id="int-description" placeholder="Describe your responsibilities and achievements..." rows={3} />
+          <Textarea id="int-description" placeholder="Describe your responsibilities and achievements..." rows={3} value={description} onChange={(e) => setDescription(e.target.value)} />
         </div>
         <div className="space-y-2">
           <Label htmlFor="int-skills">Skills Gained</Label>
-          <Input id="int-skills" placeholder="React, Node.js, AWS" />
+          <Input id="int-skills" placeholder="React, Node.js, AWS" value={skills} onChange={(e) => setSkills(e.target.value)} />
         </div>
         <div className="flex space-x-3">
-          <Button className="btn-primary flex-1">Add Internship</Button>
-          <Button variant="outline">Cancel</Button>
+          <Button className="btn-primary flex-1" onClick={handleSubmit} disabled={!title || !organization}>Add Work Experience</Button>
+          <Button variant="outline" onClick={onClose}>Cancel</Button>
         </div>
       </div>
     );
   }
 
-  function CertificateForm() {
+  function CertificateForm({ onAdd, onClose }) {
+    const [title, setTitle] = useState('');
+    const [issuer, setIssuer] = useState('');
+    const [year, setYear] = useState('');
+    const [credentialId, setCredentialId] = useState('');
+    const [description, setDescription] = useState('');
+
+    const handleSubmit = () => {
+      if (title && issuer) {
+        onAdd({ title, issuer, year, credentialId, description, status: 'verified' });
+        setTitle('');
+        setIssuer('');
+        setYear('');
+        setCredentialId('');
+        setDescription('');
+        onClose?.();
+      }
+    };
+
     return (
       <div className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="cert-title">Certificate Title</Label>
-          <Input id="cert-title" placeholder="AWS Certified Solutions Architect" />
+          <Input id="cert-title" placeholder="AWS Certified Solutions Architect" value={title} onChange={(e) => setTitle(e.target.value)} />
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-2">
             <Label htmlFor="cert-issuer">Issuer</Label>
-            <Input id="cert-issuer" placeholder="Amazon Web Services" />
+            <Input id="cert-issuer" placeholder="Amazon Web Services" value={issuer} onChange={(e) => setIssuer(e.target.value)} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="cert-year">Year</Label>
-            <Input id="cert-year" placeholder="2024" />
+            <Input id="cert-year" placeholder="2024" value={year} onChange={(e) => setYear(e.target.value)} />
           </div>
         </div>
         <div className="space-y-2">
           <Label htmlFor="cert-id">Credential ID (optional)</Label>
-          <Input id="cert-id" placeholder="AWS-12345" />
+          <Input id="cert-id" placeholder="AWS-12345" value={credentialId} onChange={(e) => setCredentialId(e.target.value)} />
         </div>
         <div className="space-y-2">
           <Label htmlFor="cert-description">Description</Label>
-          <Textarea id="cert-description" placeholder="Brief description of the certification..." rows={2} />
+          <Textarea id="cert-description" placeholder="Brief description of the certification..." rows={2} value={description} onChange={(e) => setDescription(e.target.value)} />
         </div>
         <div className="flex space-x-3">
-          <Button className="btn-primary flex-1">Add Certificate</Button>
-          <Button variant="outline">Cancel</Button>
+          <Button className="btn-primary flex-1" onClick={handleSubmit} disabled={!title || !issuer}>Add Certificate</Button>
+          <Button variant="outline" onClick={onClose}>Cancel</Button>
         </div>
       </div>
     );
   }
 
-  function AwardForm() {
+  function AwardForm({ onAdd, onClose }) {
+    const [title, setTitle] = useState('');
+    const [organization, setOrganization] = useState('');
+    const [year, setYear] = useState('');
+    const [category, setCategory] = useState('');
+    const [description, setDescription] = useState('');
+
+    const handleSubmit = () => {
+      if (title && organization) {
+        onAdd({ title, organization, year, category, description });
+        setTitle('');
+        setOrganization('');
+        setYear('');
+        setCategory('');
+        setDescription('');
+        onClose?.();
+      }
+    };
+
     return (
       <div className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="award-title">Award Title</Label>
-          <Input id="award-title" placeholder="Best Innovation Award" />
+          <Label htmlFor="award-title">Highlight Title</Label>
+          <Input id="award-title" placeholder="Best Innovation Award" value={title} onChange={(e) => setTitle(e.target.value)} />
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-2">
             <Label htmlFor="award-org">Organization</Label>
-            <Input id="award-org" placeholder="University Hackathon" />
+            <Input id="award-org" placeholder="University Hackathon" value={organization} onChange={(e) => setOrganization(e.target.value)} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="award-year">Year</Label>
-            <Input id="award-year" placeholder="2024" />
+            <Input id="award-year" placeholder="2024" value={year} onChange={(e) => setYear(e.target.value)} />
           </div>
         </div>
         <div className="space-y-2">
           <Label htmlFor="award-category">Category</Label>
-          <Input id="award-category" placeholder="Competition, Academic, etc." />
+          <Input id="award-category" placeholder="Competition, Academic, etc." value={category} onChange={(e) => setCategory(e.target.value)} />
         </div>
         <div className="space-y-2">
           <Label htmlFor="award-description">Description</Label>
-          <Textarea id="award-description" placeholder="Describe the achievement..." rows={2} />
+          <Textarea id="award-description" placeholder="Describe the achievement..." rows={2} value={description} onChange={(e) => setDescription(e.target.value)} />
         </div>
         <div className="flex space-x-3">
-          <Button className="btn-primary flex-1">Add Award</Button>
-          <Button variant="outline">Cancel</Button>
+          <Button className="btn-primary flex-1" onClick={handleSubmit} disabled={!title || !organization}>Add Highlight</Button>
+          <Button variant="outline" onClick={onClose}>Cancel</Button>
         </div>
       </div>
     );
