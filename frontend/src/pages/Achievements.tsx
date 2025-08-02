@@ -178,11 +178,6 @@ const Achievements = () => {
                 </DialogHeader>
                 <InternshipForm 
                   onAdd={(data) => setAchievements(prev => ({...prev, internships: [...prev.internships, {id: Date.now(), ...data}]}))} 
-                  onClose={() => {
-                    const dialog = document.querySelector('[role="dialog"]');
-                    const closeButton = dialog?.querySelector('[aria-label="Close"]') as HTMLButtonElement;
-                    closeButton?.click();
-                  }}
                 />
               </DialogContent>
             </Dialog>
@@ -264,11 +259,6 @@ const Achievements = () => {
                   </DialogHeader>
                   <CertificateForm 
                     onAdd={(data) => setAchievements(prev => ({...prev, certificates: [...prev.certificates, {id: Date.now(), ...data}]}))} 
-                    onClose={() => {
-                      const dialog = document.querySelector('[role="dialog"]');
-                      const closeButton = dialog?.querySelector('[aria-label="Close"]') as HTMLButtonElement;
-                      closeButton?.click();
-                    }}
                   />
                 </DialogContent>
               </Dialog>
@@ -333,14 +323,9 @@ const Achievements = () => {
                   <DialogHeader>
                     <DialogTitle>Add Highlight</DialogTitle>
                   </DialogHeader>
-                  <AwardForm 
-                    onAdd={(data) => setAchievements(prev => ({...prev, awards: [...prev.awards, {id: Date.now(), ...data}]}))} 
-                    onClose={() => {
-                      const dialog = document.querySelector('[role="dialog"]');
-                      const closeButton = dialog?.querySelector('[aria-label="Close"]') as HTMLButtonElement;
-                      closeButton?.click();
-                    }}
-                  />
+                    <AwardForm 
+                      onAdd={(data) => setAchievements(prev => ({...prev, awards: [...prev.awards, {id: Date.now(), ...data}]}))} 
+                    />
                 </DialogContent>
               </Dialog>
             </div>
@@ -395,7 +380,7 @@ const Achievements = () => {
     </div>
   );
 
-  function InternshipForm({ onAdd, onClose }) {
+  function InternshipForm({ onAdd }) {
     const [title, setTitle] = useState('');
     const [organization, setOrganization] = useState('');
     const [duration, setDuration] = useState('');
@@ -420,7 +405,9 @@ const Achievements = () => {
         setLocation('');
         setDescription('');
         setSkills('');
-        onClose?.();
+        // Close dialog
+        const closeButton = document.querySelector('[role="dialog"] [data-state="open"] button[aria-label="Close"]') as HTMLButtonElement;
+        closeButton?.click();
       }
     };
 
@@ -456,13 +443,16 @@ const Achievements = () => {
         </div>
         <div className="flex space-x-3">
           <Button className="btn-primary flex-1" onClick={handleSubmit} disabled={!title || !organization}>Add Work Experience</Button>
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button variant="outline" onClick={() => {
+            const closeButton = document.querySelector('[role="dialog"] [data-state="open"] button[aria-label="Close"]') as HTMLButtonElement;
+            closeButton?.click();
+          }}>Cancel</Button>
         </div>
       </div>
     );
   }
 
-  function CertificateForm({ onAdd, onClose }) {
+  function CertificateForm({ onAdd }) {
     const [title, setTitle] = useState('');
     const [issuer, setIssuer] = useState('');
     const [year, setYear] = useState('');
@@ -477,7 +467,9 @@ const Achievements = () => {
         setYear('');
         setCredentialId('');
         setDescription('');
-        onClose?.();
+        // Close dialog
+        const closeButton = document.querySelector('[role="dialog"] [data-state="open"] button[aria-label="Close"]') as HTMLButtonElement;
+        closeButton?.click();
       }
     };
 
@@ -507,13 +499,16 @@ const Achievements = () => {
         </div>
         <div className="flex space-x-3">
           <Button className="btn-primary flex-1" onClick={handleSubmit} disabled={!title || !issuer}>Add Certificate</Button>
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button variant="outline" onClick={() => {
+            const closeButton = document.querySelector('[role="dialog"] [data-state="open"] button[aria-label="Close"]') as HTMLButtonElement;
+            closeButton?.click();
+          }}>Cancel</Button>
         </div>
       </div>
     );
   }
 
-  function AwardForm({ onAdd, onClose }) {
+  function AwardForm({ onAdd }) {
     const [title, setTitle] = useState('');
     const [organization, setOrganization] = useState('');
     const [year, setYear] = useState('');
@@ -528,7 +523,9 @@ const Achievements = () => {
         setYear('');
         setCategory('');
         setDescription('');
-        onClose?.();
+        // Close dialog
+        const closeButton = document.querySelector('[role="dialog"] [data-state="open"] button[aria-label="Close"]') as HTMLButtonElement;
+        closeButton?.click();
       }
     };
 
@@ -558,7 +555,10 @@ const Achievements = () => {
         </div>
         <div className="flex space-x-3">
           <Button className="btn-primary flex-1" onClick={handleSubmit} disabled={!title || !organization}>Add Highlight</Button>
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button variant="outline" onClick={() => {
+            const closeButton = document.querySelector('[role="dialog"] [data-state="open"] button[aria-label="Close"]') as HTMLButtonElement;
+            closeButton?.click();
+          }}>Cancel</Button>
         </div>
       </div>
     );

@@ -226,27 +226,22 @@ const Projects = () => {
                 />
               </DialogContent>
             </Dialog>
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button variant="outline">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Project
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Add Project Manually</DialogTitle>
-                </DialogHeader>
-                <ManualProjectForm 
-                  onAdd={handleAddProject} 
-                  onClose={() => {
-                    const dialog = document.querySelector('[role="dialog"]');
-                    const closeButton = dialog?.querySelector('[aria-label="Close"]') as HTMLButtonElement;
-                    closeButton?.click();
-                  }}
-                />
-              </DialogContent>
-            </Dialog>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="outline">
+                <Plus className="w-4 h-4 mr-2" />
+                Add Project
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Add Project Manually</DialogTitle>
+              </DialogHeader>
+              <ManualProjectForm 
+                onAdd={handleAddProject} 
+              />
+            </DialogContent>
+          </Dialog>
           </div>
         </div>
 
@@ -341,7 +336,7 @@ const Projects = () => {
     );
   }
 
-  function ManualProjectForm({ onAdd, onClose }) {
+  function ManualProjectForm({ onAdd }) {
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [stack, setStack] = useState('');
@@ -362,7 +357,9 @@ const Projects = () => {
         setStack('');
         setFeatures('');
         setUrl('');
-        onClose?.();
+        // Close dialog
+        const closeButton = document.querySelector('[role="dialog"] [data-state="open"] button[aria-label="Close"]') as HTMLButtonElement;
+        closeButton?.click();
       }
     };
 
@@ -423,7 +420,10 @@ const Projects = () => {
             <Plus className="w-4 h-4 mr-2" />
             Add Project
           </Button>
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button variant="outline" onClick={() => {
+            const closeButton = document.querySelector('[role="dialog"] [data-state="open"] button[aria-label="Close"]') as HTMLButtonElement;
+            closeButton?.click();
+          }}>Cancel</Button>
         </div>
       </div>
     );

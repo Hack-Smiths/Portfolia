@@ -168,10 +168,9 @@ const Skills = () => {
                   <DialogTitle>Add New Skill</DialogTitle>
                 </DialogHeader>
                 <SkillForm 
-                  onAdd={handleAddSkill} 
+                  onAdd={handleAddSkill}
                   onClose={() => {
-                    const dialog = document.querySelector('[role="dialog"]');
-                    const closeButton = dialog?.querySelector('[aria-label="Close"]') as HTMLButtonElement;
+                    const closeButton = document.querySelector('[role="dialog"] [data-state="open"] button[aria-label="Close"]') as HTMLButtonElement;
                     closeButton?.click();
                   }}
                 />
@@ -235,7 +234,14 @@ const Skills = () => {
                                 <DialogHeader>
                                   <DialogTitle>Edit Skill</DialogTitle>
                                 </DialogHeader>
-                                <EditSkillForm skill={skill} onEdit={handleEditSkill} />
+                                <EditSkillForm 
+                                  skill={skill} 
+                                  onEdit={handleEditSkill}
+                                  onClose={() => {
+                                    const closeButton = document.querySelector('[role="dialog"] [data-state="open"] button[aria-label="Close"]') as HTMLButtonElement;
+                                    closeButton?.click();
+                                  }}
+                                />
                               </DialogContent>
                             </Dialog>
                             <Button 
@@ -402,7 +408,7 @@ const Skills = () => {
     );
   }
 
-  function EditSkillForm({ skill, onEdit }) {
+  function EditSkillForm({ skill, onEdit, onClose }) {
     const [name, setName] = useState(skill.name);
     const [category, setCategory] = useState(skill.category);
     const [level, setLevel] = useState(skill.level);
@@ -416,6 +422,7 @@ const Skills = () => {
         level,
         experience
       });
+      onClose?.();
     };
 
     return (
@@ -476,11 +483,7 @@ const Skills = () => {
           <Button className="btn-primary flex-1" onClick={handleSubmit}>
             Save Changes
           </Button>
-          <Button variant="outline" onClick={() => {
-            const dialog = document.querySelector('[role="dialog"]');
-            const closeButton = dialog?.querySelector('[aria-label="Close"]') as HTMLButtonElement;
-            closeButton?.click();
-          }}>Cancel</Button>
+          <Button variant="outline" onClick={onClose}>Cancel</Button>
         </div>
       </div>
     );

@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Download, Link2, Share2, Palette, Eye, QrCode, Copy, CheckCircle, Globe } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { usePortfolio } from '@/contexts/PortfolioContext';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -9,7 +11,8 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 
 const Export = () => {
-  const [selectedTheme, setSelectedTheme] = useState('light');
+  const navigate = useNavigate();
+  const { selectedTemplate, setSelectedTemplate, projects, skills, achievements, profile } = usePortfolio();
   const [exportSettings, setExportSettings] = useState({
     includeContact: true,
     includeProjects: true,
@@ -18,24 +21,24 @@ const Export = () => {
     customDomain: false
   });
 
-  const themes = [
+  const templates = [
     { 
-      id: 'light', 
-      name: 'Light', 
+      id: 'classic', 
+      name: 'Classic Professional', 
       preview: 'bg-white border-2 border-gray-200',
-      description: 'Clean and professional'
+      description: 'Clean and professional design'
     },
     { 
-      id: 'soft', 
-      name: 'Soft', 
+      id: 'creative', 
+      name: 'Creative Timeline', 
       preview: 'bg-gradient-to-br from-blue-50 to-purple-50 border-2 border-blue-200',
-      description: 'Gentle gradients and colors'
+      description: 'Creative timeline layout'
     },
     { 
-      id: 'neon', 
-      name: 'Neon', 
+      id: 'modern', 
+      name: 'Futuristic Modern', 
       preview: 'bg-gradient-to-br from-purple-900 to-blue-900 border-2 border-electric',
-      description: 'Bold and futuristic'
+      description: 'Bold and futuristic design'
     }
   ];
 
@@ -48,6 +51,14 @@ const Export = () => {
   const handleDownloadPDF = () => {
     // Dummy PDF download
     console.log('Downloading PDF...');
+  };
+
+  const handleOpenFullPreview = () => {
+    navigate('/portfolio');
+  };
+
+  const handleViewMainPortfolio = () => {
+    navigate(`/main-portfolio?template=${selectedTemplate}`);
   };
 
   const handleShare = (platform) => {
@@ -82,31 +93,31 @@ const Export = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Left Side - Settings */}
           <div className="space-y-6">
-            {/* Theme Selection */}
+            {/* Template Selection */}
             <Card className="glass-card animate-slide-in-up">
               <div className="flex items-center space-x-2 mb-6">
                 <Palette className="w-5 h-5 text-primary" />
-                <h2 className="text-xl font-semibold">Choose Theme</h2>
+                <h2 className="text-xl font-semibold">Choose Template</h2>
               </div>
               
               <div className="grid grid-cols-1 gap-4">
-                {themes.map((theme) => (
+                {templates.map((template) => (
                   <div
-                    key={theme.id}
+                    key={template.id}
                     className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                      selectedTheme === theme.id 
+                      selectedTemplate === template.id 
                         ? 'border-primary bg-primary/5' 
                         : 'border-border hover:border-primary/50'
                     }`}
-                    onClick={() => setSelectedTheme(theme.id)}
+                    onClick={() => setSelectedTemplate(template.id)}
                   >
                     <div className="flex items-center space-x-3">
-                      <div className={`w-12 h-8 rounded ${theme.preview}`} />
+                      <div className={`w-12 h-8 rounded ${template.preview}`} />
                       <div className="flex-1">
-                        <h3 className="font-medium">{theme.name}</h3>
-                        <p className="text-sm text-foreground-muted">{theme.description}</p>
+                        <h3 className="font-medium">{template.name}</h3>
+                        <p className="text-sm text-foreground-muted">{template.description}</p>
                       </div>
-                      {selectedTheme === theme.id && (
+                      {selectedTemplate === template.id && (
                         <CheckCircle className="w-5 h-5 text-primary" />
                       )}
                     </div>
@@ -168,6 +179,14 @@ const Export = () => {
                       </Button>
                     </div>
                     
+                    <Button 
+                      className="w-full btn-primary"
+                      onClick={handleViewMainPortfolio}
+                    >
+                      <Eye className="w-4 h-4 mr-2" />
+                      View Main Portfolio
+                    </Button>
+                    
                     <div className="grid grid-cols-3 gap-2">
                       <Button 
                         variant="outline" 
@@ -221,12 +240,12 @@ const Export = () => {
               
               <div className="grid grid-cols-2 gap-4">
                 <div className="text-center p-3 bg-muted/50 rounded-lg">
-                  <div className="text-2xl font-bold text-primary">247</div>
-                  <div className="text-xs text-foreground-muted">Total Views</div>
+                  <div className="text-2xl font-bold text-primary">{projects.length}</div>
+                  <div className="text-xs text-foreground-muted">Projects</div>
                 </div>
                 <div className="text-center p-3 bg-muted/50 rounded-lg">
-                  <div className="text-2xl font-bold text-electric">12</div>
-                  <div className="text-xs text-foreground-muted">This Week</div>
+                  <div className="text-2xl font-bold text-electric">{skills.length}</div>
+                  <div className="text-xs text-foreground-muted">Skills</div>
                 </div>
               </div>
             </Card>
@@ -248,8 +267,8 @@ const Export = () => {
 
               {/* Portfolio Preview */}
               <div className={`relative overflow-hidden rounded-lg border-2 ${
-                selectedTheme === 'light' ? 'bg-white border-gray-200' :
-                selectedTheme === 'soft' ? 'bg-gradient-to-br from-blue-50 to-purple-50 border-blue-200' :
+                selectedTemplate === 'classic' ? 'bg-white border-gray-200' :
+                selectedTemplate === 'creative' ? 'bg-gradient-to-br from-blue-50 to-purple-50 border-blue-200' :
                 'bg-gradient-to-br from-purple-900 to-blue-900 border-electric'
               }`}>
                 {/* Mini Portfolio Preview */}
@@ -259,63 +278,65 @@ const Export = () => {
                     <div className="w-12 h-12 bg-gradient-primary rounded-full" />
                     <div>
                       <div className={`h-3 rounded mb-1 ${
-                        selectedTheme === 'neon' ? 'bg-white/80' : 'bg-foreground/80'
-                      }`} style={{ width: '120px' }} />
+                        selectedTemplate === 'modern' ? 'bg-white/80' : 'bg-foreground/80'
+                      }`} style={{ width: `${profile.name.length * 8}px` }} />
                       <div className={`h-2 rounded ${
-                        selectedTheme === 'neon' ? 'bg-white/60' : 'bg-foreground/60'
-                      }`} style={{ width: '80px' }} />
+                        selectedTemplate === 'modern' ? 'bg-white/60' : 'bg-foreground/60'
+                      }`} style={{ width: `${profile.location.length * 6}px` }} />
                     </div>
                   </div>
 
                   {/* Bio */}
                   <div className="space-y-2">
                     <div className={`h-2 rounded ${
-                      selectedTheme === 'neon' ? 'bg-white/60' : 'bg-foreground/60'
+                      selectedTemplate === 'modern' ? 'bg-white/60' : 'bg-foreground/60'
                     }`} />
                     <div className={`h-2 rounded ${
-                      selectedTheme === 'neon' ? 'bg-white/60' : 'bg-foreground/60'
+                      selectedTemplate === 'modern' ? 'bg-white/60' : 'bg-foreground/60'
                     }`} style={{ width: '85%' }} />
                   </div>
 
                   {/* Projects */}
                   {exportSettings.includeProjects && (
                     <div className="grid grid-cols-2 gap-2">
-                      <div className={`aspect-video rounded ${
-                        selectedTheme === 'neon' ? 'bg-white/20' : 'bg-foreground/10'
-                      }`} />
-                      <div className={`aspect-video rounded ${
-                        selectedTheme === 'neon' ? 'bg-white/20' : 'bg-foreground/10'
-                      }`} />
+                      {projects.slice(0, 2).map((_, i) => (
+                        <div 
+                          key={i}
+                          className={`aspect-video rounded ${
+                            selectedTemplate === 'modern' ? 'bg-white/20' : 'bg-foreground/10'
+                          }`} 
+                        />
+                      ))}
                     </div>
                   )}
 
                   {/* Skills */}
                   {exportSettings.includeSkills && (
                     <div className="flex flex-wrap gap-1">
-                      {[1, 2, 3, 4, 5].map((i) => (
+                      {skills.slice(0, 5).map((skill, i) => (
                         <div 
-                          key={i}
+                          key={skill.id}
                           className={`h-4 rounded-full ${
-                            selectedTheme === 'neon' ? 'bg-electric/60' : 'bg-primary/60'
+                            selectedTemplate === 'modern' ? 'bg-electric/60' : 'bg-primary/60'
                           }`}
-                          style={{ width: `${30 + i * 10}px` }}
+                          style={{ width: `${30 + skill.name.length * 3}px` }}
                         />
                       ))}
                     </div>
                   )}
                 </div>
 
-                {/* Theme Label */}
+                {/* Template Label */}
                 <div className="absolute top-2 right-2">
                   <Badge variant="secondary" className="text-xs">
-                    {themes.find(t => t.id === selectedTheme)?.name}
+                    {templates.find(t => t.id === selectedTemplate)?.name}
                   </Badge>
                 </div>
               </div>
 
               {/* Preview Actions */}
               <div className="mt-4 space-y-3">
-                <Button className="w-full btn-primary">
+                <Button className="w-full btn-primary" onClick={handleOpenFullPreview}>
                   <Eye className="w-4 h-4 mr-2" />
                   Open Full Preview
                 </Button>
