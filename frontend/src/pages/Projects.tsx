@@ -10,57 +10,58 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import AIAssistant from '@/components/AIAssistant';
 import { usePortfolio } from '@/contexts/PortfolioContext';
-
+// add this in your parent component (where the dialog is rendered)
 const Projects = () => {
+  const [open, setOpen] = useState(false); 
   const { projects, addProject, deleteProject, updateProject } = usePortfolio();
   const [selectedTab, setSelectedTab] = useState('all');
   const [localProjects, setLocalProjects] = useState([
     {
       id: 1,
-      title: 'E-commerce React App',
-      description: 'Full-stack e-commerce platform with React, Node.js, and Stripe integration',
-      type: 'github',
-      stack: ['React', 'Node.js', 'MongoDB', 'Stripe'],
-      features: ['User Authentication', 'Payment Processing', 'Admin Dashboard', 'Real-time Inventory'],
+      title: 'Sample Project',
+      description: 'Sample is a demo project created to showcase the core functionalities of the Portfolia platform. It simulates a typical user project by demonstrating AI-generated summaries, tech stack visualization, and GitHub integration.',
+      type: 'manual',
+      stack: ["React", "FastAPI", "PostgreSQL", "Tailwind CSS"],
+      features: ["AI-enhanced project description", "GitHub stats simulation (stars, forks)", "Live project and code preview links"],
       status: { imported: true, aiSummary: true, saved: true },
-      stars: 24,
-      forks: 8,
-      lastUpdated: '2 days ago',
+      stars: 0,
+      forks: 0,
+      lastUpdated: 'now',
       image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&h=200&fit=crop'
     },
-    {
-      id: 2,
-      title: 'AI Chat Application',
-      description: 'Real-time chat app with AI-powered responses using OpenAI API',
-      type: 'github',
-      stack: ['Next.js', 'OpenAI', 'Socket.io', 'PostgreSQL'],
-      features: ['AI-Powered Responses', 'Real-time Messaging', 'Message History', 'Multi-user Support'],
-      status: { imported: true, aiSummary: false, saved: true },
-      stars: 16,
-      forks: 3,
-      lastUpdated: '1 week ago',
-      image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&h=200&fit=crop'
-    },
-    {
-      id: 3,
-      title: 'Data Visualization Dashboard',
-      description: 'Interactive dashboard for business analytics with D3.js and Python backend',
-      type: 'manual',
-      stack: ['D3.js', 'Python', 'Flask', 'SQLite'],
-      status: { imported: false, aiSummary: true, saved: true },
-      lastUpdated: '3 weeks ago',
-      image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=200&fit=crop'
-    },
-    {
-      id: 4,
-      title: 'Mobile Weather App',
-      description: 'Cross-platform weather application built with React Native',
-      type: 'manual',
-      stack: ['React Native', 'Expo', 'Weather API'],
-      status: { imported: false, aiSummary: false, saved: true },
-      lastUpdated: '1 month ago',
-      image: 'https://images.unsplash.com/photo-1504608524841-42fe6f032b4b?w=400&h=200&fit=crop'
-    }
+  //   {
+  //     id: 2,
+  //     title: 'AI Chat Application',
+  //     description: 'Real-time chat app with AI-powered responses using OpenAI API',
+  //     type: 'github',
+  //     stack: ['Next.js', 'OpenAI', 'Socket.io', 'PostgreSQL'],
+  //     features: ['AI-Powered Responses', 'Real-time Messaging', 'Message History', 'Multi-user Support'],
+  //     status: { imported: true, aiSummary: false, saved: true },
+  //     stars: 16,
+  //     forks: 3,
+  //     lastUpdated: '1 week ago',
+  //     image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&h=200&fit=crop'
+  //   },
+    // {
+    //   id: 3,
+    //   title: 'Data Visualization Dashboard',
+    //   description: 'Interactive dashboard for business analytics with D3.js and Python backend',
+    //   type: 'manual',
+    //   stack: ['D3.js', 'Python', 'Flask', 'SQLite'],
+    //   status: { imported: false, aiSummary: true, saved: true },
+    //   lastUpdated: '3 weeks ago',
+    //   image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=200&fit=crop'
+    // },
+  //   {
+  //     id: 4,
+  //     title: 'Mobile Weather App',
+  //     description: 'Cross-platform weather application built with React Native',
+  //     type: 'manual',
+  //     stack: ['React Native', 'Expo', 'Weather API'],
+  //     status: { imported: false, aiSummary: false, saved: true },
+  //     lastUpdated: '1 month ago',
+  //     image: 'https://images.unsplash.com/photo-1504608524841-42fe6f032b4b?w=400&h=200&fit=crop'
+  //   }
   ]);
 
   const handleDeleteProject = (projectId: number) => {
@@ -121,9 +122,13 @@ const Projects = () => {
             {project.title}
           </h3>
           <div className="flex space-x-1">
-            <Dialog>
+            <Dialog open={open} onOpenChange={setOpen}>
               <DialogTrigger asChild>
-                <Button size="sm" variant="ghost" className="w-8 h-8 p-0">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="w-8 h-8 p-0"
+                >
                   <Edit3 className="w-4 h-4" />
                 </Button>
               </DialogTrigger>
@@ -131,9 +136,15 @@ const Projects = () => {
                 <DialogHeader>
                   <DialogTitle>Edit Project</DialogTitle>
                 </DialogHeader>
-                <EditProjectForm project={project} setProjects={setLocalProjects} projects={localProjects} />
+                <EditProjectForm
+                  project={project}
+                  setProjects={setLocalProjects}
+                  projects={localProjects}
+                  onClose={() => setOpen(false)} // 👈 pass close callback to form
+                />
               </DialogContent>
             </Dialog>
+
             <Button 
               size="sm" 
               variant="ghost" 
@@ -265,7 +276,7 @@ const Projects = () => {
           <TabsList className="grid w-full grid-cols-3 max-w-md">
             <TabsTrigger value="all">All Projects</TabsTrigger>
             <TabsTrigger value="github">GitHub</TabsTrigger>
-            <TabsTrigger value="manual">Manual</TabsTrigger>
+            <TabsTrigger value="manual">Others</TabsTrigger>
           </TabsList>
 
           <TabsContent value="all" className="mt-6">
@@ -446,7 +457,7 @@ const Projects = () => {
     );
   }
 
-  function EditProjectForm({ project, setProjects, projects }) {
+  function EditProjectForm({ project, setProjects, projects, onClose }) {
     const [title, setTitle] = useState(project.title);
     const [description, setDescription] = useState(project.description);
     const [stack, setStack] = useState(project.stack.join(', '));
@@ -460,7 +471,15 @@ const Projects = () => {
       };
       
       setProjects(projects.map(p => p.id === project.id ? updatedProject : p));
+      onClose();
     };
+    const handleClose = () => {
+      setTitle(project.title);
+      setDescription(project.description);
+      setStack(project.stack.join(', '));
+      onClose();
+    };
+
 
     return (
       <div className="space-y-4">
@@ -495,11 +514,7 @@ const Projects = () => {
             Enhance with AI
           </Button>
           <Button className="btn-primary" onClick={handleSave}>Save</Button>
-          <Button variant="outline" onClick={() => {
-            const dialog = document.querySelector('[role="dialog"]');
-            const closeButton = dialog?.querySelector('[aria-label="Close"]') as HTMLButtonElement;
-            closeButton?.click();
-          }}>Cancel</Button>
+          <Button variant="outline" onClick={handleClose}>Cancel</Button>
         </div>
       </div>
     );

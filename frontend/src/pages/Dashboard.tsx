@@ -9,28 +9,28 @@ import AIAssistant from '@/components/AIAssistant';
 import ResumeUploadDialog from '@/components/ResumeUploadDialog';
 
 const Dashboard = () => {
-  const [completionProgress] = useState(75);
+  const [completionProgress] = useState(0);
   const [uploadStatus, setUploadStatus] = useState(null);
   const [showAllActivities, setShowAllActivities] = useState(false);
 
   const stats = [
     { 
       label: 'Total Projects', 
-      value: '8', 
+      value: '1', 
       icon: Github, 
       color: 'text-electric',
       bgColor: 'bg-electric/10'
     },
     { 
       label: 'AI Summaries', 
-      value: '12', 
+      value: '0', 
       icon: TrendingUp, 
       color: 'text-pulse',
       bgColor: 'bg-pulse/10'
     },
     { 
       label: 'Portfolios Shared', 
-      value: '3', 
+      value: '0', 
       icon: Eye, 
       color: 'text-success',
       bgColor: 'bg-success/10'
@@ -70,53 +70,53 @@ const Dashboard = () => {
 
   const recentActivity = [
     {
-      action: 'Imported "E-commerce React App" from GitHub',
-      time: '2 hours ago',
-      icon: Github,
-      status: 'completed'
-    },
-    {
-      action: 'Added "AWS Cloud Internship" achievement',
-      time: '1 day ago',
+      action: 'Welcome aboard! Your Portfolia account was created.',
+      time: 'Now',
       icon: CheckCircle,
       status: 'completed'
     },
-    {
-      action: 'Generated AI summary for "ML Project"',
-      time: '2 days ago',
-      icon: TrendingUp,
-      status: 'completed'
-    },
-    {
-      action: 'Updated portfolio theme to "Modern"',
-      time: '3 days ago',
-      icon: Eye,
-      status: 'completed'
-    },
-    {
-      action: 'Uploaded resume and extracted skills',
-      time: '4 days ago',
-      icon: FileText,
-      status: 'completed'
-    },
-    {
-      action: 'Added new certificate "React Fundamentals"',
-      time: '5 days ago',
-      icon: CheckCircle,
-      status: 'completed'
-    },
-    {
-      action: 'Updated project descriptions with AI',
-      time: '1 week ago',
-      icon: TrendingUp,
-      status: 'completed'
-    },
-    {
-      action: 'Shared portfolio with 5 recruiters',
-      time: '1 week ago',
-      icon: Eye,
-      status: 'completed'
-    }
+    // {
+    //   action: 'Added "AWS Cloud Internship" achievement',
+    //   time: '1 day ago',
+    //   icon: CheckCircle,
+    //   status: 'completed'
+    // },
+    // {
+    //   action: 'Generated AI summary for "ML Project"',
+    //   time: '2 days ago',
+    //   icon: Github,
+    //   status: 'completed'
+    // },
+    // {
+    //   action: 'Updated portfolio theme to "Modern"',
+    //   time: '3 days ago',
+    //   icon: Eye,
+    //   status: 'completed'
+    // },
+    // {
+    //   action: 'Uploaded resume and extracted skills',
+    //   time: '4 days ago',
+    //   icon: FileText,
+    //   status: 'completed'
+    // },
+    // {
+    //   action: 'Added new certificate "React Fundamentals"',
+    //   time: '5 days ago',
+    //   icon: CheckCircle,
+    //   status: 'completed'
+    // },
+    // {
+    //   action: 'Updated project descriptions with AI',
+    //   time: '1 week ago',
+    //   icon: TrendingUp,
+    //   status: 'completed'
+    // },
+    // {
+    //   action: 'Shared portfolio with 5 recruiters',
+    //   time: '1 week ago',
+    //   icon: Eye,
+    //   status: 'completed'
+    // }
   ];
 
   const handleResumeUpload = () => {
