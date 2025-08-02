@@ -202,7 +202,7 @@ const Projects = () => {
             </p>
           </div>
           <div className="flex space-x-3 mt-4 sm:mt-0">
-            <Dialog>
+            <Dialog open={openGithub} onOpenChange={setOpenGithub}>
               <DialogTrigger asChild>
                 <Button className="btn-primary">
                   <Github className="w-4 h-4 mr-2" />
@@ -218,7 +218,7 @@ const Projects = () => {
                   onClose={() => {
                     const dialog = document.querySelector('[role="dialog"]');
                     const closeButton = dialog?.querySelector('[aria-label="Close"]') as HTMLButtonElement;
-                    closeButton?.click();
+                    closeButton?.click(); setOpenGithub(false)
                   }}
                 />
               </DialogContent>
