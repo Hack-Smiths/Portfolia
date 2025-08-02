@@ -20,17 +20,73 @@ const Auth = () => {
     confirmPassword: ''
   });
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Dummy login - just navigate to dashboard
-    navigate('/dashboard');
+
+    try {
+      const res = await fetch("http://127.0.0.1:8000/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: loginForm.email,
+          password: loginForm.password,
+        }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        alert(errorData.detail || "Login failed");
+        return;
+      }
+
+      const data = await res.json();
+      localStorage.setItem("token", data.access_token); // store JWT token
+      navigate("/dashboard");
+    } catch (err) {
+      alert("Something went wrong during login");
+      console.error(err);
+    }
   };
 
-  const handleSignup = (e: React.FormEvent) => {
+
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Dummy signup - just navigate to dashboard
-    navigate('/dashboard');
+
+    if (signupForm.password !== signupForm.confirmPassword) {
+      alert("Passwords do not match");
+      return;
+    }
+
+    try {
+      const res = await fetch("http://127.0.0.1:8000/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: signupForm.name,
+          email: signupForm.email,
+          password: signupForm.password,
+        }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        alert(errorData.detail || "Signup failed");
+        return;
+      }
+
+      const data = await res.json();
+      localStorage.setItem("token", data.access_token); // store JWT token
+      navigate("/dashboard");
+    } catch (err) {
+      alert("Something went wrong during signup");
+      console.error(err);
+    }
   };
+
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
