@@ -9,10 +9,12 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import AIAssistant from '@/components/AIAssistant';
+import { usePortfolio } from '@/contexts/PortfolioContext';
 
 const Skills = () => {
+  const { skills, addSkill, deleteSkill, updateSkill } = usePortfolio();
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [skills, setSkills] = useState([
+  const [localSkills, setLocalSkills] = useState([
     { id: 1, name: 'React', category: 'Frontend', level: 'Expert', experience: '3+ years' },
     { id: 2, name: 'Node.js', category: 'Backend', level: 'Expert', experience: '2+ years' },
     { id: 3, name: 'Python', category: 'Programming', level: 'Expert', experience: '4+ years' },
@@ -28,7 +30,8 @@ const Skills = () => {
   ]);
 
   const handleDeleteSkill = (skillId: number) => {
-    setSkills(skills.filter(s => s.id !== skillId));
+    setLocalSkills(localSkills.filter(s => s.id !== skillId));
+    deleteSkill(skillId);
   };
 
   const handleAddSkill = (newSkill: any) => {
@@ -36,18 +39,20 @@ const Skills = () => {
       id: Date.now(),
       ...newSkill
     };
-    setSkills([...skills, skill]);
+    setLocalSkills([...localSkills, skill]);
+    addSkill(newSkill);
   };
 
   const handleEditSkill = (updatedSkill: any) => {
-    setSkills(skills.map(s => s.id === updatedSkill.id ? updatedSkill : s));
+    setLocalSkills(localSkills.map(s => s.id === updatedSkill.id ? updatedSkill : s));
+    updateSkill(updatedSkill.id, updatedSkill);
   };
 
   const categories = ['all', 'Frontend', 'Backend', 'Programming', 'Cloud', 'DevOps', 'Database', 'Design', 'AI/ML', 'Soft Skills'];
 
-  const allSkills = skills;
+  const allSkills = localSkills;
   const filteredSkills = selectedCategory === 'all' 
-    ? allSkills 
+    ? allSkills
     : allSkills.filter(skill => skill.category === selectedCategory);
 
   const getSkillLevelColor = (level) => {
@@ -324,6 +329,11 @@ const Skills = () => {
         setCategory('');
         setExperience('');
         setSkillLevel([2]);
+        // Close dialog
+        setTimeout(() => {
+          const closeButton = document.querySelector('[data-state="open"] button[aria-label="Close"]') as HTMLButtonElement;
+          closeButton?.click();
+        }, 100);
         onClose?.();
       }
     };

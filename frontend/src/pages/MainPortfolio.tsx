@@ -743,7 +743,7 @@ const MainPortfolio = () => {
                       <div className="relative z-10 p-8">
                         <div className="flex items-start justify-between mb-6">
                           <div className="w-16 h-16 bg-gradient-accent rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300">
-                            <Award className="w-8 h-8 text-white" />
+                            <Award className="w-8 h-8 text-primary-foreground" />
                           </div>
                           <Badge className="bg-gradient-to-r from-accent/20 to-electric/20 border-accent/30 text-foreground px-3 py-1 rounded-lg">
                             <Calendar className="w-3 h-3 mr-2" />

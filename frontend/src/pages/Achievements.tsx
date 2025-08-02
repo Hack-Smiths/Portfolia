@@ -9,8 +9,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import EditAchievementDialog, { Achievement } from '@/components/EditAchievementDialog';
 import AIAssistant from '@/components/AIAssistant';
+import { usePortfolio } from '@/contexts/PortfolioContext';
+import { toast } from '@/hooks/use-toast';
 
 const Achievements = () => {
+  const { achievements, addAchievement } = usePortfolio();
   const [editDialog, setEditDialog] = useState<{
     isOpen: boolean;
     achievement: Achievement | null;
@@ -21,7 +24,7 @@ const Achievements = () => {
     type: 'internship'
   });
   
-  const [achievements, setAchievements] = useState({
+  const [localAchievements, setLocalAchievements] = useState({
     internships: [
       {
         id: 1,
@@ -85,21 +88,21 @@ const Achievements = () => {
   });
 
   const handleDeleteInternship = (internshipId: number) => {
-    setAchievements(prev => ({
+    setLocalAchievements(prev => ({
       ...prev,
       internships: prev.internships.filter(item => item.id !== internshipId)
     }));
   };
 
   const handleDeleteCertificate = (certId: number) => {
-    setAchievements(prev => ({
+    setLocalAchievements(prev => ({
       ...prev,
       certificates: prev.certificates.filter(item => item.id !== certId)
     }));
   };
 
   const handleDeleteAward = (awardId: number) => {
-    setAchievements(prev => ({
+    setLocalAchievements(prev => ({
       ...prev,
       awards: prev.awards.filter(item => item.id !== awardId)
     }));
@@ -132,7 +135,7 @@ const Achievements = () => {
   const handleSaveEdit = (updatedAchievement: Achievement) => {
     const { type } = editDialog;
     
-    setAchievements(prev => ({
+    setLocalAchievements(prev => ({
       ...prev,
       [type === 'internship' ? 'internships' : 
         type === 'certificate' ? 'certificates' : 'awards']: 
@@ -176,15 +179,18 @@ const Achievements = () => {
                 <DialogHeader>
                   <DialogTitle>Add Work Experience</DialogTitle>
                 </DialogHeader>
-                <InternshipForm 
-                  onAdd={(data) => setAchievements(prev => ({...prev, internships: [...prev.internships, {id: Date.now(), ...data}]}))} 
-                />
+                  <InternshipForm 
+                    onAdd={(data) => {
+                      setLocalAchievements(prev => ({...prev, internships: [...prev.internships, {id: Date.now(), ...data}]}));
+                      addAchievement('internships', data);
+                    }} 
+                  />
               </DialogContent>
             </Dialog>
           </div>
 
           <div className="space-y-4">
-            {achievements.internships.map((internship, index) => (
+            {localAchievements.internships.map((internship, index) => (
               <Card key={internship.id} className="glass-card interactive animate-slide-in-right" style={{ animationDelay: `${index * 100}ms` }}>
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
@@ -258,14 +264,17 @@ const Achievements = () => {
                     <DialogTitle>Add Certificate</DialogTitle>
                   </DialogHeader>
                   <CertificateForm 
-                    onAdd={(data) => setAchievements(prev => ({...prev, certificates: [...prev.certificates, {id: Date.now(), ...data}]}))} 
+                    onAdd={(data) => {
+                      setLocalAchievements(prev => ({...prev, certificates: [...prev.certificates, {id: Date.now(), ...data}]}));
+                      addAchievement('certificates', data);
+                    }} 
                   />
                 </DialogContent>
               </Dialog>
             </div>
 
             <div className="space-y-4">
-              {achievements.certificates.map((cert, index) => (
+              {localAchievements.certificates.map((cert, index) => (
                 <Card key={cert.id} className="glass-card interactive animate-slide-in-up" style={{ animationDelay: `${index * 150}ms` }}>
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1">
@@ -324,14 +333,17 @@ const Achievements = () => {
                     <DialogTitle>Add Highlight</DialogTitle>
                   </DialogHeader>
                     <AwardForm 
-                      onAdd={(data) => setAchievements(prev => ({...prev, awards: [...prev.awards, {id: Date.now(), ...data}]}))} 
+                      onAdd={(data) => {
+                        setLocalAchievements(prev => ({...prev, awards: [...prev.awards, {id: Date.now(), ...data}]}));
+                        addAchievement('awards', data);
+                      }} 
                     />
                 </DialogContent>
               </Dialog>
             </div>
 
             <div className="space-y-4">
-              {achievements.awards.map((award, index) => (
+              {localAchievements.awards.map((award, index) => (
                 <Card key={award.id} className="glass-card interactive animate-slide-in-up" style={{ animationDelay: `${index * 150}ms` }}>
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1">
@@ -381,6 +393,7 @@ const Achievements = () => {
   );
 
   function InternshipForm({ onAdd }) {
+    const [open, setOpen] = useState(true);
     const [title, setTitle] = useState('');
     const [organization, setOrganization] = useState('');
     const [duration, setDuration] = useState('');
@@ -405,9 +418,12 @@ const Achievements = () => {
         setLocation('');
         setDescription('');
         setSkills('');
-        // Close dialog
-        const closeButton = document.querySelector('[role="dialog"] [data-state="open"] button[aria-label="Close"]') as HTMLButtonElement;
-        closeButton?.click();
+        setOpen(false);
+        // Close dialog via parent
+        setTimeout(() => {
+          const closeButton = document.querySelector('[data-state="open"] button[aria-label="Close"]') as HTMLButtonElement;
+          closeButton?.click();
+        }, 100);
       }
     };
 
@@ -453,6 +469,7 @@ const Achievements = () => {
   }
 
   function CertificateForm({ onAdd }) {
+    const [open, setOpen] = useState(true);
     const [title, setTitle] = useState('');
     const [issuer, setIssuer] = useState('');
     const [year, setYear] = useState('');
@@ -467,9 +484,12 @@ const Achievements = () => {
         setYear('');
         setCredentialId('');
         setDescription('');
-        // Close dialog
-        const closeButton = document.querySelector('[role="dialog"] [data-state="open"] button[aria-label="Close"]') as HTMLButtonElement;
-        closeButton?.click();
+        setOpen(false);
+        // Close dialog via parent
+        setTimeout(() => {
+          const closeButton = document.querySelector('[data-state="open"] button[aria-label="Close"]') as HTMLButtonElement;
+          closeButton?.click();
+        }, 100);
       }
     };
 
@@ -509,6 +529,7 @@ const Achievements = () => {
   }
 
   function AwardForm({ onAdd }) {
+    const [open, setOpen] = useState(true);
     const [title, setTitle] = useState('');
     const [organization, setOrganization] = useState('');
     const [year, setYear] = useState('');
@@ -523,9 +544,12 @@ const Achievements = () => {
         setYear('');
         setCategory('');
         setDescription('');
-        // Close dialog
-        const closeButton = document.querySelector('[role="dialog"] [data-state="open"] button[aria-label="Close"]') as HTMLButtonElement;
-        closeButton?.click();
+        setOpen(false);
+        // Close dialog via parent
+        setTimeout(() => {
+          const closeButton = document.querySelector('[data-state="open"] button[aria-label="Close"]') as HTMLButtonElement;
+          closeButton?.click();
+        }, 100);
       }
     };
 

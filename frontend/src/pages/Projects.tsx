@@ -9,10 +9,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import AIAssistant from '@/components/AIAssistant';
+import { usePortfolio } from '@/contexts/PortfolioContext';
 
 const Projects = () => {
+  const { projects, addProject, deleteProject, updateProject } = usePortfolio();
   const [selectedTab, setSelectedTab] = useState('all');
-  const [projects, setProjects] = useState([
+  const [localProjects, setLocalProjects] = useState([
     {
       id: 1,
       title: 'E-commerce React App',
@@ -62,7 +64,8 @@ const Projects = () => {
   ]);
 
   const handleDeleteProject = (projectId: number) => {
-    setProjects(projects.filter(p => p.id !== projectId));
+    setLocalProjects(localProjects.filter(p => p.id !== projectId));
+    deleteProject(projectId);
   };
 
   const handleAddProject = (newProject: any) => {
@@ -73,7 +76,13 @@ const Projects = () => {
       status: { imported: false, aiSummary: false, saved: true },
       lastUpdated: 'Just now'
     };
-    setProjects([...projects, project]);
+    setLocalProjects([...localProjects, project]);
+    addProject({
+      ...newProject,
+      type: 'manual' as const,
+      status: { imported: false, aiSummary: false, saved: true },
+      lastUpdated: 'Just now'
+    });
   };
 
   const handleImportFromGitHub = (projectData: any) => {
@@ -84,10 +93,16 @@ const Projects = () => {
       status: { imported: true, aiSummary: false, saved: true },
       lastUpdated: 'Just now'
     };
-    setProjects([...projects, project]);
+    setLocalProjects([...localProjects, project]);
+    addProject({
+      ...projectData,
+      type: 'github' as const,
+      status: { imported: true, aiSummary: false, saved: true },
+      lastUpdated: 'Just now'
+    });
   };
 
-  const filteredProjects = projects.filter(project => {
+  const filteredProjects = localProjects.filter(project => {
     if (selectedTab === 'all') return true;
     if (selectedTab === 'github') return project.type === 'github';
     if (selectedTab === 'manual') return project.type === 'manual';
@@ -116,7 +131,7 @@ const Projects = () => {
                 <DialogHeader>
                   <DialogTitle>Edit Project</DialogTitle>
                 </DialogHeader>
-                <EditProjectForm project={project} setProjects={setProjects} projects={projects} />
+                <EditProjectForm project={project} setProjects={setLocalProjects} projects={localProjects} />
               </DialogContent>
             </Dialog>
             <Button 
@@ -257,10 +272,10 @@ const Projects = () => {
             <ProjectGrid projects={filteredProjects} />
           </TabsContent>
           <TabsContent value="github" className="mt-6">
-            <ProjectGrid projects={projects.filter(p => p.type === 'github')} />
+            <ProjectGrid projects={localProjects.filter(p => p.type === 'github')} />
           </TabsContent>
           <TabsContent value="manual" className="mt-6">
-            <ProjectGrid projects={projects.filter(p => p.type === 'manual')} />
+            <ProjectGrid projects={localProjects.filter(p => p.type === 'manual')} />
           </TabsContent>
         </Tabs>
       </div>
@@ -358,8 +373,10 @@ const Projects = () => {
         setFeatures('');
         setUrl('');
         // Close dialog
-        const closeButton = document.querySelector('[role="dialog"] [data-state="open"] button[aria-label="Close"]') as HTMLButtonElement;
-        closeButton?.click();
+        setTimeout(() => {
+          const closeButton = document.querySelector('[data-state="open"] button[aria-label="Close"]') as HTMLButtonElement;
+          closeButton?.click();
+        }, 100);
       }
     };
 
