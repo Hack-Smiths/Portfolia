@@ -30,7 +30,7 @@ const Projects = () => {
       stars: 0,
       forks: 0,
       lastUpdated: 'now',
-      image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&h=200&fit=crop'
+      link: 'https://portfolia-ai.vercel.app/'
     },
   ]);
 
@@ -173,10 +173,12 @@ const Projects = () => {
             <div className={`w-2 h-2 rounded-full ${project.status.saved ? 'bg-electric' : 'bg-muted'}`} />
           </div>
           <div className="flex-1" />
-          <Button size="sm" variant="ghost" className="text-xs">
-            <ExternalLink className="w-3 h-3 mr-1" />
-            View
-          </Button>
+          <a href={project.link} target="_blank" rel="noopener noreferrer">
+            <Button size="sm" variant="ghost" className="text-xs">
+              <ExternalLink className="w-3 h-3 mr-1" />
+              View
+            </Button>
+          </a>
           {!project.status.aiSummary && (
             <Button size="sm" className="btn-primary text-xs">
               <Sparkles className="w-3 h-3 mr-1" />
@@ -338,7 +340,7 @@ const Projects = () => {
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [stack, setStack] = useState('');
-    const [url, setUrl] = useState('');
+    const [link, setUrl] = useState('');
     const [features, setFeatures] = useState('');
 
     const handleSubmit = () => {
@@ -348,7 +350,7 @@ const Projects = () => {
           description,
           stack: stack.split(',').map(s => s.trim()).filter(s => s),
           features: features.split(',').map(s => s.trim()).filter(s => s),
-          url
+          link
         });
         setTitle('');
         setDescription('');
@@ -412,7 +414,7 @@ const Projects = () => {
           <Input 
             id="project-url" 
             placeholder="https://myproject.com" 
-            value={url}
+            value={link}
             onChange={(e) => setUrl(e.target.value)}
           />
         </div>
@@ -435,13 +437,17 @@ const Projects = () => {
     const [title, setTitle] = useState(project.title);
     const [description, setDescription] = useState(project.description);
     const [stack, setStack] = useState(project.stack.join(', '));
+    const [features, setFeatures] = useState(project.features.join(', '));
+    const [link, setLink] = useState(project.link);
 
     const handleSave = () => {
       const updatedProject = {
         ...project,
         title,
         description,
-        stack: stack.split(',').map(s => s.trim())
+        stack: stack.split(',').map(s => s.trim()),
+        features: features.split(',').map(s => s.trim()),
+        link
       };
       
       setProjects(projects.map(p => p.id === project.id ? updatedProject : p));
@@ -451,6 +457,8 @@ const Projects = () => {
       setTitle(project.title);
       setDescription(project.description);
       setStack(project.stack.join(', '));
+      setFeatures(project.features.join(", "));
+      setLink(project.link);
       onClose();
     };
 
@@ -482,13 +490,29 @@ const Projects = () => {
             onChange={(e) => setStack(e.target.value)}
           />
         </div>
+        <div className="space-y-2">
+          <Label htmlFor="edit-features">Features</Label>
+          <Input 
+            id="edit-features" 
+            value={features}
+            onChange={(e) => setFeatures(e.target.value)}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="edit-link">Link</Label>
+          <Input 
+            id="edit-link" 
+            value={link}
+            onChange={(e) => setLink(e.target.value)}
+          />
+        </div>
         <div className="flex space-x-3">
-          <Button className="btn-electric flex-1">
+          {/* <Button className="btn-electric flex-1">
             <Sparkles className="w-4 h-4 mr-2" />
             Enhance with AI
-          </Button>
-          <Button className="btn-primary" onClick={handleSave}>Save</Button>
-          <Button variant="outline" onClick={handleClose}>Cancel</Button>
+          </Button> */}
+          <Button className="btn-electric flex-1" onClick={handleSave}>Save</Button>
+          <Button className="btn-primary flex-2" variant="secondary" onClick={handleClose}>Cancel</Button>
         </div>
       </div>
     );
