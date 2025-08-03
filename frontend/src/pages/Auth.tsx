@@ -42,10 +42,11 @@ const Auth = () => {
         setLoginError(errorData.detail || "Login failed");
         return;
       }
+      window.location.href = "/dashboard";
 
       const data = await res.json();
-      localStorage.setItem("token", data.access_token); // store JWT token
-      navigate("/dashboard");
+      localStorage.setItem("token", data.access_token);
+      // navigate("/dashboard");
     } catch (err) {
       setLoginError("Something went wrong, Please try again");
       console.error(err);
@@ -82,7 +83,7 @@ const Auth = () => {
 
       const data = await res.json();
       localStorage.setItem("token", data.access_token); // store JWT token
-      navigate("/dashboard");
+      window.location.href = "/dashboard";
     } catch (err) {
       setSignupError("Something went wrong during signup");
       console.error(err);

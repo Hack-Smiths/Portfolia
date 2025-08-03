@@ -4,12 +4,14 @@ import { User, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { LogOut } from 'lucide-react';
+import { useAuthContext } from "@/contexts/AuthContext";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
   const isLandingPage = location.pathname === '/';
   const navigate = useNavigate();
+  const { user } = useAuthContext(); 
   const handleLogout = () => {
     localStorage.removeItem('token'); // Clear the auth token
     navigate('/auth'); // Redirect to login/signup page
@@ -19,7 +21,7 @@ const Navbar = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
+          <Link to={user? "/dashboard":"/"} className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-sm">P</span>
             </div>
