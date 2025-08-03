@@ -2,12 +2,18 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { User, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
+import { LogOut } from 'lucide-react';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
   const isLandingPage = location.pathname === '/';
-
+  const navigate = useNavigate();
+  const handleLogout = () => {
+    localStorage.removeItem('token'); // Clear the auth token
+    navigate('/auth'); // Redirect to login/signup page
+  };
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-white/20">
       <div className="container mx-auto px-4">
@@ -56,6 +62,9 @@ const Navbar = () => {
                 >
                   Portfolio
                 </Link>
+                
+
+
               </div>
             )}
             
@@ -77,6 +86,10 @@ const Navbar = () => {
                 <User className="w-6 h-6 text-foreground-muted" />
               </Link>
             )}
+            <LogOut
+              className="w-4 h-4 text-foreground-muted text-red-500 hover:text-red-700 cursor-pointer"
+              onClick={handleLogout}
+            />
           </div>
 
           {/* Mobile Menu Button */}
@@ -138,6 +151,17 @@ const Navbar = () => {
                   >
                     Profile
                   </Link>
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      handleLogout();
+                      setIsMenuOpen(false);
+                    }}
+                    className="w-full text-left"
+                  >
+                    Logout
+                  </Button>
+
                 </>
               )}
               
