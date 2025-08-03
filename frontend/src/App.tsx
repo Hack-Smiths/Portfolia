@@ -18,7 +18,7 @@ import Export from "./pages/Export";
 import Profile from "./pages/Profile";
 import MainPortfolio from "./pages/MainPortfolio";
 import NotFound from "./pages/NotFound";
-
+import PrivateRoute from "./components/PrivateRoute";
 const queryClient = new QueryClient();
 
 const AppContent = () => {
@@ -33,15 +33,15 @@ const AppContent = () => {
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/auth" element={<Auth />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/projects" element={<Projects />} />
-        <Route path="/achievements" element={<Achievements />} />
-        <Route path="/skills" element={<Skills />} />
-        <Route path="/portfolio" element={<Portfolio />} />
+        <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+        <Route path="/projects" element={<PrivateRoute><Projects /></PrivateRoute>} />
+        <Route path="/achievements" element={<PrivateRoute><Achievements /></PrivateRoute>} />
+        <Route path="/skills" element={<PrivateRoute><Skills /></PrivateRoute>} />
+        <Route path="/portfolio" element={<PrivateRoute><Portfolio /></PrivateRoute>} />
         <Route path="/dummy-portfolio" element={<DummyPortfolio />} />
         <Route path="/main-portfolio" element={<MainPortfolio />} />
-        <Route path="/export" element={<Export />} />
-        <Route path="/profile" element={<Profile />} />
+        <Route path="/export" element={<PrivateRoute><Export /></PrivateRoute>} />
+        <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       {!isDummyPortfolio && !isMainPortfolio && !isAuthPage && <AIAssistant />}
