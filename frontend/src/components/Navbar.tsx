@@ -84,14 +84,17 @@ const Navbar = () => {
                 </Link>
               </div>
             ) : (
-              <Link to="/profile" className="p-2 rounded-full hover:bg-muted transition-colors">
-                <User className="w-6 h-6 text-foreground-muted" />
-              </Link>
+              <>
+                <Link to="/profile" className="p-2 rounded-full hover:bg-muted transition-colors">
+                  <User className="w-6 h-6 text-foreground-muted" />
+                </Link>
+                <LogOut
+                  className="w-4 h-4 text-foreground-muted text-red-500 hover:text-red-700 cursor-pointer"
+                  onClick={handleLogout}
+                />
+              </>
             )}
-            <LogOut
-              className="w-4 h-4 text-foreground-muted text-red-500 hover:text-red-700 cursor-pointer"
-              onClick={handleLogout}
-            />
+            
           </div>
 
           {/* Mobile Menu Button */}
