@@ -29,12 +29,16 @@ def github_summary(repo_url: str = Query(..., description="GitHub repo URL")):
         resp = requests.get(raw_url)
         if resp.status_code != 200:
             return {"error": f"README.md not found at {raw_url}"}
-
+        repo_resp = requests.get(
+            f"https://api.github.com/repos/{owner}/{repo}",
+            headers=headers
+        )
+        repo_data = repo_resp.json()
         readme = resp.text[:2000].replace("\n", " ").strip()
 
         # Define prompt
         prompt = f"""
-Extract the following JSON from the README below. Be concise and accurate. If any field is missing, infer it cautiously if possible, otherwise leave it empty or say "Not explicitly mentioned". Use bullet points for features.
+Extract the following JSON from the README below. Be concise and accurate. If any field is missing, infer it cautiously if possible, otherwise leave it empty or null. Use bullet points for features.
 
 {{
   "title": "",
@@ -45,7 +49,7 @@ Extract the following JSON from the README below. Be concise and accurate. If an
 }}
 
 README:
-{readme}
+{readme, repo_data}
 """
 
 

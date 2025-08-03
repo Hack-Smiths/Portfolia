@@ -9,6 +9,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const Auth = () => {
   const navigate = useNavigate();
+  const [loginError, setLoginError] = useState('');
+  const [signupError, setSignupError] = useState('');
   const [loginForm, setLoginForm] = useState({
     email: '',
     password: ''
@@ -22,7 +24,7 @@ const Auth = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-
+    setLoginError('');
     try {
       const res = await fetch("http://127.0.0.1:8000/login", {
         method: "POST",
@@ -37,7 +39,7 @@ const Auth = () => {
 
       if (!res.ok) {
         const errorData = await res.json();
-        alert(errorData.detail || "Login failed");
+        setLoginError(errorData.detail || "Login failed");
         return;
       }
 
@@ -45,7 +47,7 @@ const Auth = () => {
       localStorage.setItem("token", data.access_token); // store JWT token
       navigate("/dashboard");
     } catch (err) {
-      alert("Something went wrong during login");
+      setLoginError("Something went wrong, Please try again");
       console.error(err);
     }
   };
@@ -53,9 +55,9 @@ const Auth = () => {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-
+    setSignupError('');
     if (signupForm.password !== signupForm.confirmPassword) {
-      alert("Passwords do not match");
+      setSignupError("Passwords do not match");
       return;
     }
 
@@ -74,7 +76,7 @@ const Auth = () => {
 
       if (!res.ok) {
         const errorData = await res.json();
-        alert(errorData.detail || "Signup failed");
+        setSignupError(errorData.detail || "Signup failed");
         return;
       }
 
@@ -82,7 +84,7 @@ const Auth = () => {
       localStorage.setItem("token", data.access_token); // store JWT token
       navigate("/dashboard");
     } catch (err) {
-      alert("Something went wrong during signup");
+      setSignupError("Something went wrong during signup");
       console.error(err);
     }
   };
@@ -147,7 +149,9 @@ const Auth = () => {
                     />
                   </div>
                 </div>
-
+                {loginError && (
+                  <p className="text-sm text-red-500 text-center">{loginError}</p>
+                )}
                 <Button type="submit" className="btn-primary w-full">
                   Sign In
                   <ArrowRight className="w-4 h-4 ml-2" />
@@ -234,7 +238,9 @@ const Auth = () => {
                     />
                   </div>
                 </div>
-
+                {signupError && (
+                  <p className="text-sm text-red-500 text-center">{signupError}</p>
+                )}
                 <Button type="submit" className="btn-primary w-full">
                   Create Account
                   <ArrowRight className="w-4 h-4 ml-2" />

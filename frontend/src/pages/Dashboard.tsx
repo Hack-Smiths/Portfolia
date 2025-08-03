@@ -7,11 +7,13 @@ import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import AIAssistant from '@/components/AIAssistant';
 import ResumeUploadDialog from '@/components/ResumeUploadDialog';
+import { useUser } from "../hooks/use-user";
 
 const Dashboard = () => {
   const [completionProgress] = useState(0);
   const [uploadStatus, setUploadStatus] = useState(null);
   const [showAllActivities, setShowAllActivities] = useState(false);
+  const { user, loading } = useUser();
 
   const stats = [
     { 
@@ -126,14 +128,17 @@ const Dashboard = () => {
       setTimeout(() => setUploadStatus(null), 3000);
     }, 2000);
   };
-
+  if (loading) return <p>Loading...</p>;
+  const capitalizedUsername = user?.username
+  ? user.username.charAt(0).toUpperCase() + user.username.slice(1)
+  : "Guest";
   return (
     <div className="min-h-screen pt-16 bg-gradient-soft">
       <div className="container mx-auto px-4 py-8">
         {/* Welcome Section */}
         <div className="mb-8 animate-fade-in">
           <h1 className="text-3xl lg:text-4xl font-space font-bold mb-2">
-            Welcome back, <span className="text-gradient-primary">Alex</span> 👋
+            Welcome back, <span className="text-gradient-primary">{capitalizedUsername}</span> 👋
           </h1>
           <p className="text-foreground-muted text-lg">
             Let's continue building your amazing portfolio
