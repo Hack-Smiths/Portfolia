@@ -105,10 +105,10 @@ const Portfolio = () => {
     name: user?.username.charAt(0).toUpperCase() + user?.username.slice(1),
     title: "Full-Stack Developer & AI Enthusiast",
     tagline: "Building the future with code, one project at a time",
-    location: "San Francisco, CA",
-    email: "alex.chen@email.com",
-    github: "alex-dev",
-    linkedin: "alexchen-dev",
+    location: "Sample, India",
+    email: user?.email,
+    github: user?.username || "-dev",
+    linkedin: user?.username || "-dev",
     about: "Aspiring full-stack developer with a passion for AI and machine learning. Experienced in React, Python, and cloud technologies. Currently pursuing Computer Science degree while building real-world applications and contributing to open-source projects.",
     
     projects: [
@@ -324,7 +324,7 @@ const Portfolio = () => {
                         rel="noopener noreferrer"
                       >
                         <Github className="w-4 h-4 text-muted-foreground" />
-                        <span className="text-foreground">GitHub</span>
+                        <span className="text-foreground">{portfolioData.github}-dev</span>
                       </a>
                       <a 
                         href={`https://linkedin.com/in/${portfolioData.linkedin}`}
@@ -333,7 +333,7 @@ const Portfolio = () => {
                         rel="noopener noreferrer"
                       >
                         <Linkedin className="w-4 h-4 text-muted-foreground" />
-                        <span className="text-foreground">LinkedIn</span>
+                        <span className="text-foreground">{portfolioData.linkedin}-dev</span>
                       </a>
                     </div>
                     
