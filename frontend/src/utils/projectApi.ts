@@ -1,5 +1,5 @@
 // src/utils/projectApi.ts
-const API_URL = "http://localhost:8000";
+const API_URL = "https://portfolia-z7of.onrender.com/";
 
 export async function getAllProjects() {
   const token = localStorage.getItem("token");

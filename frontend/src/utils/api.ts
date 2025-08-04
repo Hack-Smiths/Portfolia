@@ -4,7 +4,7 @@ export async function getCurrentUser() {
 
   if (!token) throw new Error("No token found");
 
-  const res = await fetch("http://localhost:8000/me", {
+  const res = await fetch("https://portfolia-z7of.onrender.com/me", {
     method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,
