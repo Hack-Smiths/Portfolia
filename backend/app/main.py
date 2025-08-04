@@ -10,14 +10,19 @@ from app.models.project import Project  # This ensures both classes are register
 
 app = FastAPI()
 
-# Optional CORS
+origins = [
+    "https://portfolia-ai.vercel.app",  # your deployed frontend
+    "http://localhost:8080",         # optional, for local testing
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,  # or ["*"] temporarily
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 app.include_router(summary.router, tags=["GitHub Summary"])
 # app.include_router(github.router, prefix="/api/v1/github", tags=["GitHub"])
