@@ -28,62 +28,35 @@ const Achievements = () => {
     internships: [
       {
         id: 1,
-        title: 'Software Engineering Intern',
-        organization: 'TechCorp Inc.',
+        title: 'Sample Work Experience',
+        organization: 'Sample Inc.',
         duration: 'Jun 2024 - Aug 2024',
-        location: 'San Francisco, CA',
-        description: 'Developed microservices architecture, improved API performance by 40%, and collaborated with cross-functional teams.',
+        location: 'Sample, CA',
+        description: 'Sample Work Experience, improved API performance by 40%, and collaborated with cross-functional teams.',
         skills: ['React', 'Node.js', 'AWS', 'Docker'],
         status: 'completed'
       },
-      {
-        id: 2,
-        title: 'ML Research Intern',
-        organization: 'AI Labs',
-        duration: 'Dec 2023 - Feb 2024',
-        location: 'Remote',
-        description: 'Researched deep learning models for computer vision, published paper on image classification improvements.',
-        skills: ['Python', 'TensorFlow', 'OpenCV', 'Research'],
-        status: 'completed'
-      }
     ],
     certificates: [
       {
-        id: 3,
-        title: 'AWS Certified Solutions Architect',
-        issuer: 'Amazon Web Services',
+        id: 2,
+        title: 'Sample Certificate',
+        issuer: 'Sample Web Services',
         year: '2024',
-        credentialId: 'AWS-12345',
-        description: 'Comprehensive cloud architecture certification covering design principles and best practices.',
+        credentialId: 'SAMPLE-12345',
+        description: 'Sample Desctiption',
         status: 'verified'
       },
-      {
-        id: 4,
-        title: 'Google Data Analytics Certificate',
-        issuer: 'Google',
-        year: '2023',
-        credentialId: 'GOOGLE-67890',
-        description: 'Data analysis, visualization, and business intelligence using industry-standard tools.',
-        status: 'verified'
-      }
     ],
     awards: [
       {
-        id: 5,
-        title: 'Best Innovation Award',
-        organization: 'University Hackathon',
+        id: 3,
+        title: 'Best Sample Award',
+        organization: 'University Sample',
         year: '2024',
-        description: 'First place for developing an AI-powered sustainability platform that helps businesses reduce carbon footprint.',
+        description: 'Sample Description.',
         category: 'Competition'
       },
-      {
-        id: 6,
-        title: 'Dean\'s List',
-        organization: 'University of Technology',
-        year: '2023',
-        description: 'Academic excellence recognition for maintaining GPA above 3.8 for consecutive semesters.',
-        category: 'Academic'
-      }
     ]
   });
 

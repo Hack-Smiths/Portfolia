@@ -46,11 +46,13 @@ import {
 import Navbar from "@/components/Navbar";
 import AIAssistant from "@/components/AIAssistant";
 import AIEditAssistant from "@/components/AIEditAssistant";
+import { useAuthContext } from '@/contexts/AuthContext';
 
 const Portfolio = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [currentTemplate, setCurrentTemplate] = useState('classic');
   const [editingSection, setEditingSection] = useState<string | null>(null);
+  const { user, loading } = useAuthContext();
 
   const templates = {
     classic: {
@@ -98,9 +100,9 @@ const Portfolio = () => {
   };
 
   const currentStyles = templates[currentTemplate].styles;
-
+  if (loading) return <p>Loading...</p>;
   const portfolioData = {
-    name: "Alex Chen",
+    name: user?.username.charAt(0).toUpperCase() + user?.username.slice(1),
     title: "Full-Stack Developer & AI Enthusiast",
     tagline: "Building the future with code, one project at a time",
     location: "San Francisco, CA",
@@ -112,83 +114,47 @@ const Portfolio = () => {
     projects: [
       {
         id: 1,
-        title: "E-commerce API",
-        description: "Full-stack e-commerce platform with Django REST Framework, JWT authentication, and payment integration",
+        title: "Sample Project",
+        description: 'Sample is a demo project created to showcase the core functionalities of the Portfolia platform. It simulates a typical user project by demonstrating AI-generated summaries, tech stack visualization, and GitHub integration.',
         image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&h=250&fit=crop",
-        tech: ["Django", "PostgreSQL", "Redis", "Docker"],
-        features: ["User Authentication", "Payment Processing", "Admin Dashboard", "Real-time Inventory"],
-        stars: 123,
-        demo: "https://demo.example.com",
-        repo: "https://github.com/alex-dev/ecommerce-api",
-        featured: true
-      },
-      {
-        id: 2,
-        title: "AI Chat Application",
-        description: "Real-time chat app with AI assistant integration using OpenAI API and WebSockets",
-        image: "https://images.unsplash.com/photo-1587560699334-cc4ff634909a?w=400&h=250&fit=crop",
-        tech: ["Node.js", "Socket.io", "OpenAI", "Express"],
-        features: ["AI-Powered Responses", "Real-time Messaging", "Message History", "Multi-user Support"],
-        stars: 234,
-        demo: "https://chat.example.com",
-        repo: "https://github.com/alex-dev/ai-chat",
-        featured: true
-      },
-      {
-        id: 3,
-        title: "Portfolio Dashboard",
-        description: "Modern React dashboard with TypeScript, TailwindCSS, and responsive design",
-        image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=250&fit=crop",
-        tech: ["React", "TypeScript", "TailwindCSS", "Vite"],
-        features: ["Responsive Design", "Dark Mode", "Performance Optimized", "Modern UI"],
-        stars: 87,
-        demo: "https://portfolio.example.com",
-        repo: "https://github.com/alex-dev/portfolio",
+        tech: ["React", "FastAPI", "PostgreSQL", "Tailwind CSS"],
+        features: ["AI-enhanced project description", "GitHub stats simulation (stars, forks)", "Live project and code preview links"],
+        stars: 0,
+        forks: 0,
+        demo: "https://portfolia-ai.vercel.app/",
+        repo: "https://github.com/Hack-Smiths/portfolia",
         featured: false
-      }
+      },
     ],
 
     achievements: [
       {
-        title: "Software Engineering Intern",
-        issuer: "TechCorp Inc.",
-        date: "Summer 2024",
+        title: 'Sample Work Experience',
+        issuer: 'Sample Inc.',
+        date: 'Jun 2024 - Aug 2024',
         type: "internship",
-        description: "Developed microservices architecture, improved API performance by 40%"
+        description: 'Sample Work Experience, improved API performance by 40%, and collaborated with cross-functional teams.',
       },
-      {
-        title: "Best Innovation Award",
-        issuer: "University Hackathon",
-        date: "2024",
-        type: "award",
-        description: "First place for developing an AI-powered sustainability platform"
-      }
     ],
 
     certificates: [
       {
-        title: "AWS Cloud Practitioner",
-        issuer: "Amazon Web Services",
+        title: 'Sample Certificate',
+        issuer: "Sample Web Services",
         date: "2024",
-        credentialId: "AWS-12345"
+        credentialId: "SAMPLE-12345"
       },
-      {
-        title: "Google Data Analytics Certificate",
-        issuer: "Google",
-        date: "2023",
-        credentialId: "GOOGLE-67890"
-      }
     ],
 
     skills: [
-      { name: "React", level: 85, category: "Frontend" },
-      { name: "Python", level: 90, category: "Backend" },
-      { name: "TypeScript", level: 80, category: "Frontend" },
-      { name: "Django", level: 75, category: "Backend" },
-      { name: "AWS", level: 60, category: "Cloud" },
-      { name: "Machine Learning", level: 70, category: "AI/ML" },
-      { name: "Docker", level: 65, category: "DevOps" },
-      { name: "PostgreSQL", level: 70, category: "Database" }
+      { name: "Sample Skill", level: 85, category: "Frontend" },
+      // { name: "Python", level: 90, category: "Backend" },
+      // { name: "TypeScript", level: 80, category: "Frontend" },
+      // { name: "Django", level: 75, category: "Backend" },
+      // { name: "AWS", level: 60, category: "Cloud" },
+      // { name: "Machine Learning", level: 70, category: "AI/ML" },
+      // { name: "Docker", level: 65, category: "DevOps" },
+      // { name: "PostgreSQL", level: 70, category: "Database" }
     ]
   };
 
