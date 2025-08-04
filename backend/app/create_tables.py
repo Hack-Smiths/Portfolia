@@ -1,4 +1,7 @@
-from app.database import engine
-from app.models import user  # import all model files
+# main.py or db_init.py
 
-user.Base.metadata.create_all(bind=engine)
+from app.models.user import User
+from app.models.project import Project
+from app.utils.database import Base, engine
+
+Base.metadata.create_all(bind=engine)
