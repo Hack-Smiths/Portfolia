@@ -26,7 +26,7 @@ const Auth = () => {
     e.preventDefault();
     setLoginError('');
     try {
-      const res = await fetch("http://127.0.0.1:8000/login", {
+      const res = await fetch("https://portfolia-z7of.onrender.com/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -63,7 +63,7 @@ const Auth = () => {
     }
 
     try {
-      const res = await fetch("http://127.0.0.1:8000/signup", {
+      const res = await fetch("https://portfolia-z7of.onrender.com/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
