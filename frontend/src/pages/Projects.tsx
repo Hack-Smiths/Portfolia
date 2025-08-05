@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import AIAssistant from '@/components/AIAssistant';
 import { usePortfolio } from '@/contexts/PortfolioContext';
 import { useAuthContext } from '@/contexts/AuthContext';
-import { getUserProjects, addProject as addProjectAPI, updateProject as updateProjectAPI } from '@/utils/api';
+import { getUserProjects, addProject as addProjectAPI, updateProject as updateProjectAPI, deleteProject as deleteProjectAPI } from '@/utils/api';
 import type { Project } from '@/types/project';
 
 const Projects = () => {
@@ -60,10 +60,16 @@ const Projects = () => {
   }, [authLoading, user]); // ✅ don't forget dependencies
 
 
-  const handleDeleteProject = (projectId: number) => {
-    setLocalProjects(localProjects.filter(p => p.id !== projectId));
-    deleteProject(projectId);
+  const handleDeleteProject = async (projectId: number) => {
+    try {
+      await deleteProjectAPI(projectId); // call backend first
+      setLocalProjects(localProjects.filter(p => p.id !== projectId)); // then update UI
+    } catch (error) {
+      console.error(error);
+      setError("Failed to delete project");
+    }
   };
+
 
   const handleAddProject = async (newProject: any) => {
     // build payload for backend
