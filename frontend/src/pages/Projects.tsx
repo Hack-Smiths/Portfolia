@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import AIAssistant from '@/components/AIAssistant';
 import { usePortfolio } from '@/contexts/PortfolioContext';
 import { useAuthContext } from '@/contexts/AuthContext';
-import { getUserProjects } from '@/utils/api';
+import { getUserProjects, addProject as addProjectAPI } from '@/utils/api';
 import type { Project } from '@/types/project';
 
 const Projects = () => {
@@ -65,21 +65,37 @@ const Projects = () => {
     deleteProject(projectId);
   };
 
-  const handleAddProject = (newProject: any) => {
-    const project = {
-      id: Date.now(),
-      ...newProject,
+  const handleAddProject = async (newProject: any) => {
+    // build payload for backend
+    const payload = {
+      title: newProject.title,
+      description: newProject.description ?? '',
       type: 'others',
-      status: { imported: false, aiSummary: false, saved: true },
-      lastUpdated: 'Just now'
+      stack: newProject.stack ?? [],
+      features: newProject.features ?? [],
+      stars: 0,
+      forks: 0,
+      link: newProject.link ?? '',
+      imported: false,
+      ai_summary: false,
+      saved: true,
     };
-    setLocalProjects([...localProjects, project]);
-    addProject({
-      ...newProject,
-      type: 'others' as const,
-      status: { imported: false, aiSummary: false, saved: true },
-      lastUpdated: 'Just now'
-    });
+
+    // call API
+    const created = await addProjectAPI(payload);
+
+    // map backend -> UI shape
+    const mapped = {
+      ...created,
+      status: {
+        imported: Boolean(created.imported),
+        aiSummary: Boolean(created.ai_summary),
+        saved: Boolean(created.saved),
+      },
+    };
+
+    // append to UI
+    setLocalProjects((prev) => [...prev, mapped]);
   };
 
   const handleImportFromGitHub = (projectData: any) => {
@@ -363,36 +379,48 @@ const Projects = () => {
     );
   }
 
-  function ManualProjectForm({ onAdd, onCloseProject }) {
-    const [title, setTitle] = useState('');
-    const [description, setDescription] = useState('');
-    const [stack, setStack] = useState('');
-    const [link, setUrl] = useState('');
-    const [features, setFeatures] = useState('');
+function ManualProjectForm({ onAdd, onCloseProject }) {
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [stack, setStack] = useState('');
+  const [link, setUrl] = useState('');
+  const [features, setFeatures] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
 
-    const handleSubmit = () => {
-      if (title && description) {
-        onAdd({
-          title,
-          description,
-          stack: stack.split(',').map(s => s.trim()).filter(s => s),
-          features: features.split(',').map(s => s.trim()).filter(s => s),
-          link
-        });
-        setTitle('');
-        setDescription('');
-        setStack('');
-        setFeatures('');
-        setUrl('');
-        // Close dialog
-        setTimeout(() => {
-          const closeButton = document.querySelector('[data-state="open"] button[aria-label="Close"]') as HTMLButtonElement;
-          closeButton?.click();
-        }, 100);
-      }
-      onCloseProject();
-      
+  const handleSubmit = async () => {
+    if (!title.trim() || !description.trim()) {
+      setErr('Title and description are required');
+      return;
+    }
+
+    const payload = {
+      title,
+      description,
+      stack: stack.split(',').map(s => s.trim()).filter(Boolean),
+      features: features.split(',').map(s => s.trim()).filter(Boolean),
+      link,
     };
+
+    try {
+      setSubmitting(true);
+      setErr(null);
+      await onAdd(payload); // <-- will call API & update parent state
+      // reset local fields
+      setTitle('');
+      setDescription('');
+      setStack('');
+      setFeatures('');
+      setUrl('');
+      // close dialog after success
+      onCloseProject();
+    } catch (e: any) {
+      console.error(e);
+      setErr(e?.message || 'Failed to add project');
+    } finally {
+      setSubmitting(false);
+    }
+  };
     const handleClose = () => {
       onCloseProject();
     };
