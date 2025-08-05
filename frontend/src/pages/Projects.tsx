@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Github, Plus, Edit3, Trash2, ExternalLink, Star, GitBranch, Code, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -10,29 +10,55 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import AIAssistant from '@/components/AIAssistant';
 import { usePortfolio } from '@/contexts/PortfolioContext';
-// add this in your parent component (where the dialog is rendered)
+import { useAuthContext } from '@/contexts/AuthContext';
+import { getUserProjects } from '@/utils/api';
+import type { Project } from '@/types/project';
+
 const Projects = () => {
   const [openedit, setOpenEdit] = useState(false); 
   const [selectedProject, setSelectedProject] = useState(null); 
   const [openProject, setOpenProject] = useState(false); 
   const [openGithub, setOpenGithub] = useState(false); 
+
   const { projects, addProject, deleteProject, updateProject } = usePortfolio();
+
+  const { user, loading: authLoading } = useAuthContext();
+
   const [selectedTab, setSelectedTab] = useState('all');
-  const [localProjects, setLocalProjects] = useState([
-    {
-      id: 1,
-      title: 'Sample Project',
-      description: 'Sample is a demo project created to showcase the core functionalities of the Portfolia platform. It simulates a typical user project by demonstrating AI-generated summaries, tech stack visualization, and GitHub integration.',
-      type: 'others',
-      stack: ["React", "FastAPI", "PostgreSQL", "Tailwind CSS"],
-      features: ["AI-enhanced project description", "GitHub stats simulation (stars, forks)", "Live project and code preview links"],
-      status: { imported: true, aiSummary: true, saved: true },
-      stars: 0,
-      forks: 0,
-      lastUpdated: 'now',
-      link: 'https://portfolia-ai.vercel.app/'
-    },
-  ]);
+  const [localProjects, setLocalProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (authLoading) return;            // wait for /me result
+    if (!user) {                        // no user → clear data
+      setLocalProjects([]);
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    getUserProjects()
+      .then((data: any[]) => {
+        const mapped: Project[] = data.map((p: any) => ({
+          ...p,
+          status: {
+            imported: Boolean(p.imported),
+            aiSummary: Boolean(p.ai_summary), // backend snake_case → UI camelCase
+            saved: Boolean(p.saved),
+          },
+        }));
+        setLocalProjects(mapped);
+      })
+      .catch((e) => {
+        console.error(e);
+        setError('Failed to load projects');
+      })
+      .finally(() => setLoading(false));
+  }, [authLoading, user]); // ✅ don't forget dependencies
+
 
   const handleDeleteProject = (projectId: number) => {
     setLocalProjects(localProjects.filter(p => p.id !== projectId));
@@ -75,12 +101,13 @@ const Projects = () => {
 
   const filteredProjects = localProjects.filter(project => {
     if (selectedTab === 'all') return true;
-    if (selectedTab === 'github') return project.type === 'github';
-    if (selectedTab === 'others') return project.type === 'others';
-    return true;
+    // if (selectedTab === 'github') return project.type === 'github';
+    // if (selectedTab === 'others') return project.type === 'others';
+    // return true;
+    return project.type === selectedTab;
   });
 
-  const ProjectCard = ({ project }) => (
+  const ProjectCard = ({ project }: {project: Project}) => (
     <Card className="glass-card interactive group overflow-hidden">
       <div className="w-12 h-12 bg-gradient-primary rounded-lg flex items-center justify-center mb-4 group-hover:glow-primary transition-all">
         <Code className="w-6 h-6 text-white" />
