@@ -4,14 +4,16 @@ from datetime import datetime
 
 class ProjectBase(BaseModel):
     title: str
-    description: Optional[str] = ""
-    type: Optional[str] = "others"
+    description: str
+    type: str
     stack: List[str]
     features: List[str]
     stars: Optional[int] = 0
     forks: Optional[int] = 0
-    last_updated: Optional[datetime] = None
     link: Optional[str] = ""
+    imported: Optional[bool] = False
+    ai_summary: Optional[bool] = False
+    saved: Optional[bool] = False
 
 class ProjectCreate(ProjectBase):
     pass
@@ -19,9 +21,10 @@ class ProjectCreate(ProjectBase):
 class ProjectUpdate(ProjectBase):
     pass
 
-class Project(ProjectBase):
+class ProjectOut(ProjectBase):
     id: int
-    user_id: int
+    last_updated: datetime
+    owner_id: int
 
     class Config:
         orm_mode = True

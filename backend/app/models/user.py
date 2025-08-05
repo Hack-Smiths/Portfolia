@@ -12,4 +12,5 @@ class User(Base):
     username = Column(String, nullable=False)
     email = Column(String, unique=True, index=True)
     hashed_password = Column(String)
-    projects = relationship("Project", back_populates="user", cascade="all, delete")
+    projects = relationship("Project", back_populates="owner")
+
