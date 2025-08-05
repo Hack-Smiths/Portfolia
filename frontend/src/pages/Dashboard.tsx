@@ -208,7 +208,7 @@ const Dashboard = () => {
             <Progress value={completionProgress} className="h-3" />
             <div className="absolute inset-0 rounded-full bg-gradient-primary opacity-20 animate-pulse-slow" />
           </div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 mt-4 text-xs">
+          {/* <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 mt-4 text-xs">
             <div className="flex items-center text-success">
               <CheckCircle className="w-3 h-3 mr-1" />
               Profile Info
@@ -225,7 +225,7 @@ const Dashboard = () => {
               <CheckCircle className="w-3 h-3 mr-1" />
               Resume Upload
             </div>
-          </div>
+          </div> */}
         </Card>
 
         {/* Stats Cards */}
