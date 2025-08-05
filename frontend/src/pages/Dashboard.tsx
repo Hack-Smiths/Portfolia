@@ -18,7 +18,7 @@ const Dashboard = () => {
   const stats = [
     { 
       label: 'Total Projects', 
-      value: '1', 
+      value: '0', 
       icon: Github, 
       color: 'text-electric',
       bgColor: 'bg-electric/10'
