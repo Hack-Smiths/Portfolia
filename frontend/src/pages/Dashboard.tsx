@@ -135,6 +135,11 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen pt-16 bg-gradient-soft">
       <div className="container mx-auto px-4 py-8">
+        {/* Background with mesh effect */}
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/30 via-purple-50/20 to-pink-50/30 dark:from-slate-900 dark:via-purple-900/10 dark:to-slate-900" />
+          <div className="mesh-bg absolute inset-0" />
+        </div>
         {/* Welcome Section */}
         <div className="mb-8 animate-fade-in">
           <h1 className="text-3xl lg:text-4xl font-space font-bold mb-2">
@@ -205,7 +210,16 @@ const Dashboard = () => {
             </div>
           </div>
           <div className="relative">
-            <Progress value={completionProgress} className="h-3" />
+            <Progress
+              value={completionProgress}
+              className="h-3 bg-[#dbc8ebff] rounded-full"
+              style={{
+                backgroundImage: `linear-gradient(to right, #dbc8ebff, #6314a3ff)`,
+                backgroundSize: `${completionProgress}% 100%`,
+                backgroundRepeat: 'no-repeat',
+              }}
+            />
+
             <div className="absolute inset-0 rounded-full bg-gradient-primary opacity-20 animate-pulse-slow" />
           </div>
           {/* <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 mt-4 text-xs">

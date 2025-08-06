@@ -208,7 +208,7 @@ const Projects = () => {
           </div>
         )}
 
-        {project.type === 'github' && (
+        {(
           <div className="flex items-center space-x-4 text-xs text-foreground-muted">
             <div className="flex items-center space-x-1">
               <Star className="w-3 h-3" />
@@ -247,57 +247,67 @@ const Projects = () => {
   );
 
   return (
-    <div className="min-h-screen pt-16 bg-gradient-soft">
-      <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen pt-1 bg-gradient-soft">
+      <div className="container mx-auto px-3 py-3">
+        {/* Background with mesh effect */}
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/30 via-purple-50/20 to-pink-50/30 dark:from-slate-900 dark:via-purple-900/10 dark:to-slate-900" />
+          <div className="mesh-bg absolute inset-0" />
+        </div>
+        
+        <div className="container mx-auto px-4 py-8 relative z-10"></div>
         {/* Header */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 animate-fade-in">
-          <div>
-            <h1 className="text-3xl lg:text-4xl font-space font-bold text-gradient-primary mb-2">
-              Projects
-            </h1>
-            <p className="text-foreground-muted">
-              Showcase your best work and let AI enhance your descriptions
-            </p>
-          </div>
-          <div className="flex space-x-3 mt-4 sm:mt-0">
-            <Dialog open={openGithub} onOpenChange={setOpenGithub}>
+        <div className="container mx-auto px-4 py-4 relative z-10">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 animate-fade-in">
+            <div>
+              <h1 className="text-3xl lg:text-4xl font-space font-bold text-gradient-primary mb-2">
+                Projects
+              </h1>
+              <p className="text-foreground-muted">
+                Showcase your best work and let AI enhance your descriptions
+              </p>
+            </div>
+            <div className="flex space-x-3 mt-4 sm:mt-0">
+              <Dialog open={openGithub} onOpenChange={setOpenGithub}>
+                <DialogTrigger asChild>
+                  <Button className="btn-primary">
+                    <Github className="w-4 h-4 mr-2" />
+                    Import from GitHub
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Import from GitHub</DialogTitle>
+                  </DialogHeader>
+                  <GitHubImportForm 
+                    onImport={handleImportFromGitHub} 
+                    onClose={() => {
+                      const dialog = document.querySelector('[role="dialog"]');
+                      const closeButton = dialog?.querySelector('[aria-label="Close"]') as HTMLButtonElement;
+                      closeButton?.click(); setOpenGithub(false)
+                    }}
+                  />
+                </DialogContent>
+              </Dialog>
+            <Dialog open={openProject} onOpenChange={setOpenProject}>
               <DialogTrigger asChild>
-                <Button className="btn-primary">
-                  <Github className="w-4 h-4 mr-2" />
-                  Import from GitHub
+                <Button variant="outline">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Project
                 </Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Import from GitHub</DialogTitle>
+                  <DialogTitle>Add Project Manually</DialogTitle>
                 </DialogHeader>
-                <GitHubImportForm 
-                  onImport={handleImportFromGitHub} 
-                  onClose={() => {
-                    const dialog = document.querySelector('[role="dialog"]');
-                    const closeButton = dialog?.querySelector('[aria-label="Close"]') as HTMLButtonElement;
-                    closeButton?.click(); setOpenGithub(false)
-                  }}
+                <ManualProjectForm 
+                  onAdd={handleAddProject} 
+                  onCloseProject={() => setOpenProject(false)}
                 />
               </DialogContent>
             </Dialog>
-          <Dialog open={openProject} onOpenChange={setOpenProject}>
-            <DialogTrigger asChild>
-              <Button variant="outline">
-                <Plus className="w-4 h-4 mr-2" />
-                Add Project
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Add Project Manually</DialogTitle>
-              </DialogHeader>
-              <ManualProjectForm 
-                onAdd={handleAddProject} 
-                onCloseProject={() => setOpenProject(false)}
-              />
-            </DialogContent>
-          </Dialog>
+            </div>
+          
           </div>
         </div>
 

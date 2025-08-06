@@ -14,17 +14,17 @@ const Skills = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [skills, setSkills] = useState([
     { id: 1, name: 'Sample Skill', category: 'Frontend', level: 'Beginner', experience: '0+ years' },
-    // { id: 2, name: 'Node.js', category: 'Backend', level: 'Expert', experience: '2+ years' },
-    // { id: 3, name: 'Python', category: 'Programming', level: 'Expert', experience: '4+ years' },
-    // { id: 4, name: 'AWS', category: 'Cloud', level: 'Intermediate', experience: '1+ year' },
-    // { id: 5, name: 'Docker', category: 'DevOps', level: 'Intermediate', experience: '1 year' },
-    // { id: 6, name: 'MongoDB', category: 'Database', level: 'Intermediate', experience: '2 years' },
-    // { id: 7, name: 'GraphQL', category: 'Backend', level: 'Beginner', experience: '6 months' },
-    // { id: 8, name: 'TypeScript', category: 'Programming', level: 'Expert', experience: '2+ years' },
-    // { id: 9, name: 'Leadership', category: 'Soft Skills', level: 'Expert', experience: '3+ years' },
-    // { id: 10, name: 'Project Management', category: 'Soft Skills', level: 'Intermediate', experience: '2+ years' },
-    // { id: 11, name: 'UI/UX Design', category: 'Design', level: 'Intermediate', experience: '1+ year' },
-    // { id: 12, name: 'Machine Learning', category: 'AI/ML', level: 'Beginner', experience: '6 months' }
+    { id: 2, name: 'Node.js', category: 'Backend', level: 'Expert', experience: '2+ years' },
+    { id: 3, name: 'Python', category: 'Programming', level: 'Expert', experience: '4+ years' },
+    { id: 4, name: 'AWS', category: 'Cloud', level: 'Intermediate', experience: '1+ year' },
+    { id: 5, name: 'Docker', category: 'DevOps', level: 'Intermediate', experience: '1 year' },
+    { id: 6, name: 'MongoDB', category: 'Database', level: 'Intermediate', experience: '2 years' },
+    { id: 7, name: 'GraphQL', category: 'Backend', level: 'Beginner', experience: '6 months' },
+    { id: 8, name: 'TypeScript', category: 'Programming', level: 'Expert', experience: '2+ years' },
+    { id: 9, name: 'riyaz', category: 'Soft Skills', level: 'Expert', experience: '3+ years' },
+    { id: 10, name: 'Project Management', category: 'Soft Skills', level: 'Intermediate', experience: '2+ years' },
+    { id: 11, name: 'UI/UX Design', category: 'Design', level: 'Intermediate', experience: '1+ year' },
+    { id: 12, name: 'Machine Learning', category: 'AI/ML', level: 'Beginner', experience: '6 months' }
   ]);
 
   const handleDeleteSkill = (skillId: number) => {
@@ -52,10 +52,10 @@ const Skills = () => {
 
   const getSkillLevelColor = (level) => {
     switch (level) {
-      case 'Expert': return 'bg-purple-100 text-purple-800 border-purple-200';
-      case 'Intermediate': return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'Beginner': return 'bg-green-100 text-green-800 border-green-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+      case 'Expert': return 'bg-gradient-primary text-white border-primary/20';
+      case 'Intermediate': return 'bg-accent/10 text-accent border-accent/20';
+      case 'Beginner': return 'bg-success/10 text-success border-success/20';
+      default: return 'bg-muted text-muted-foreground border-border';
     }
   };
 
@@ -73,79 +73,85 @@ const Skills = () => {
       case 'Frontend': 
         return { 
           icon: Code, 
-          bgColor: 'bg-slate-500', 
+          bgColor: 'bg-gradient-primary', 
           iconColor: 'text-white',
-          borderColor: 'border-slate-200'
+          borderColor: 'border-primary/20'
         };
       case 'Backend': 
         return { 
           icon: Server, 
-          bgColor: 'bg-gray-600', 
+          bgColor: 'bg-gradient-primary', 
           iconColor: 'text-white',
-          borderColor: 'border-gray-200'
+          borderColor: 'border-primary/20'
         };
       case 'Programming': 
         return { 
           icon: Code, 
-          bgColor: 'bg-indigo-600', 
+          bgColor: 'bg-gradient-primary', 
           iconColor: 'text-white',
-          borderColor: 'border-indigo-200'
+          borderColor: 'border-primary/20'
         };
       case 'Cloud': 
         return { 
           icon: Cloud, 
-          bgColor: 'bg-blue-600', 
+          bgColor: 'bg-gradient-primary', 
           iconColor: 'text-white',
-          borderColor: 'border-blue-200'
+          borderColor: 'border-primary/20'
         };
       case 'DevOps': 
         return { 
           icon: Settings, 
-          bgColor: 'bg-orange-600', 
+          bgColor: 'bg-gradient-primary', 
           iconColor: 'text-white',
-          borderColor: 'border-orange-200'
+          borderColor: 'border-primary/20'
         };
       case 'Database': 
         return { 
           icon: Database, 
-          bgColor: 'bg-green-600', 
+          bgColor: 'bg-gradient-primary', 
           iconColor: 'text-white',
-          borderColor: 'border-green-200'
+          borderColor: 'border-primary/20'
         };
       case 'Design': 
         return { 
           icon: Palette, 
-          bgColor: 'bg-pink-600', 
+          bgColor: 'bg-gradient-primary', 
           iconColor: 'text-white',
-          borderColor: 'border-pink-200'
+          borderColor: 'border-primary/20'
         };
       case 'AI/ML': 
         return { 
           icon: Brain, 
-          bgColor: 'bg-purple-600', 
+          bgColor: 'bg-gradient-primary', 
           iconColor: 'text-white',
-          borderColor: 'border-purple-200'
+          borderColor: 'border-primary/20'
         };
       case 'Soft Skills': 
         return { 
           icon: Users, 
-          bgColor: 'bg-teal-600', 
+          bgColor: 'bg-gradient-primary', 
           iconColor: 'text-white',
-          borderColor: 'border-teal-200'
+          borderColor: 'border-primary/20'
         };
       default: 
         return { 
           icon: Lightbulb, 
-          bgColor: 'bg-gray-600', 
+          bgColor: 'bg-gradient-primary', 
           iconColor: 'text-white',
-          borderColor: 'border-gray-200'
+          borderColor: 'border-primary/20'
         };
     }
   };
 
   return (
-    <div className="min-h-screen pt-16 bg-gradient-soft">
-      <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen pt-16">
+      {/* Background with mesh effect */}
+      <div className="absolute inset-0">
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/30 via-purple-50/20 to-pink-50/30 dark:from-slate-900 dark:via-purple-900/10 dark:to-slate-900" />
+        <div className="mesh-bg absolute inset-0" />
+      </div>
+      
+      <div className="container mx-auto px-6 py-8 relative z-10">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 animate-fade-in">
           <div>
@@ -214,7 +220,7 @@ const Skills = () => {
                     <IconComponent className={`w-8 h-8 ${categoryData.iconColor}`} />
                   </div>
                   <h3 className="text-xl font-bold text-foreground">{category}</h3>
-                  <div className="w-12 h-1 bg-gradient-to-r from-purple-500 to-pink-500 mx-auto mt-2 rounded-full"></div>
+                  <div className="w-12 h-1 bg-gradient-primary mx-auto mt-2 rounded-full"></div>
                 </div>
                 
                 <div className="space-y-3">

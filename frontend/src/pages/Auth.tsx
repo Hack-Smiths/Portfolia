@@ -96,8 +96,8 @@ const Auth = () => {
       <div className="w-full max-w-md animate-scale-in">
         <Card className="glass-card">
           <div className="text-center mb-8">
-            <div className="w-12 h-12 bg-gradient-primary rounded-lg flex items-center justify-center mx-auto mb-4">
-              <span className="text-white font-bold text-lg">P</span>
+            <div className="w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-4">
+              <img src="/programming.png" alt="Icon" className="w-14 h-14 object-contain" />
             </div>
             <h1 className="text-2xl font-space font-bold text-gradient-primary mb-2">
               Welcome to PortFolia

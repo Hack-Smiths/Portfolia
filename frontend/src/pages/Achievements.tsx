@@ -121,8 +121,14 @@ const Achievements = () => {
 
 
   return (
-    <div className="min-h-screen pt-16 bg-gradient-soft">
-      <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen pt-16">
+      {/* Background with mesh effect */}
+      <div className="absolute inset-0">
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/30 via-purple-50/20 to-pink-50/30 dark:from-slate-900 dark:via-purple-900/10 dark:to-slate-900" />
+        <div className="mesh-bg absolute inset-0" />
+      </div>
+      
+      <div className="container mx-auto px-4 py-8 relative z-10">
         {/* Header */}
         <div className="mb-8 animate-fade-in">
           <h1 className="text-3xl lg:text-4xl font-space font-bold text-gradient-primary mb-2">
@@ -137,8 +143,8 @@ const Achievements = () => {
         {/* Internships Section */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-space font-bold flex items-center">
-              <Briefcase className="w-6 h-6 mr-2 text-primary" />
+            <h2 className="text-2xl font-space font-bold flex items-center text-gradient-primary">
+              <Briefcase className="w-6 h-6 mr-2" />
               Work Experience
             </h2>
             <Dialog>
@@ -164,7 +170,7 @@ const Achievements = () => {
 
           <div className="space-y-4">
             {localAchievements.internships.map((internship, index) => (
-              <Card key={internship.id} className="glass-card interactive animate-slide-in-right" style={{ animationDelay: `${index * 100}ms` }}>
+              <Card key={internship.id} className="glass-card interactive animate-slide-in-right group hover:shadow-xl transition-all duration-300" style={{ animationDelay: `${index * 100}ms` }}>
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
                     <h3 className="text-lg font-semibold">{internship.title}</h3>
@@ -205,9 +211,9 @@ const Achievements = () => {
                 
                 <p className="text-foreground-muted text-sm mb-4">{internship.description}</p>
                 
-                <div className="flex flex-wrap gap-1">
+                <div className="flex flex-wrap gap-2">
                   {internship.skills.map((skill, skillIndex) => (
-                    <Badge key={skillIndex} variant="secondary" className="text-xs">
+                    <Badge key={skillIndex} variant="secondary" className="text-xs bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 transition-colors">
                       {skill}
                     </Badge>
                   ))}
@@ -221,8 +227,8 @@ const Achievements = () => {
           {/* Certificates Section */}
           <div>
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-space font-bold flex items-center">
-                <Award className="w-6 h-6 mr-2 text-electric" />
+              <h2 className="text-2xl font-space font-bold flex items-center text-gradient-primary">
+                <Award className="w-6 h-6 mr-2" />
                 Certificates
               </h2>
               <Dialog>
@@ -248,7 +254,7 @@ const Achievements = () => {
 
             <div className="space-y-4">
               {localAchievements.certificates.map((cert, index) => (
-                <Card key={cert.id} className="glass-card interactive animate-slide-in-up" style={{ animationDelay: `${index * 150}ms` }}>
+                <Card key={cert.id} className="glass-card interactive animate-slide-in-up group hover:shadow-xl transition-all duration-300" style={{ animationDelay: `${index * 150}ms` }}>
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1">
                       <h3 className="font-semibold">{cert.title}</h3>
@@ -275,11 +281,12 @@ const Achievements = () => {
                   </div>
                   <p className="text-foreground-muted text-sm mb-3">{cert.description}</p>
                   <div className="flex items-center justify-between">
-                    <Badge variant="outline" className="text-xs">
+                    <Badge variant="outline" className="text-xs border-primary/30 text-primary">
                       ID: {cert.credentialId}
                     </Badge>
-                    <Badge className="text-xs bg-success/10 text-success">
-                      ✓ Verified
+                    <Badge className="text-xs bg-success/10 text-success border-success/20">
+                      <CheckCircle className="w-3 h-3 mr-1" />
+                      Verified
                     </Badge>
                   </div>
                 </Card>
@@ -290,8 +297,8 @@ const Achievements = () => {
           {/* Awards Section */}
           <div>
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-space font-bold flex items-center">
-                <Award className="w-6 h-6 mr-2 text-pulse" />
+              <h2 className="text-2xl font-space font-bold flex items-center text-gradient-primary">
+                <Award className="w-6 h-6 mr-2" />
                 Highlights
               </h2>
               <Dialog>
@@ -317,7 +324,7 @@ const Achievements = () => {
 
             <div className="space-y-4">
               {localAchievements.awards.map((award, index) => (
-                <Card key={award.id} className="glass-card interactive animate-slide-in-up" style={{ animationDelay: `${index * 150}ms` }}>
+                <Card key={award.id} className="glass-card interactive animate-slide-in-up group hover:shadow-xl transition-all duration-300" style={{ animationDelay: `${index * 150}ms` }}>
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1">
                       <h3 className="font-semibold">{award.title}</h3>
@@ -343,7 +350,7 @@ const Achievements = () => {
                     </div>
                   </div>
                   <p className="text-foreground-muted text-sm mb-3">{award.description}</p>
-                  <Badge variant="outline" className="text-xs">
+                  <Badge variant="outline" className="text-xs border-primary/30 text-primary">
                     {award.category}
                   </Badge>
                 </Card>
