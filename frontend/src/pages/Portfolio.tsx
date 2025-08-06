@@ -1373,19 +1373,6 @@ const Portfolio = () => {
                     </div>
                   </div>
                 </div>
-                
-                {/* Vertical Social Icons */}
-                <div className="fixed left-8 top-1/2 -translate-y-1/2 space-y-4 z-50">
-                  <a href={`https://github.com/${portfolioData.github}`} className="block w-14 h-14 glass-card rounded-2xl flex items-center justify-center text-electric hover:glow-electric transition-all duration-300 hover:scale-110">
-                    <Github className="w-6 h-6" />
-                  </a>
-                  <a href={`https://linkedin.com/in/${portfolioData.linkedin}`} className="block w-14 h-14 glass-card rounded-2xl flex items-center justify-center text-electric hover:glow-electric transition-all duration-300 hover:scale-110">
-                    <Linkedin className="w-6 h-6" />
-                  </a>
-                  <a href={`mailto:${portfolioData.email}`} className="block w-14 h-14 glass-card rounded-2xl flex items-center justify-center text-electric hover:glow-electric transition-all duration-300 hover:scale-110">
-                    <Mail className="w-6 h-6" />
-                  </a>
-                </div>
               </div>
             </section>
 
