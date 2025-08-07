@@ -26,7 +26,7 @@ const Auth = () => {
     e.preventDefault();
     setLoginError('');
     try {
-      const res = await fetch("https://portfolia-z7of.onrender.com/login", {
+      const res = await fetch("https://portfolia-production.up.railway.app/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -63,7 +63,7 @@ const Auth = () => {
     }
 
     try {
-      const res = await fetch("https://portfolia-z7of.onrender.com/signup", {
+      const res = await fetch("https://portfolia-production.up.railway.app/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

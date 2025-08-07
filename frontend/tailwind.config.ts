@@ -111,6 +111,10 @@ export default {
 						height: 'var(--radix-accordion-content-height)'
 					}
 				},
+				progressFill: {
+					'0%': { width: '0%' },
+					'100%': { width: '100%' },
+				},
 				'accordion-up': {
 					from: {
 						height: 'var(--radix-accordion-content-height)'
@@ -122,7 +126,8 @@ export default {
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				progressFill: 'progressFill 1.5s linear infinite'
 			}
 		}
 	},

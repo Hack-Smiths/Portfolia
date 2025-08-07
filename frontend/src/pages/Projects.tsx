@@ -29,6 +29,8 @@ const Projects = () => {
   const [localProjects, setLocalProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [progress, setProgress] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (authLoading) return;            // wait for /me result
@@ -105,21 +107,44 @@ const Projects = () => {
     setLocalProjects((prev) => [...prev, mapped]);
   };
 
-  const handleImportFromGitHub = (projectData: any) => {
-    // 1. Prepare the project object with metadata and fallback values
-    const project = {
-      ...projectData,
-      type: 'github' as const,
-      status: { imported: true, aiSummary: true, saved: false }, // saved = false until confirmed from DB
-      lastUpdated: 'Just now'
-    };
+  const handleImportFromGitHub = async (projectData: any) => {
+    try {
+      // 1. Build payload in backend format
+      const payload = {
+        title: projectData.title,
+        description: projectData.description ?? '',
+        type: 'github',
+        stack: projectData.stack ?? [],
+        features: projectData.features ?? [],
+        stars: projectData.githubStars ?? 0,
+        forks: projectData.githubForks ?? 0,
+        link: projectData.githubLink ?? '',
+        imported: true,
+        ai_summary: true,
+        saved: true,
+      };
 
-    // 2. Update local UI immediately
-    setLocalProjects((prev) => [...prev, project]);
+      // 2. Call backend
+      const created = await addProjectAPI(payload);
 
-    // 3. Save to backend DB (this sets saved = true later)
-    addProject(project);
+      // 3. Map backend → UI format
+      const mapped: Project = {
+        ...created,
+        status: {
+          imported: Boolean(created.imported),
+          aiSummary: Boolean(created.ai_summary),
+          saved: Boolean(created.saved),
+        },
+      };
+
+      // 4. Add to local UI
+      setLocalProjects((prev) => [...prev, mapped]);
+    } catch (err) {
+      console.error("Failed to import from GitHub:", err);
+      setError("Failed to import from GitHub");
+    }
   };
+
 
 
 
@@ -247,6 +272,14 @@ const Projects = () => {
       </div>
     </Card>
   );
+  const simulateProgress = () => {
+    let current = 0;
+    const interval = setInterval(() => {
+      current += 10;
+      setProgress(current);
+      if (current >= 100) clearInterval(interval);
+    }, 100);
+  };
 
   return (
     <div className="min-h-screen pt-1 bg-gradient-soft">
@@ -397,13 +430,24 @@ const Projects = () => {
           </p>
         )}
         <div className="flex space-x-3">
-          <Button 
-            className="btn-primary flex-1" 
+          <Button
+            className="btn-primary flex-1 relative overflow-hidden"
             onClick={handleImport}
             disabled={!url || loading}
           >
-            <Code className="w-4 h-4 mr-2" />
-            {loading ? 'Importing...' : 'Import Project'}
+            {/* Progress Fill Layer */}
+            {loading && (
+              <div
+                className="absolute left-0 top-0 h-full bg-purple-900/40 z-0 transition-all duration-300 ease-out"
+                style={{ width: '100%', animation: 'progressFill 1.5s linear infinite' }}
+              />
+            )}
+
+            {/* Button Content */}
+            <div className="flex items-center relative z-10">
+              <Code className="w-4 h-4 mr-2" />
+              {loading ? 'Importing...' : 'Import Project'}
+            </div>
           </Button>
           <Button variant="outline" onClick={onClose}>Cancel</Button>
         </div>

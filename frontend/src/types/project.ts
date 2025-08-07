@@ -7,6 +7,7 @@ export type Project = {
   features: string[];
   stars: number;
   forks: number;
+  githublink?: string;
   link?: string;
 
   // backend booleans:

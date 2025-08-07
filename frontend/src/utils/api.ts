@@ -4,7 +4,7 @@ export async function getCurrentUser() {
 
   if (!token) throw new Error("No token found");
 
-  const res = await fetch("https://portfolia-z7of.onrender.com/me", {
+  const res = await fetch("https://portfolia-production.up.railway.app/me", {
     method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -18,7 +18,7 @@ export async function getCurrentUser() {
   return await res.json(); // should return { username, email, id }
 }
 
-const BASE_URL = "https://portfolia-z7of.onrender.com";
+const BASE_URL = "https://portfolia-production.up.railway.app";
 
 export async function getUserProjects() {
   const token = localStorage.getItem("token");
@@ -67,7 +67,7 @@ export async function updateProject(id: number, updatedData: any) {
 }
 
 export async function fetchGithubSummary(repoUrl: string) {
-  const res = await fetch(`${BASE_URL}/smart-summary?repo_url=${encodeURIComponent(repoUrl)}`);
+  const res = await fetch(`http://127.0.0.1:8000/smart-summary?repo_url=${encodeURIComponent(repoUrl)}`);
   if (!res.ok) throw new Error("Failed to fetch GitHub summary");
   return res.json();
 }
