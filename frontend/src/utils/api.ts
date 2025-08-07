@@ -65,3 +65,9 @@ export async function updateProject(id: number, updatedData: any) {
   if (!res.ok) throw new Error("Failed to update project");
   return res.json();
 }
+
+export async function fetchGithubSummary(repoUrl: string) {
+  const res = await fetch(`${BASE_URL}/smart-summary?repo_url=${encodeURIComponent(repoUrl)}`);
+  if (!res.ok) throw new Error("Failed to fetch GitHub summary");
+  return res.json();
+}

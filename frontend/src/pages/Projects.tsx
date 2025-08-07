@@ -11,8 +11,9 @@ import { Textarea } from '@/components/ui/textarea';
 import AIAssistant from '@/components/AIAssistant';
 import { usePortfolio } from '@/contexts/PortfolioContext';
 import { useAuthContext } from '@/contexts/AuthContext';
-import { getUserProjects, addProject as addProjectAPI, updateProject as updateProjectAPI, deleteProject as deleteProjectAPI } from '@/utils/api';
+import { getUserProjects as getUserProjectsAPI, addProject as addProjectAPI, updateProject as updateProjectAPI, deleteProject as deleteProjectAPI, fetchGithubSummary as fetchGithubSummaryAPI } from '@/utils/api';
 import type { Project } from '@/types/project';
+
 
 const Projects = () => {
   const [openedit, setOpenEdit] = useState(false); 
@@ -40,7 +41,7 @@ const Projects = () => {
     setLoading(true);
     setError(null);
 
-    getUserProjects()
+    getUserProjectsAPI()
       .then((data: any[]) => {
         const mapped: Project[] = data.map((p: any) => ({
           ...p,
@@ -105,21 +106,22 @@ const Projects = () => {
   };
 
   const handleImportFromGitHub = (projectData: any) => {
+    // 1. Prepare the project object with metadata and fallback values
     const project = {
-      id: Date.now(),
-      ...projectData,
-      type: 'github',
-      status: { imported: true, aiSummary: false, saved: true },
-      lastUpdated: 'Just now'
-    };
-    setLocalProjects([...localProjects, project]);
-    addProject({
       ...projectData,
       type: 'github' as const,
-      status: { imported: true, aiSummary: false, saved: true },
+      status: { imported: true, aiSummary: true, saved: false }, // saved = false until confirmed from DB
       lastUpdated: 'Just now'
-    });
+    };
+
+    // 2. Update local UI immediately
+    setLocalProjects((prev) => [...prev, project]);
+
+    // 3. Save to backend DB (this sets saved = true later)
+    addProject(project);
   };
+
+
 
   const filteredProjects = localProjects.filter(project => {
     if (selectedTab === 'all') return true;
@@ -350,27 +352,28 @@ const Projects = () => {
   function GitHubImportForm({ onImport, onClose }) {
     const [url, setUrl] = useState('');
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
 
     const handleImport = async () => {
+      if (!url) return;
       setLoading(true);
-      // Simulate GitHub import
-      const projectData = {
-        title: 'Imported GitHub Project',
-        description: 'Project imported from GitHub repository',
-        stack: ['React', 'TypeScript', 'Node.js'],
-        stars: Math.floor(Math.random() * 100),
-        forks: Math.floor(Math.random() * 20),
-        image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&h=200&fit=crop'
-      };
-      
-      setTimeout(() => {
-        onImport(projectData);
-        setLoading(false);
-        setUrl('');
-        onClose?.();
-      }, 1000);
-    };
+      setError(null);
 
+      try {
+        const data = await fetchGithubSummaryAPI(url); // ✅ use API wrapper
+        if (data.error) {
+          setError(data.error);
+        } else {
+          onImport(data);    // ✅ Pass parsed project back to parent
+          onClose?.();       // ✅ Close the dialog if onClose provided
+          setUrl('');
+        }
+      } catch (err) {
+        setError('Failed to import from GitHub. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    };
     return (
       <div className="space-y-4">
         <div className="space-y-2">
@@ -387,6 +390,12 @@ const Projects = () => {
             We'll automatically extract project details, tech stack, and generate an AI-enhanced description.
           </p>
         </div>
+        {/* ✅ Display error message if any */}
+        {error && (
+          <p className="text-sm text-red-500">
+            {error}
+          </p>
+        )}
         <div className="flex space-x-3">
           <Button 
             className="btn-primary flex-1" 
