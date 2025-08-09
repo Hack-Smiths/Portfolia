@@ -150,10 +150,9 @@ const Projects = () => {
 
   const filteredProjects = localProjects.filter(project => {
     if (selectedTab === 'all') return true;
-    // if (selectedTab === 'github') return project.type === 'github';
-    // if (selectedTab === 'others') return project.type === 'others';
-    // return true;
-    return project.type === selectedTab;
+    if (selectedTab === 'github') return project.type === 'github';
+    if (selectedTab === 'others') return project.type === 'others';
+    return true;
   });
 
   const ProjectCard = ({ project }: {project: Project}) => (
@@ -285,7 +284,7 @@ const Projects = () => {
     <div className="min-h-screen pt-1 bg-gradient-soft">
       <div className="container mx-auto px-3 py-3">
         {/* Background with mesh effect */}
-        <div className="absolute inset-0">
+        <div className="absolute inset-0 pointer-events-none">
           <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/30 via-purple-50/20 to-pink-50/30 dark:from-slate-900 dark:via-purple-900/10 dark:to-slate-900" />
           <div className="mesh-bg absolute inset-0" />
         </div>
@@ -364,6 +363,7 @@ const Projects = () => {
             <ProjectGrid projects={localProjects.filter(p => p.type === 'others')} />
           </TabsContent>
         </Tabs>
+
       </div>
 
       <AIAssistant />

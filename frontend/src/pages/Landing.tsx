@@ -50,7 +50,7 @@ const Landing = () => {
       icon: FileText,
       title: 'Resume Integration',
       description: 'Upload your resume and extract achievements automatically',
-      interactive: true
+      interactive: false
     },
     {
       icon: Award,
@@ -200,7 +200,10 @@ const Landing = () => {
               </Button>
             </Link>
             <Link to="/dummy-portfolio">
-              <Button variant="outline" className="border-2 border-purple-300 dark:border-purple-600 text-purple-700 dark:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-900/20 font-semibold px-8 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300">
+              <Button
+                variant="outline"
+                className="border-2 border-purple-300 dark:border-purple-600 text-purple-700 dark:text-purple-300 hover:text-purple-700 dark:hover:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-900/20 font-semibold px-8 py-3 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+              >
                 <Play className="w-4 h-4 mr-2" />
                 View Live Demo
               </Button>
@@ -270,7 +273,7 @@ const Landing = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-            <Card className="glass-card text-center group">
+            <Card className="glass-card text-center group transition-transform duration-300 hover:scale-105 hover:shadow-xl">
               <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4 group-hover:glow-primary transition-all">
                 <Brain className="w-8 h-8 text-white" />
               </div>
@@ -280,7 +283,7 @@ const Landing = () => {
               </p>
             </Card>
 
-            <Card className="glass-card text-center group">
+            <Card className="glass-card text-center group transition-transform duration-300 hover:scale-105 hover:shadow-xl">
               <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4 group-hover:glow-primary transition-all">
                 <Github className="w-8 h-8 text-white" />
               </div>
@@ -290,7 +293,7 @@ const Landing = () => {
               </p>
             </Card>
 
-            <Card className="glass-card text-center group">
+            <Card className="glass-card text-center group transition-transform duration-300 hover:scale-105 hover:shadow-xl">
               <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4 group-hover:glow-primary transition-all">
                 <Award className="w-8 h-8 text-white" />
               </div>
@@ -301,7 +304,7 @@ const Landing = () => {
             </Card>
           </div>
 
-          <div className="bg-white/50 backdrop-blur-sm rounded-2xl p-8 border border-white/20 text-center">
+          {/* <div className="bg-white/50 backdrop-blur-sm rounded-2xl p-8 border border-white/20 text-center">
             <div className="max-w-4xl mx-auto">
               <h3 className="text-3xl font-bold mb-6 text-gradient-primary">Join thousands of successful students</h3>
               <p className="text-foreground-muted mb-8 text-lg max-w-2xl mx-auto">
@@ -336,7 +339,7 @@ const Landing = () => {
                 </div>
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
       </section>
 
@@ -347,7 +350,7 @@ const Landing = () => {
             <h2 className="text-3xl lg:text-4xl font-space font-bold mb-6">
               Ready to build your <span className="text-gradient-primary">standout portfolio</span>?
             </h2>
-            <p className="text-xl text-foreground-muted mb-8">
+            <p className="text-xl text-foreground-muted mt-16 mb-8">
               Join thousands of students who've landed their dream internships with AI-enhanced portfolios.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -357,10 +360,6 @@ const Landing = () => {
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
               </Link>
-              <Button className="btn-ghost text-lg px-8 py-4">
-                <Star className="w-5 h-5 mr-2" />
-                View Examples
-              </Button>
             </div>
           </Card>
         </div>

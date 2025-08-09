@@ -67,7 +67,7 @@ export async function updateProject(id: number, updatedData: any) {
 }
 
 export async function fetchGithubSummary(repoUrl: string) {
-  const res = await fetch(`http://127.0.0.1:8000/smart-summary?repo_url=${encodeURIComponent(repoUrl)}`);
+  const res = await fetch(`${BASE_URL}/smart-summary?repo_url=${encodeURIComponent(repoUrl)}`);
   if (!res.ok) throw new Error("Failed to fetch GitHub summary");
   return res.json();
 }
