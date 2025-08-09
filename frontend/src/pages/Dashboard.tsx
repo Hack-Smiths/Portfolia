@@ -136,14 +136,14 @@ const Dashboard = () => {
     <div className="min-h-screen pt-16 bg-gradient-soft">
       <div className="container mx-auto px-4 py-8">
         {/* Background with mesh effect */}
-        <div className="absolute inset-0">
+        <div className="absolute inset-0 pointer-events-none">
           <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/30 via-purple-50/20 to-pink-50/30 dark:from-slate-900 dark:via-purple-900/10 dark:to-slate-900" />
           <div className="mesh-bg absolute inset-0" />
         </div>
         {/* Welcome Section */}
         <div className="mb-8 animate-fade-in">
           <h1 className="text-3xl lg:text-4xl font-space font-bold mb-2">
-            Welcome back, <span className="text-gradient-primary">{user?.username.charAt(0).toUpperCase() + user?.username.slice(1)}</span> 👋
+            Welcome back, <span className="text-3xl lg:text-4xl font-space font-bold text-gradient-primary mb-2">{user?.username.charAt(0).toUpperCase() + user?.username.slice(1)}</span> 👋
           </h1>
           <p className="text-foreground-muted text-lg">
             Let's continue building your amazing portfolio
