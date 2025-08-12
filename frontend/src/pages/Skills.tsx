@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, Brain, Edit3, Trash2, Filter, Star, Code, Server, Palette, Cloud, Settings, Database, Lightbulb, Users, Smartphone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -9,38 +9,56 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import AIAssistant from '@/components/AIAssistant';
+import { getSkills as getSkillsAPI, addSkill as addSkillAPI, updateSkill as updateSkillAPI, deleteSkill as deleteSkillAPI } from '@/utils/api';
 
 const Skills = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [skills, setSkills] = useState([
-    { id: 1, name: 'Sample Skill', category: 'Frontend', level: 'Beginner', experience: '0+ years' },
-    { id: 2, name: 'Node.js', category: 'Backend', level: 'Expert', experience: '2+ years' },
-    { id: 3, name: 'Python', category: 'Programming', level: 'Expert', experience: '4+ years' },
-    { id: 4, name: 'AWS', category: 'Cloud', level: 'Intermediate', experience: '1+ year' },
-    { id: 5, name: 'Docker', category: 'DevOps', level: 'Intermediate', experience: '1 year' },
-    { id: 6, name: 'MongoDB', category: 'Database', level: 'Intermediate', experience: '2 years' },
-    { id: 7, name: 'GraphQL', category: 'Backend', level: 'Beginner', experience: '6 months' },
-    { id: 8, name: 'TypeScript', category: 'Programming', level: 'Expert', experience: '2+ years' },
-    { id: 9, name: 'riyaz', category: 'Soft Skills', level: 'Expert', experience: '3+ years' },
-    { id: 10, name: 'Project Management', category: 'Soft Skills', level: 'Intermediate', experience: '2+ years' },
-    { id: 11, name: 'UI/UX Design', category: 'Design', level: 'Intermediate', experience: '1+ year' },
-    { id: 12, name: 'Machine Learning', category: 'AI/ML', level: 'Beginner', experience: '6 months' }
-  ]);
+  const [ openSkillForm, setOpenSkillForm ] = useState(false);
+  const [ openEditSkillForm, setOpenEditSkillForm ] = useState(false);
+  const [skills, setSkills] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const handleDeleteSkill = (skillId: number) => {
-    setSkills(skills.filter(s => s.id !== skillId));
+  const handleDeleteSkill = async (skillId) => {
+    try {
+      await deleteSkillAPI(skillId);
+      setSkills((prev) => prev.filter((s) => s.id !== skillId));
+    } catch (err) {
+      alert(err.message || "Failed to delete skill");
+    }
   };
 
-  const handleAddSkill = (newSkill: any) => {
-    const skill = {
-      id: Date.now(),
-      ...newSkill
-    };
-    setSkills([...skills, skill]);
+  useEffect(() => {
+    (async () => {
+      try {
+        const data = await getSkillsAPI();
+        setSkills(data);
+      } catch (err) {
+        setError(err.message || "Failed to load skills");
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+
+  const handleAddSkill = async (newSkill) => {
+    try {
+      const savedSkill = await addSkillAPI(newSkill);
+      setSkills((prev) => [...prev, savedSkill]);
+    } catch (err) {
+      alert(err.message || "Failed to add skill");
+    }
   };
 
-  const handleEditSkill = (updatedSkill: any) => {
-    setSkills(skills.map(s => s.id === updatedSkill.id ? updatedSkill : s));
+  const handleEditSkill = async (updatedSkill) => {
+    try {
+      const savedSkill = await updateSkillAPI(updatedSkill.id, updatedSkill);
+      setSkills((prev) =>
+        prev.map((s) => (s.id === savedSkill.id ? savedSkill : s))
+      );
+    } catch (err) {
+      alert(err.message || "Failed to update skill");
+    }
   };
 
   const categories = ['all', 'Frontend', 'Backend', 'Programming', 'Cloud', 'DevOps', 'Database', 'Design', 'AI/ML', 'Soft Skills'];
@@ -141,6 +159,7 @@ const Skills = () => {
           borderColor: 'border-primary/20'
         };
     }
+    
   };
 
   return (
@@ -162,7 +181,7 @@ const Skills = () => {
               AI-parsed skills and manual additions
             </p>
           </div>
-          <Dialog>
+          <Dialog open={openSkillForm} onOpenChange={setOpenSkillForm}>
             <DialogTrigger asChild>
               <Button className="btn-primary mt-4 sm:mt-0">
                 <Plus className="w-4 h-4 mr-2" />
@@ -175,10 +194,7 @@ const Skills = () => {
                 </DialogHeader>
                 <SkillForm 
                   onAdd={handleAddSkill}
-                  onClose={() => {
-                    const closeButton = document.querySelector('[role="dialog"] [data-state="open"] button[aria-label="Close"]') as HTMLButtonElement;
-                    closeButton?.click();
-                  }}
+                  onClose={() => setOpenSkillForm(false)}
                 />
               </DialogContent>
           </Dialog>
@@ -230,7 +246,7 @@ const Skills = () => {
                         <div className="flex items-center space-x-2">
                           <span className="font-medium text-foreground">{skill.name}</span>
                           <div className="flex items-center space-x-1">
-                            <Dialog>
+                            <Dialog open={openEditSkillForm} onOpenChange={setOpenEditSkillForm}>
                               <DialogTrigger asChild>
                                 <Button size="sm" variant="ghost" className="w-6 h-6 p-0 opacity-0 group-hover:opacity-100 transition-all">
                                   <Edit3 className="w-3 h-3" />
@@ -243,10 +259,7 @@ const Skills = () => {
                                 <EditSkillForm 
                                   skill={skill} 
                                   onEdit={handleEditSkill}
-                                  onClose={() => {
-                                    const closeButton = document.querySelector('[role="dialog"] [data-state="open"] button[aria-label="Close"]') as HTMLButtonElement;
-                                    closeButton?.click();
-                                  }}
+                                  onClose={() => setOpenEditSkillForm(false)}
                                 />
                               </DialogContent>
                             </Dialog>

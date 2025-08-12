@@ -1,4 +1,7 @@
 // src/utils/api.ts
+
+const BASE_URL = "https://portfolia-production.up.railway.app";
+
 export async function getCurrentUser() {
   const token = localStorage.getItem("token");
 
@@ -18,7 +21,7 @@ export async function getCurrentUser() {
   return await res.json(); // should return { username, email, id }
 }
 
-const BASE_URL = "https://portfolia-production.up.railway.app";
+// Projects API endpoints
 
 export async function getUserProjects() {
   const token = localStorage.getItem("token");
@@ -73,7 +76,7 @@ export async function fetchGithubSummary(repoUrl: string) {
 }
 
 
-
+// Achievements API endpoints
 
 // GET
 export async function getAchievementsAPI(
@@ -165,3 +168,51 @@ export async function deleteAchievementAPI(
   return true;
 }
 
+// Skills API endpoints
+
+export async function getSkills() {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${BASE_URL}/skills/`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error("Failed to fetch skills");
+  return res.json(); // returns array of skills
+}
+
+export async function addSkill(skillData: any) {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${BASE_URL}/skills/`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(skillData),
+  });
+  if (!res.ok) throw new Error("Failed to add skill");
+  return res.json();
+}
+
+export async function updateSkill(id: number, updatedData: any) {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${BASE_URL}/skills/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(updatedData),
+  });
+  if (!res.ok) throw new Error("Failed to update skill");
+  return res.json();
+}
+
+export async function deleteSkill(id: number) {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${BASE_URL}/skills/${id}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error("Failed to delete skill");
+  return true;
+}
