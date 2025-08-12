@@ -1,7 +1,7 @@
 
 
 from fastapi import FastAPI
-from app.api.v1.routes import summary, user, auth, project, achievements
+from app.api.v1.routes import summary, user, auth, project, achievements, skills
 from fastapi.middleware.cors import CORSMiddleware
 from app.models.user import User
 from app.models.project import Project  # This ensures both classes are registered
@@ -29,3 +29,4 @@ app.include_router(auth.router, tags=['Auth'])
 app.include_router(user.router, tags=['Auth'])
 app.include_router(project.router, prefix="/projects", tags=["Projects"])
 app.include_router(achievements.router)
+app.include_router(skills.router)

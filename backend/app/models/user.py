@@ -10,7 +10,9 @@ class User(Base):
     username = Column(String, nullable=False)
     email = Column(String, unique=True, index=True)
     hashed_password = Column(String)
+
     projects = relationship("Project", back_populates="owner")
     work_experiences = relationship("WorkExperience", back_populates="owner")
     certificates = relationship("Certificate", back_populates="owner")
     awards = relationship("Award", back_populates="owner")
+    skills = relationship("Skill", back_populates="user")
