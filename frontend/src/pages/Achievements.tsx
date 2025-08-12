@@ -15,7 +15,9 @@ import { addAchievementAPI, getAchievementsAPI, deleteAchievementAPI, updateAchi
 
 const Achievements = () => {
   const { achievements, addAchievement } = usePortfolio();
-  
+  const [openInternshipForm, setOpenInternshipForm] = useState(false);
+  const [openCertificateForm, setOpenCertificateForm] = useState(false);
+  const [openAwardForm, setOpenAwardForm] = useState(false);
   const [editDialog, setEditDialog] = useState<{
     isOpen: boolean;
     achievement: Achievement | null;
@@ -67,6 +69,8 @@ const Achievements = () => {
       ...prev,
       internships: [...prev.internships, created],
     }));
+    
+    setOpenInternshipForm(false);
   };
 
   const handleAddCertificate = async (newCertificate: any) => {
@@ -226,7 +230,7 @@ const Achievements = () => {
               <Briefcase className="w-6 h-6 mr-2" />
               Work Experience
             </h2>
-            <Dialog>
+            <Dialog open={openInternshipForm} onOpenChange={setOpenInternshipForm}>
               <DialogTrigger asChild>
                 <Button variant="outline">
                   <Plus className="w-4 h-4 mr-2" />
@@ -239,6 +243,7 @@ const Achievements = () => {
                 </DialogHeader>
                   <InternshipForm 
                     onAdd={handleAddInternship} 
+                    onCloseInternshipForm={() => setOpenInternshipForm(false)}
                   />
               </DialogContent>
             </Dialog>
@@ -307,7 +312,7 @@ const Achievements = () => {
                 <Award className="w-6 h-6 mr-2" />
                 Certificates
               </h2>
-              <Dialog>
+              <Dialog open={openCertificateForm} onOpenChange={setOpenCertificateForm}>
                 <DialogTrigger asChild>
                   <Button variant="outline" size="sm">
                     <Plus className="w-4 h-4 mr-2" />
@@ -320,6 +325,7 @@ const Achievements = () => {
                   </DialogHeader>
                   <CertificateForm 
                     onAdd={handleAddCertificate} 
+                    onCloseCertificateForm={() => setOpenCertificateForm(false)}
                   />
                 </DialogContent>
               </Dialog>
@@ -374,7 +380,7 @@ const Achievements = () => {
                 <Award className="w-6 h-6 mr-2" />
                 Highlights
               </h2>
-              <Dialog>
+              <Dialog open={openAwardForm} onOpenChange={setOpenAwardForm}>
                 <DialogTrigger asChild>
                   <Button variant="outline" size="sm">
                     <Plus className="w-4 h-4 mr-2" />
@@ -387,6 +393,7 @@ const Achievements = () => {
                   </DialogHeader>
                     <AwardForm 
                       onAdd={handleAddAward} 
+                      onCloseAwardForm={() => setOpenAwardForm(false)}
                     />
                 </DialogContent>
               </Dialog>
@@ -442,7 +449,7 @@ const Achievements = () => {
     </div>
   );
 
-  function InternshipForm({ onAdd }) {
+  function InternshipForm({ onAdd, onCloseInternshipForm }) {
     const [open, setOpen] = useState(true);
     const [title, setTitle] = useState('');
     const [organization, setOrganization] = useState('');
@@ -470,11 +477,23 @@ const Achievements = () => {
         setSkills('');
         setOpen(false);
         // Close dialog via parent
+        // Use setTimeout to ensure the dialog closes after state updates
         setTimeout(() => {
           const closeButton = document.querySelector('[data-state="open"] button[aria-label="Close"]') as HTMLButtonElement;
           closeButton?.click();
         }, 100);
+        
+        onCloseInternshipForm();
       }
+    };
+    const handleCloseInternshipForm = () => {
+      setOpen(false);
+      onCloseInternshipForm();
+      // Use setTimeout to ensure the dialog closes after state updates
+      setTimeout(() => {
+        const closeButton = document.querySelector('[data-state="open"] button[aria-label="Close"]') as HTMLButtonElement;
+        closeButton?.click();
+      }, 100);
     };
 
     return (
@@ -509,16 +528,13 @@ const Achievements = () => {
         </div>
         <div className="flex space-x-3">
           <Button className="btn-primary flex-1" onClick={handleSubmit} disabled={!title || !organization}>Add Work Experience</Button>
-          <Button variant="outline" onClick={() => {
-            const closeButton = document.querySelector('[role="dialog"] [data-state="open"] button[aria-label="Close"]') as HTMLButtonElement;
-            closeButton?.click();
-          }}>Cancel</Button>
+          <Button variant="outline" onClick={handleCloseInternshipForm}>Cancel</Button>
         </div>
       </div>
     );
   }
 
-  function CertificateForm({ onAdd }) {
+  function CertificateForm({ onAdd, onCloseCertificateForm }) {
     const [open, setOpen] = useState(true);
     const [title, setTitle] = useState('');
     const [issuer, setIssuer] = useState('');
@@ -536,11 +552,21 @@ const Achievements = () => {
         setDescription('');
         setOpen(false);
         // Close dialog via parent
+        onCloseCertificateForm();
         setTimeout(() => {
           const closeButton = document.querySelector('[data-state="open"] button[aria-label="Close"]') as HTMLButtonElement;
           closeButton?.click();
         }, 100);
       }
+    };
+    const handleCloseCertificateForm = () => {
+      setOpen(false);
+      onCloseCertificateForm();
+      // Use setTimeout to ensure the dialog closes after state updates
+      setTimeout(() => {
+        const closeButton = document.querySelector('[data-state="open"] button[aria-label="Close"]') as HTMLButtonElement;
+        closeButton?.click();
+      }, 100);
     };
 
     return (
@@ -569,16 +595,13 @@ const Achievements = () => {
         </div>
         <div className="flex space-x-3">
           <Button className="btn-primary flex-1" onClick={handleSubmit} disabled={!title || !issuer}>Add Certificate</Button>
-          <Button variant="outline" onClick={() => {
-            const closeButton = document.querySelector('[role="dialog"] [data-state="open"] button[aria-label="Close"]') as HTMLButtonElement;
-            closeButton?.click();
-          }}>Cancel</Button>
+          <Button variant="outline" onClick={handleCloseCertificateForm}>Cancel</Button>
         </div>
       </div>
     );
   }
 
-  function AwardForm({ onAdd }) {
+  function AwardForm({ onAdd, onCloseAwardForm }) {
     const [open, setOpen] = useState(true);
     const [title, setTitle] = useState('');
     const [organization, setOrganization] = useState('');
@@ -596,11 +619,21 @@ const Achievements = () => {
         setDescription('');
         setOpen(false);
         // Close dialog via parent
+        onCloseAwardForm();
         setTimeout(() => {
           const closeButton = document.querySelector('[data-state="open"] button[aria-label="Close"]') as HTMLButtonElement;
           closeButton?.click();
         }, 100);
       }
+    };
+    const handleCloseAwardForm = () => {
+      setOpen(false);
+      onCloseAwardForm();
+      // Use setTimeout to ensure the dialog closes after state updates
+      setTimeout(() => {
+        const closeButton = document.querySelector('[data-state="open"] button[aria-label="Close"]') as HTMLButtonElement;
+        closeButton?.click();
+      }, 100);
     };
 
     return (
@@ -629,10 +662,7 @@ const Achievements = () => {
         </div>
         <div className="flex space-x-3">
           <Button className="btn-primary flex-1" onClick={handleSubmit} disabled={!title || !organization}>Add Highlight</Button>
-          <Button variant="outline" onClick={() => {
-            const closeButton = document.querySelector('[role="dialog"] [data-state="open"] button[aria-label="Close"]') as HTMLButtonElement;
-            closeButton?.click();
-          }}>Cancel</Button>
+          <Button variant="outline" onClick={handleCloseAwardForm}>Cancel</Button>
         </div>
       </div>
     );
