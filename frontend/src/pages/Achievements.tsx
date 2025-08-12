@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Upload, Plus, Award, Briefcase, FileText, Calendar, MapPin, Building, Edit3, Trash2, CheckCircle, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -11,9 +11,11 @@ import EditAchievementDialog, { Achievement } from '@/components/EditAchievement
 import AIAssistant from '@/components/AIAssistant';
 import { usePortfolio } from '@/contexts/PortfolioContext';
 import { toast } from '@/hooks/use-toast';
+import { addAchievementAPI, getAchievementsAPI, deleteAchievementAPI, updateAchievementAPI } from '@/utils/api';
 
 const Achievements = () => {
   const { achievements, addAchievement } = usePortfolio();
+  
   const [editDialog, setEditDialog] = useState<{
     isOpen: boolean;
     achievement: Achievement | null;
@@ -23,62 +25,122 @@ const Achievements = () => {
     achievement: null,
     type: 'internship'
   });
-  
   const [localAchievements, setLocalAchievements] = useState({
-    internships: [
-      {
-        id: 1,
-        title: 'Sample Work Experience',
-        organization: 'Sample Inc.',
-        duration: 'Jun 2024 - Aug 2024',
-        location: 'Sample, CA',
-        description: 'Sample Work Experience, improved API performance by 40%, and collaborated with cross-functional teams.',
-        skills: ['React', 'Node.js', 'AWS', 'Docker'],
-        status: 'completed'
-      },
-    ],
-    certificates: [
-      {
-        id: 2,
-        title: 'Sample Certificate',
-        issuer: 'Sample Web Services',
-        year: '2024',
-        credentialId: 'SAMPLE-12345',
-        description: 'Sample Desctiption',
-        status: 'verified'
-      },
-    ],
-    awards: [
-      {
-        id: 3,
-        title: 'Best Sample Award',
-        organization: 'University Sample',
-        year: '2024',
-        description: 'Sample Description.',
-        category: 'Competition'
-      },
-    ]
+    internships: [],
+    certificates: [],
+    awards: []
   });
+  useEffect(() => {
+    const fetchAchievements = async () => {
+      try {
+        const [internshipsRes, certificatesRes, awardsRes] = await Promise.all([
+          getAchievementsAPI("work-experience"),   // GET /achievements/work-experience
+          getAchievementsAPI("certificates"),      // GET /achievements/certificates
+          getAchievementsAPI("awards")             // GET /achievements/awards
+        ]);
+        setLocalAchievements({
+          internships: internshipsRes,
+          certificates: certificatesRes,
+          awards: awardsRes
+        });
+      } catch (err) {
+        console.error("Failed to fetch achievements:", err);
+      }
+    };
 
-  const handleDeleteInternship = (internshipId: number) => {
+    fetchAchievements();
+  }, []);
+  const handleAddInternship = async (newInternship: any) => {
+    const payload = {
+      title: newInternship.title,
+      organization: newInternship.organization ?? '',
+      duration: newInternship.duration ?? '',
+      location: newInternship.location ?? '',
+      description: newInternship.description ?? '',
+      skills: newInternship.skills ?? [],
+      status: newInternship.status ?? 'completed',
+    };
+
+    const created = await addAchievementAPI('work-experience', payload);
+
     setLocalAchievements(prev => ({
       ...prev,
-      internships: prev.internships.filter(item => item.id !== internshipId)
+      internships: [...prev.internships, created],
     }));
   };
 
-  const handleDeleteCertificate = (certId: number) => {
+  const handleAddCertificate = async (newCertificate: any) => {
+    const payload = {
+      title: newCertificate.title,
+      issuer: newCertificate.issuer ?? '',
+      year: newCertificate.year ?? '',
+      credentialId: newCertificate.credentialId ?? '',
+      description: newCertificate.description ?? '',
+      status: newCertificate.status ?? 'verified',
+    };
+
+    const created = await addAchievementAPI('certificates', payload);
+
     setLocalAchievements(prev => ({
       ...prev,
-      certificates: prev.certificates.filter(item => item.id !== certId)
+      certificates: [...prev.certificates, created],
     }));
   };
 
-  const handleDeleteAward = (awardId: number) => {
+  const handleAddAward = async (newAward: any) => {
+    const payload = {
+      title: newAward.title,
+      organization: newAward.organization ?? '',
+      year: newAward.year ?? '',
+      description: newAward.description ?? '',
+      category: newAward.category ?? '',
+    };
+
+    const created = await addAchievementAPI('awards', payload);
+
     setLocalAchievements(prev => ({
       ...prev,
-      awards: prev.awards.filter(item => item.id !== awardId)
+      awards: [...prev.awards, created],
     }));
+  };
+
+  const handleDeleteInternship = async (internshipId: number) => {
+    try {
+      await deleteAchievementAPI('work-experience', internshipId);
+      setLocalAchievements(prev => ({
+        ...prev,
+        internships: prev.internships.filter(item => item.id !== internshipId)
+      }));
+      toast({ title: "Deleted internship successfully", variant: "default" });
+    } catch (error) {
+      toast({ title: "Failed to delete internship", variant: "destructive" });
+    }
+  };
+
+  const handleDeleteCertificate = async (certId: number) => {
+    try {
+      await deleteAchievementAPI('certificates', certId);
+      setLocalAchievements(prev => ({
+        ...prev,
+        certificates: prev.certificates.filter(item => item.id !== certId)
+      }));
+      toast({ title: "Deleted certificate successfully", variant: "default" });
+    } catch (error) {
+      toast({ title: "Failed to delete certificate", variant: "destructive" });
+    }
+  };
+
+  const handleDeleteAward = async (awardId: number) => {
+    try {
+      await deleteAchievementAPI('awards', awardId);
+      setLocalAchievements(prev => ({
+        ...prev,
+        awards: prev.awards.filter(item => item.id !== awardId)
+      }));
+      toast({ title: "Deleted award successfully", variant: "default" });
+    } catch (error) {
+      toast({ title: "Failed to delete award", variant: "destructive" });
+    }
   };
 
   const handleEditInternship = (internship: any) => {
@@ -105,19 +167,36 @@ const Achievements = () => {
     });
   };
 
-  const handleSaveEdit = (updatedAchievement: Achievement) => {
+  const handleSaveEdit = async (updatedAchievement: Achievement) => {
     const { type } = editDialog;
-    
-    setLocalAchievements(prev => ({
-      ...prev,
-      [type === 'internship' ? 'internships' : 
-        type === 'certificate' ? 'certificates' : 'awards']: 
-        prev[type === 'internship' ? 'internships' : 
-            type === 'certificate' ? 'certificates' : 'awards'].map((item: any) =>
-          item.id === updatedAchievement.id ? updatedAchievement : item
-        )
-    }));
+
+    try {
+      // Map your local types to API route segments
+      const apiType =
+        type === 'internship' ? 'work-experience' :
+        type === 'certificate' ? 'certificates' :
+        'awards';
+
+      const updatedFromServer = await updateAchievementAPI(apiType, updatedAchievement.id, updatedAchievement);
+
+      setLocalAchievements(prev => ({
+        ...prev,
+        [type === 'internship' ? 'internships' :
+          type === 'certificate' ? 'certificates' : 'awards']:
+          prev[type === 'internship' ? 'internships' :
+              type === 'certificate' ? 'certificates' : 'awards'].map(item =>
+            item.id === updatedFromServer.id ? updatedFromServer : item
+          )
+      }));
+
+      toast({ title: `${type.charAt(0).toUpperCase() + type.slice(1)} updated successfully`, variant: 'default' });
+      setEditDialog({ isOpen: false, achievement: null, type: 'internship' });
+
+    } catch (error) {
+      toast({ title: `Failed to update ${type}`, variant: 'destructive' });
+    }
   };
+
 
 
   return (
@@ -159,10 +238,7 @@ const Achievements = () => {
                   <DialogTitle>Add Work Experience</DialogTitle>
                 </DialogHeader>
                   <InternshipForm 
-                    onAdd={(data) => {
-                      setLocalAchievements(prev => ({...prev, internships: [...prev.internships, {id: Date.now(), ...data}]}));
-                      addAchievement('internships', data);
-                    }} 
+                    onAdd={handleAddInternship} 
                   />
               </DialogContent>
             </Dialog>
@@ -235,7 +311,7 @@ const Achievements = () => {
                 <DialogTrigger asChild>
                   <Button variant="outline" size="sm">
                     <Plus className="w-4 h-4 mr-2" />
-                    Add
+                    Add Certificate
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-md">
@@ -243,10 +319,7 @@ const Achievements = () => {
                     <DialogTitle>Add Certificate</DialogTitle>
                   </DialogHeader>
                   <CertificateForm 
-                    onAdd={(data) => {
-                      setLocalAchievements(prev => ({...prev, certificates: [...prev.certificates, {id: Date.now(), ...data}]}));
-                      addAchievement('certificates', data);
-                    }} 
+                    onAdd={handleAddCertificate} 
                   />
                 </DialogContent>
               </Dialog>
@@ -305,7 +378,7 @@ const Achievements = () => {
                 <DialogTrigger asChild>
                   <Button variant="outline" size="sm">
                     <Plus className="w-4 h-4 mr-2" />
-                    Add
+                    Add Highlight
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-md">
@@ -313,10 +386,7 @@ const Achievements = () => {
                     <DialogTitle>Add Highlight</DialogTitle>
                   </DialogHeader>
                     <AwardForm 
-                      onAdd={(data) => {
-                        setLocalAchievements(prev => ({...prev, awards: [...prev.awards, {id: Date.now(), ...data}]}));
-                        addAchievement('awards', data);
-                      }} 
+                      onAdd={handleAddAward} 
                     />
                 </DialogContent>
               </Dialog>

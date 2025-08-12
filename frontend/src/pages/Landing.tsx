@@ -303,43 +303,6 @@ const Landing = () => {
               </p>
             </Card>
           </div>
-
-          {/* <div className="bg-white/50 backdrop-blur-sm rounded-2xl p-8 border border-white/20 text-center">
-            <div className="max-w-4xl mx-auto">
-              <h3 className="text-3xl font-bold mb-6 text-gradient-primary">Join thousands of successful students</h3>
-              <p className="text-foreground-muted mb-8 text-lg max-w-2xl mx-auto">
-                Our AI-powered platform has helped students from top universities secure internships at leading tech companies, startups, and organizations worldwide.
-              </p>
-              <div className="flex flex-wrap justify-center gap-8 mb-8">
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-gradient-primary">95%</div>
-                  <div className="text-sm text-foreground-muted">Interview Success Rate</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-gradient-primary">2.5x</div>
-                  <div className="text-sm text-foreground-muted">Faster Hiring Process</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-gradient-primary">10K+</div>
-                  <div className="text-sm text-foreground-muted">Portfolios Created</div>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-md mx-auto opacity-60">
-                <div className="text-center p-3 bg-white/20 dark:bg-slate-800/20 backdrop-blur-sm rounded-lg border border-white/20 dark:border-slate-700/20">
-                  <div className="text-xs font-medium">Google</div>
-                </div>
-                <div className="text-center p-3 bg-white/20 dark:bg-slate-800/20 backdrop-blur-sm rounded-lg border border-white/20 dark:border-slate-700/20">
-                  <div className="text-xs font-medium">Microsoft</div>
-                </div>
-                <div className="text-center p-3 bg-white/20 dark:bg-slate-800/20 backdrop-blur-sm rounded-lg border border-white/20 dark:border-slate-700/20">
-                  <div className="text-xs font-medium">Meta</div>
-                </div>
-                <div className="text-center p-3 bg-white/20 dark:bg-slate-800/20 backdrop-blur-sm rounded-lg border border-white/20 dark:border-slate-700/20">
-                  <div className="text-xs font-medium">Apple</div>
-                </div>
-              </div>
-            </div>
-          </div> */}
         </div>
       </section>
 

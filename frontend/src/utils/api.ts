@@ -71,3 +71,97 @@ export async function fetchGithubSummary(repoUrl: string) {
   if (!res.ok) throw new Error("Failed to fetch GitHub summary");
   return res.json();
 }
+
+
+
+
+// GET
+export async function getAchievementsAPI(
+  type: 'work-experience' | 'certificates' | 'awards'
+) {
+  const token = localStorage.getItem('token');
+
+  const res = await fetch(`${BASE_URL}/achievements/${type}`, {
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error(`Failed to fetch ${type}`);
+  }
+
+  return res.json();
+}
+
+// ADD
+export async function addAchievementAPI(
+  type: 'work-experience' | 'certificates' | 'awards',
+  payload: any
+) {
+  const token = localStorage.getItem('token'); // adjust to where your token is stored
+
+  const res = await fetch(
+    `${BASE_URL}/achievements/${type}`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}), // 👈 attach token if available
+      },
+      body: JSON.stringify(payload),
+    }
+  );
+
+  if (!res.ok) {
+    throw new Error(`Failed to add ${type}`);
+  }
+
+  return res.json();
+}
+
+// UPDATE
+export async function updateAchievementAPI(
+  type: 'work-experience' | 'certificates' | 'awards',
+  id: number,
+  data: any
+) {
+  const token = localStorage.getItem("token");
+
+  const res = await fetch(`${BASE_URL}/achievements/${type}/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!res.ok) throw new Error(`Failed to update ${type}`);
+
+  return res.json();
+}
+
+// DELETE
+export async function deleteAchievementAPI(
+  type: 'work-experience' | 'certificates' | 'awards',
+  id: number
+) {
+  const token = localStorage.getItem('token');
+
+  const res = await fetch(`${BASE_URL}/achievements/${type}/${id}`, {
+    method: 'DELETE',
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error(`Failed to delete ${type} with id ${id}`);
+  }
+
+  // If your backend returns some json on delete, you can return it here, 
+  // otherwise just return true/void
+  return true;
+}
+

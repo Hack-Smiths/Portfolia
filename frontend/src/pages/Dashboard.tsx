@@ -129,9 +129,6 @@ const Dashboard = () => {
     }, 2000);
   };
   if (loading) return <p>Loading...</p>;
-  // const capitalizedUsername = user?.username
-  // ? user.username.charAt(0).toUpperCase() + user.username.slice(1)
-  // : "Guest";
   return (
     <div className="min-h-screen pt-16 bg-gradient-soft">
       <div className="container mx-auto px-4 py-8">

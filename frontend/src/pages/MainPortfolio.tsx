@@ -104,13 +104,13 @@ const MainPortfolio = () => {
   const currentStyles = templates[currentTemplate].styles;
 
   const portfolioData = {
-    name: "Alex Chen",
+    name: "Mohamed Riyaz Ahamed",
     title: "Full-Stack Developer & AI Enthusiast",
     tagline: "Building the future with code, one project at a time",
     location: "San Francisco, CA",
-    email: "alex.chen@email.com",
-    github: "alex-dev",
-    linkedin: "alexchen-dev",
+    email: "riyazahamedff@email.com",
+    github: "Riyaz-dev",
+    linkedin: "riyaz-dev",
     about: "Aspiring full-stack developer with a passion for AI and machine learning. Experienced in React, Python, and cloud technologies. Currently pursuing Computer Science degree while building real-world applications and contributing to open-source projects.",
     
     projects: [
