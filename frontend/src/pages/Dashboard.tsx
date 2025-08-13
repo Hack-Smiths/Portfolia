@@ -36,14 +36,14 @@ const Dashboard = () => {
     { 
       label: 'Total Skills', 
       value: '0', 
-      icon: TrendingUp, 
+      icon: Brain, 
       color: 'text-pulse',
       bgColor: 'bg-pulse/10'
     },
     { 
       label: 'Total Achievements', 
       value: '0', 
-      icon: Eye, 
+      icon: Award, 
       color: 'text-success',
       bgColor: 'bg-success/10'
     }
