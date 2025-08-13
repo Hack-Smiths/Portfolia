@@ -34,14 +34,14 @@ const Dashboard = () => {
       bgColor: 'bg-electric/10'
     },
     { 
-      label: 'AI Summaries', 
+      label: 'Total Skills', 
       value: '0', 
       icon: TrendingUp, 
       color: 'text-pulse',
       bgColor: 'bg-pulse/10'
     },
     { 
-      label: 'Portfolios Shared', 
+      label: 'Total Achievements', 
       value: '0', 
       icon: Eye, 
       color: 'text-success',
