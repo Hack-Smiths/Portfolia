@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Github, FileText, Eye, TrendingUp, Clock, CheckCircle, ArrowRight, Upload, Award, Brain } from 'lucide-react';
+import { Plus, Github, FileText, Eye, TrendingUp, Clock, CheckCircle, ArrowRight, Upload, Award, Brain, MinusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -10,10 +10,20 @@ import ResumeUploadDialog from '@/components/ResumeUploadDialog';
 import { useAuthContext } from '@/contexts/AuthContext';
 
 const Dashboard = () => {
-  const [completionProgress] = useState(0);
   const [uploadStatus, setUploadStatus] = useState(null);
   const [showAllActivities, setShowAllActivities] = useState(false);
   const { user, loading } = useAuthContext();
+  const [isProfileInfoComplete, setIsProfileInfoComplete] = useState(false);
+  const [isProjectsAdded, setIsProjectsAdded] = useState(false);
+  const [isSkillsAdded, setIsSkillsAdded] = useState(false);
+  const [isAchievementsAdded, setIsAchievementsAdded] = useState(false);
+  const completionProgress = [
+    isProfileInfoComplete,
+    isProjectsAdded,
+    isSkillsAdded,
+    isAchievementsAdded,
+  ].filter(Boolean).length * 25;
+
 
   const stats = [
     { 
@@ -219,24 +229,24 @@ const Dashboard = () => {
 
             <div className="absolute inset-0 rounded-full bg-gradient-primary opacity-20 animate-pulse-slow" />
           </div>
-          {/* <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 mt-4 text-xs">
-            <div className="flex items-center text-success">
-              <CheckCircle className="w-3 h-3 mr-1" />
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 mt-4 text-xs">
+            <div className={`flex items-center ${isProfileInfoComplete ? 'text-success' : 'text-gray-400'}`}>
+              {isProfileInfoComplete ? <CheckCircle className="w-3 h-3 mr-1" /> : <MinusCircle className="w-3 h-3 mr-1" />}
               Profile Info
             </div>
-            <div className="flex items-center text-success">
-              <CheckCircle className="w-3 h-3 mr-1" />
-              Projects Added
+            <div className={`flex items-center ${isProjectsAdded ? 'text-success' : 'text-gray-400'}`}>
+              {isProjectsAdded ? <CheckCircle className="w-3 h-3 mr-1" /> : <MinusCircle className="w-3 h-3 mr-1" />}
+              Project Added
             </div>
-            <div className="flex items-center text-success">
-              <CheckCircle className="w-3 h-3 mr-1" />
-              Skills Section
+            <div className={`flex items-center ${isSkillsAdded ? 'text-success' : 'text-gray-400'}`}>
+              {isSkillsAdded ? <CheckCircle className="w-3 h-3 mr-1" /> : <MinusCircle className="w-3 h-3 mr-1" />}
+              Skills Added
             </div>
-            <div className="flex items-center text-success">
-              <CheckCircle className="w-3 h-3 mr-1" />
-              Resume Upload
+            <div className={`flex items-center ${isAchievementsAdded ? 'text-success' : 'text-gray-400'}`}>
+              {isAchievementsAdded ? <CheckCircle className="w-3 h-3 mr-1" /> : <MinusCircle className="w-3 h-3 mr-1" />}
+              Achievements Added
             </div>
-          </div> */}
+          </div>
         </Card>
 
         {/* Stats Cards */}
