@@ -17,26 +17,20 @@ const Dashboard = () => {
   const [isProjectsAdded, setIsProjectsAdded] = useState(false);
   const [isSkillsAdded, setIsSkillsAdded] = useState(false);
   const [isAchievementsAdded, setIsAchievementsAdded] = useState(false);
-  const completionProgress = [
-    isProfileInfoComplete,
-    isProjectsAdded,
-    isSkillsAdded,
-    isAchievementsAdded,
-  ].filter(Boolean).length * 25;
-
+  const completionProgress = [ isProfileInfoComplete, isProjectsAdded, isSkillsAdded, isAchievementsAdded, ].filter(Boolean).length * 25;
 
   const stats = [
     { 
       label: 'Total Projects', 
       value: '0', 
-      icon: Github, 
+      icon: Github,
       color: 'text-electric',
       bgColor: 'bg-electric/10'
     },
     { 
       label: 'Total Skills', 
-      value: '0', 
-      icon: Brain, 
+      value: '0',
+      icon: Brain,
       color: 'text-pulse',
       bgColor: 'bg-pulse/10'
     },

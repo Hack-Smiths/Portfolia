@@ -5,3 +5,4 @@ from .work_experience import WorkExperience
 from .awards import Award
 from .certificates import Certificate
 from .skills import Skill
+from .profile import Profile

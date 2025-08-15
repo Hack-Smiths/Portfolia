@@ -16,3 +16,4 @@ class User(Base):
     certificates = relationship("Certificate", back_populates="owner")
     awards = relationship("Award", back_populates="owner")
     skills = relationship("Skill", back_populates="user")
+    profile = relationship("Profile", back_populates="user", uselist=False)
