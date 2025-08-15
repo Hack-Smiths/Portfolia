@@ -43,18 +43,40 @@ import {
   BookOpen,
   Layers
 } from "lucide-react";
+import { useAuthContext } from '@/contexts/AuthContext';
+import { getPortfolioPreview } from '@/utils/api'; // Adjust the import based on your API structure
 
 const MainPortfolio = () => {
   const [searchParams] = useSearchParams();
   const [currentTemplate, setCurrentTemplate] = useState('classic');
-
-  // Set template from URL params
+  const { user, loading } = useAuthContext();
+  const [portfolioData, setPortfolioData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
     const templateParam = searchParams.get('template');
     if (templateParam && ['classic', 'creative', 'modern'].includes(templateParam)) {
       setCurrentTemplate(templateParam);
     }
   }, [searchParams]);
+  useEffect(() => {
+      async function fetchPortfolio() {
+        try {
+          const data = await getPortfolioPreview(); // Call backend
+          setPortfolioData(data);
+        } catch (error) {
+          console.error("Error fetching portfolio preview:", error);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+      fetchPortfolio();
+    }, []);
+  
+    if (loading || isLoading) return <p>Loading...</p>;
+  
+    if (!portfolioData) return <p>No portfolio data found</p>;
+  // Set template from URL params
+
 
   const templates = {
     classic: {
@@ -103,98 +125,7 @@ const MainPortfolio = () => {
 
   const currentStyles = templates[currentTemplate].styles;
 
-  const portfolioData = {
-    name: "Mohamed Riyaz Ahamed",
-    title: "Full-Stack Developer & AI Enthusiast",
-    tagline: "Building the future with code, one project at a time",
-    location: "San Francisco, CA",
-    email: "riyazahamedff@email.com",
-    github: "Riyaz-dev",
-    linkedin: "riyaz-dev",
-    about: "Aspiring full-stack developer with a passion for AI and machine learning. Experienced in React, Python, and cloud technologies. Currently pursuing Computer Science degree while building real-world applications and contributing to open-source projects.",
-    
-    projects: [
-      {
-        id: 1,
-        title: "E-commerce API",
-        description: "Full-stack e-commerce platform with Django REST Framework, JWT authentication, and payment integration",
-        image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&h=250&fit=crop",
-        tech: ["Django", "PostgreSQL", "Redis", "Docker"],
-        features: ["User Authentication", "Payment Processing", "Admin Dashboard", "Real-time Inventory"],
-        stars: 123,
-        demo: "https://demo.example.com",
-        repo: "https://github.com/alex-dev/ecommerce-api",
-        featured: true
-      },
-      {
-        id: 2,
-        title: "AI Chat Application",
-        description: "Real-time chat app with AI assistant integration using OpenAI API and WebSockets",
-        image: "https://images.unsplash.com/photo-1587560699334-cc4ff634909a?w=400&h=250&fit=crop",
-        tech: ["Node.js", "Socket.io", "OpenAI", "Express"],
-        features: ["AI-Powered Responses", "Real-time Messaging", "Message History", "Multi-user Support"],
-        stars: 234,
-        demo: "https://chat.example.com",
-        repo: "https://github.com/alex-dev/ai-chat",
-        featured: true
-      },
-      {
-        id: 3,
-        title: "Portfolio Dashboard",
-        description: "Modern React dashboard with TypeScript, TailwindCSS, and responsive design",
-        image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=250&fit=crop",
-        tech: ["React", "TypeScript", "TailwindCSS", "Vite"],
-        features: ["Responsive Design", "Dark Mode", "Performance Optimized", "Modern UI"],
-        stars: 87,
-        demo: "https://portfolio.example.com",
-        repo: "https://github.com/alex-dev/portfolio",
-        featured: false
-      }
-    ],
 
-    achievements: [
-      {
-        title: "Software Engineering Intern",
-        issuer: "TechCorp Inc.",
-        date: "Summer 2024",
-        type: "internship",
-        description: "Developed microservices architecture, improved API performance by 40%"
-      },
-      {
-        title: "Best Innovation Award",
-        issuer: "University Hackathon",
-        date: "2024",
-        type: "award",
-        description: "First place for developing an AI-powered sustainability platform"
-      }
-    ],
-
-    certificates: [
-      {
-        title: "AWS Cloud Practitioner",
-        issuer: "Amazon Web Services",
-        date: "2024",
-        credentialId: "AWS-12345"
-      },
-      {
-        title: "Google Data Analytics Certificate",
-        issuer: "Google",
-        date: "2023",
-        credentialId: "GOOGLE-67890"
-      }
-    ],
-
-    skills: [
-      { name: "React", level: 85, category: "Frontend" },
-      { name: "Python", level: 90, category: "Backend" },
-      { name: "TypeScript", level: 80, category: "Frontend" },
-      { name: "Django", level: 75, category: "Backend" },
-      { name: "AWS", level: 60, category: "Cloud" },
-      { name: "Machine Learning", level: 70, category: "AI/ML" },
-      { name: "Docker", level: 65, category: "DevOps" },
-      { name: "PostgreSQL", level: 70, category: "Database" }
-    ]
-  };
 
   const copyPortfolioLink = () => {
     navigator.clipboard.writeText("https://portfolio.alexchen.dev");
@@ -742,14 +673,19 @@ const MainPortfolio = () => {
                       
                       <div className="relative z-10 p-8">
                         <div className="flex items-start justify-between mb-6">
-                          <div className="w-16 h-16 bg-gradient-accent rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300">
-                            <Award className="w-8 h-8 text-primary-foreground" />
-                          </div>
-                          <Badge className="bg-gradient-to-r from-accent/20 to-electric/20 border-accent/30 text-foreground px-3 py-1 rounded-lg">
-                            <Calendar className="w-3 h-3 mr-2" />
-                            {cert.date}
-                          </Badge>
+                        {/* Icon Box */}
+                        <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center shadow-lg">
+                          <Award className="w-6 h-6 text-white" /> 
+                          {/* Or text-primary-foreground if your theme uses white here */}
                         </div>
+
+                        {/* Date Badge */}
+                        <Badge className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800">
+                          <Calendar className="w-3 h-3 mr-2" />
+                          {cert.date}
+                        </Badge>
+                      </div>
+
                         
                         <div className="space-y-4">
                           <div>
