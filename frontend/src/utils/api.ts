@@ -21,6 +21,47 @@ export async function getCurrentUser() {
   return await res.json(); // should return { username, email, id }
 }
 
+// ---------------- PROFILE ----------------
+export async function getProfile() {
+  const token = localStorage.getItem("token");
+  if (!token) throw new Error("No token found");
+
+  const res = await fetch(`https://portfolia-production.up.railway.app/profile/`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error(`Failed to fetch profile: ${res.status} ${res.statusText}`);
+  }
+
+  const data = await res.json();
+  console.log("Profile API response:", data); // 👈 Check what comes back
+  return data;
+}
+
+export async function saveProfile(profileData: any) {
+  const token = localStorage.getItem("token");
+  if (!token) throw new Error("No token found");
+
+  const res = await fetch(`${BASE_URL}/profile/`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(profileData),
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to save profile");
+  }
+
+  return await res.json();
+}
+
 // Projects API endpoints
 
 export async function getUserProjects() {

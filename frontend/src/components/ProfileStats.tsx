@@ -4,12 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 
 const ProfileStats = () => {
-  const completionPercentage = 85;
+  const completionPercentage = 0;
   const stats = [
-    { label: 'Profile Views', value: '247', trend: '+12%' },
-    { label: 'Projects', value: '8', trend: '+2' },
-    { label: 'Achievements', value: '12', trend: '+1' },
-    { label: 'Skills', value: '18', trend: '+3' }
+    { label: 'Projects', value: '0', trend: '+0' },
+    { label: 'Achievements', value: '0', trend: '+0' },
+    { label: 'Skills', value: '0', trend: '+0' }
   ];
 
   return (

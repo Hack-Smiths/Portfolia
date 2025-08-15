@@ -1,29 +1,58 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Mail, MapPin } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import ProfileHeader from '@/components/ProfileHeader';
 import ProfileAvatar from '@/components/ProfileAvatar';
 import ProfileStats from '@/components/ProfileStats';
 import ProfileForm from '@/components/ProfileForm';
+import { useAuthContext } from '@/contexts/AuthContext';
+import { getProfile, saveProfile } from '@/utils/api'; // Adjust the import based on your API structure
+import { set } from 'date-fns';
 
 const Profile = () => {
+  const {user} = useAuthContext();
+  const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [profileData, setProfileData] = useState({
-    name: 'Alex Johnson',
-    email: 'alex.johnson@email.com',
-    title: 'Full-Stack Developer & AI Enthusiast',
-    location: 'San Francisco, CA',
-    bio: 'Passionate full-stack developer with 3+ years of experience building scalable web applications. Specialized in React, Node.js, and AI integration. Always eager to learn new technologies and solve complex problems.',
-    github: 'https://github.com/alexjohnson',
-    linkedin: 'https://linkedin.com/in/alexjohnson',
-    website: 'https://alexjohnson.dev',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face'
+    name: "",
+    email: "",
+    title: "",
+    location: "",
+    bio: "",
+    github: "",
+    linkedin: "",
+    website: "",
+    avatar: ""
   });
+  useEffect(() => {
+    if (!user) return;
+    getProfile()
+      .then((data) => {
+        if (Object.keys(data).length === 0) {
+          // No profile yet, set empty defaults
+          setProfileData({
+            name: user.username,
+            email: user.email,
+            title: "",
+            location: "",
+            bio: "",
+            github: "",
+            linkedin: "",
+            website: "",
+            avatar: "",
+          });
+        } else {
+          setProfileData(data);
+        }
+      })
+      .finally(() => setLoading(false));
+  }, [user]);
 
   const handleSave = () => {
     setIsEditing(false);
-    // Save profile data to backend/localStorage
-    localStorage.setItem('portfolioProfile', JSON.stringify(profileData));
+    saveProfile(profileData)
+      .then((data) => setProfileData(data)) // ✅ renamed saved -> data
+      .catch((err) => console.error(err));
   };
 
   const handleInputChange = (field: string, value: string) => {
