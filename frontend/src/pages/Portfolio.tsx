@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -47,13 +47,34 @@ import Navbar from "@/components/Navbar";
 import AIAssistant from "@/components/AIAssistant";
 import AIEditAssistant from "@/components/AIEditAssistant";
 import { useAuthContext } from '@/contexts/AuthContext';
+import { getPortfolioPreview } from "@/utils/api"; 
 
 const Portfolio = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [currentTemplate, setCurrentTemplate] = useState('classic');
   const [editingSection, setEditingSection] = useState<string | null>(null);
   const { user, loading } = useAuthContext();
+  const [portfolioData, setPortfolioData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [categorySkills, setCategorySkills] = useState<{ name: string; level: number }[]>([]);
+  const [skills, setSkills] = useState<{ name: string; level: number }[]>([]);
+  useEffect(() => {
+    async function fetchPortfolio() {
+      try {
+        const data = await getPortfolioPreview(); // Call backend
+        setPortfolioData(data);
+      } catch (error) {
+        console.error("Error fetching portfolio preview:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchPortfolio();
+  }, []);
 
+  if (loading || isLoading) return <p>Loading...</p>;
+
+  if (!portfolioData) return <p>No portfolio data found</p>;
   const templates = {
     classic: {
       name: 'Classic Pro',
@@ -101,62 +122,7 @@ const Portfolio = () => {
 
   const currentStyles = templates[currentTemplate].styles;
   if (loading) return <p>Loading...</p>;
-  const portfolioData = {
-    name: user?.username.charAt(0).toUpperCase() + user?.username.slice(1),
-    title: "Full-Stack Developer & AI Enthusiast",
-    tagline: "Building the future with code, one project at a time",
-    location: "Sample, India",
-    email: user?.email,
-    github: user?.username || "-dev",
-    linkedin: user?.username || "-dev",
-    about: "Aspiring full-stack developer with a passion for AI and machine learning. Experienced in React, Python, and cloud technologies. Currently pursuing Computer Science degree while building real-world applications and contributing to open-source projects.",
-    
-    projects: [
-      {
-        id: 1,
-        title: "Sample Project",
-        description: 'Sample is a demo project created to showcase the core functionalities of the Portfolia platform. It simulates a typical user project by demonstrating AI-generated summaries, tech stack visualization, and GitHub integration.',
-        image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&h=250&fit=crop",
-        tech: ["React", "FastAPI", "PostgreSQL", "Tailwind CSS"],
-        features: ["AI-enhanced project description", "GitHub stats simulation (stars, forks)", "Live project and code preview links"],
-        stars: 0,
-        forks: 0,
-        demo: "https://portfolia-ai.vercel.app/",
-        repo: "https://github.com/Hack-Smiths/portfolia",
-        featured: false
-      },
-    ],
 
-    achievements: [
-      {
-        title: 'Sample Work Experience',
-        issuer: 'Sample Inc.',
-        date: 'Jun 2024 - Aug 2024',
-        type: "internship",
-        description: 'Sample Work Experience, improved API performance by 40%, and collaborated with cross-functional teams.',
-      },
-    ],
-
-    certificates: [
-      {
-        title: 'Sample Certificate',
-        issuer: "Sample Web Services",
-        date: "2024",
-        credentialId: "SAMPLE-12345"
-      },
-    ],
-
-    skills: [
-      { name: "Sample Skill", level: 85, category: "Frontend" },
-      // { name: "Python", level: 90, category: "Backend" },
-      // { name: "TypeScript", level: 80, category: "Frontend" },
-      // { name: "Django", level: 75, category: "Backend" },
-      // { name: "AWS", level: 60, category: "Cloud" },
-      // { name: "Machine Learning", level: 70, category: "AI/ML" },
-      // { name: "Docker", level: 65, category: "DevOps" },
-      // { name: "PostgreSQL", level: 70, category: "Database" }
-    ]
-  };
 
   const copyPortfolioLink = () => {
     navigator.clipboard.writeText("https://portfolio.alexchen.dev");
@@ -318,22 +284,22 @@ const Portfolio = () => {
                         <span className="text-foreground">{portfolioData.email}</span>
                       </a>
                       <a 
-                        href={`https://github.com/${portfolioData.github}`}
+                        href={`${portfolioData.github}`}
                         className="bg-card border border-border px-4 py-2 rounded-lg flex items-center space-x-2 shadow-sm hover:shadow-md transition-shadow"
                         target="_blank"
                         rel="noopener noreferrer"
                       >
                         <Github className="w-4 h-4 text-muted-foreground" />
-                        <span className="text-foreground">{portfolioData.github}-dev</span>
+                        <span className="text-foreground">{portfolioData.github}</span>
                       </a>
                       <a 
-                        href={`https://linkedin.com/in/${portfolioData.linkedin}`}
+                        href={`${portfolioData.linkedin}`}
                         className="bg-card border border-border px-4 py-2 rounded-lg flex items-center space-x-2 shadow-sm hover:shadow-md transition-shadow"
                         target="_blank"
                         rel="noopener noreferrer"
                       >
                         <Linkedin className="w-4 h-4 text-muted-foreground" />
-                        <span className="text-foreground">{portfolioData.linkedin}-dev</span>
+                        <span className="text-foreground">{portfolioData.linkedin}</span>
                       </a>
                     </div>
                     

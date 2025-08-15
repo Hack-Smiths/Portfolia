@@ -21,6 +21,26 @@ export async function getCurrentUser() {
   return await res.json(); // should return { username, email, id }
 }
 
+// ---------------- PORTFOLIO ----------------
+
+export async function getPortfolioPreview() {
+  const token = localStorage.getItem("token");
+  if (!token) throw new Error("No token found");
+
+  const res = await fetch(`${BASE_URL}/portfolio/preview`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch portfolio preview");
+  }
+
+  return await res.json();
+}
+
 // ---------------- PROFILE ----------------
 export async function getProfile() {
   const token = localStorage.getItem("token");

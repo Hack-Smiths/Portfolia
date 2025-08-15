@@ -127,6 +127,7 @@ const ProfileForm = ({ profileData, isEditing, onInputChange }: ProfileFormProps
                 onChange={(e) => onInputChange('bio', e.target.value)}
                 disabled={!isEditing}
                 rows={4}
+                maxLength={500} // <-- limit characters
                 placeholder="Tell visitors about yourself, your experience, and what you're passionate about..."
                 className={`transition-all resize-none ${isEditing ? 'ring-2 ring-primary/20' : ''}`}
               />
@@ -139,6 +140,7 @@ const ProfileForm = ({ profileData, isEditing, onInputChange }: ProfileFormProps
                 </div>
               )}
             </div>
+
           </div>
         </div>
 
