@@ -70,7 +70,7 @@ const Dashboard = () => {
       description: 'See how your portfolio looks',
       icon: Eye,
       color: 'success',
-      link: '/portfolio'
+      link: '/main-portfolio'
     }
   ];
 
