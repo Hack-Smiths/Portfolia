@@ -5,9 +5,10 @@ from sqlalchemy.orm import relationship
 
 
 class User(Base):
-    __tablename__ = "users"
+    __tablename__ = "user"
     id = Column(Integer, primary_key=True, index=True)
-    username = Column(String, nullable=False)
+    username = Column(String, nullable=False, unique=True, index=True)
+    full_name = Column(String, nullable=False)  # keep original case
     email = Column(String, unique=True, index=True)
     hashed_password = Column(String)
 

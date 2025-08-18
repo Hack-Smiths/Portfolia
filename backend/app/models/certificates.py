@@ -7,7 +7,7 @@ class Certificate(Base):
     __tablename__ = "certificates"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))  # changed from user_id
+    user_id = Column(Integer, ForeignKey("user.id", ondelete="CASCADE"))  # changed from user_id
     title = Column(String, nullable=False)
     issuer = Column(String, nullable=False)
     year = Column(String, nullable=True)

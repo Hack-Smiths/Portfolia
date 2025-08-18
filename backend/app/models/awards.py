@@ -8,7 +8,7 @@ class Award(Base):
     __tablename__ = "awards"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))  # changed from user_id
+    user_id = Column(Integer, ForeignKey("user.id", ondelete="CASCADE"))  # changed from user_id
     title = Column(String, nullable=False)
     organization = Column(String, nullable=True)
     year = Column(String, nullable=True)

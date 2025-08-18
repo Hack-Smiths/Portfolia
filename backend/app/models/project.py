@@ -21,6 +21,6 @@ class Project(Base):
     saved = Column(Boolean, default=False)
 
     last_updated = Column(DateTime, default=datetime.utcnow)
-    owner_id = Column(Integer, ForeignKey("users.id"))
+    owner_id = Column(Integer, ForeignKey("user.id"))
 
     owner = relationship("User", back_populates="projects")

@@ -8,7 +8,7 @@ class WorkExperience(Base):
     __tablename__ = "work_experience"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
+    user_id = Column(Integer, ForeignKey("user.id", ondelete="CASCADE"))
     title = Column(String, nullable=False)
     organization = Column(String, nullable=False)
     duration = Column(String, nullable=True)  # e.g., "Jun 2024 - Aug 2024"

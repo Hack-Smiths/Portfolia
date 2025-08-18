@@ -11,5 +11,5 @@ class Skill(Base):
     level = Column(String, nullable=False)
     experience = Column(String, nullable=False)
     
-    user_id = Column(Integer, ForeignKey("users.id"))  # associate skill to a user
+    user_id = Column(Integer, ForeignKey("user.id"))  # associate skill to a user
     user = relationship("User", back_populates="skills")
