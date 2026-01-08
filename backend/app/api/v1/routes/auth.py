@@ -47,8 +47,22 @@ def signup(user: UserCreate, db: Session = Depends(get_db)):
 
     db.add(profile)
     db.commit()
+    
+    access_token = create_access_token(
+        data={"sub": new_user.email}
+    )
 
-    return new_user
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user": {
+            "id": new_user.id,
+            "username": new_user.username,
+            "email": new_user.email,
+            "full_name": new_user.full_name,
+        }
+    }
+
 
 @router.post("/login")
 def login(user: UserLogin, db: Session = Depends(get_db)):
