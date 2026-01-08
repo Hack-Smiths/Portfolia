@@ -9,7 +9,7 @@ load_dotenv()
 router = APIRouter()
 
 API_KEY = os.getenv("OPENROUTER_API_KEY")
-MODEL = os.getenv("MODEL", "mistralai/mistral-7b-instruct:free")
+MODEL = os.getenv("MODEL", "google/gemma-3-4b-it:free")
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 @router.get("/smart-summary")
@@ -22,7 +22,7 @@ def github_summary(repo_url: str = Query(..., description="GitHub repo URL")):
         parts = repo_url.strip('/').split('/')
         if len(parts) < 2:
             return {"error": "Could not parse GitHub repo URL"}
-        owner, repo = parts[-2], parts[-1]
+        owner, repo = parts[-2], parts[-1].replace(".git", "")
 
         # GitHub headers
         github_headers = {
@@ -85,10 +85,6 @@ README:
             "model": MODEL,
             "messages": [
                 {
-                    "role": "system",
-                    "content": "You are a smart assistant that extracts clean structured data from GitHub repos."
-                },
-                {
                     "role": "user",
                     "content": prompt
                 }
@@ -97,16 +93,31 @@ README:
             "temperature": 0.2
         }
 
+
         response = requests.post(OPENROUTER_URL, json=payload, headers=headers)
         if response.status_code != 200:
             return {"error": f"OpenRouter error: {response.text}"}
 
         content = response.json()["choices"][0]["message"]["content"].strip()
 
+        # Remove Markdown code fences if present
+        if content.startswith("```"):
+            content = content.replace("```json", "").replace("```", "").strip()
+
         try:
             llm_data = json.loads(content)
         except json.JSONDecodeError:
-            return {"error": "LLM output is not valid JSON", "raw": content}
+            return {
+                "title": title,
+                "description": f"{title} is a GitHub project with {stars} stars and {forks} forks.",
+                "type": "github",
+                "stack": ["Unknown", "Unknown", "Unknown"],
+                "features": ["LLM output parsing failed"],
+                "stars": stars,
+                "forks": forks,
+                "link": homepage
+            }
+
 
         # Final response formatting
         description = llm_data.get("description", "").strip()[:500]
