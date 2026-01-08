@@ -26,8 +26,10 @@ def github_summary(repo_url: str = Query(..., description="GitHub repo URL")):
 
         # GitHub headers
         github_headers = {
-            "Accept": "application/vnd.github+json"
+            "Accept": "application/vnd.github+json",
+            "Authorization": f"Bearer {os.getenv('GITHUB_API_TOKEN')}"
         }
+
 
         # Fetch GitHub repo data
         repo_api_url = f"https://api.github.com/repos/{owner}/{repo}"

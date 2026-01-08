@@ -1,13 +1,13 @@
 // src/utils/api.ts
 
-const BASE_URL = "https://portfolia-production.up.railway.app";
+const BASE_URL = "https://portfolia-awd7.onrender.com";
 
 export async function getCurrentUser() {
   const token = localStorage.getItem("token");
 
   if (!token) throw new Error("No token found");
 
-  const res = await fetch("https://portfolia-production.up.railway.app/me", {
+  const res = await fetch(`${BASE_URL}/me`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -46,7 +46,7 @@ export async function getProfile() {
   const token = localStorage.getItem("token");
   if (!token) throw new Error("No token found");
 
-  const res = await fetch(`https://portfolia-production.up.railway.app/profile/`, {
+  const res = await fetch(`${BASE_URL}/profile/`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,

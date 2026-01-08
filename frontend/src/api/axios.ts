@@ -3,7 +3,7 @@ import axios from "axios";
 import { getToken } from "../utils/storage";
 
 const API = axios.create({
-  baseURL: "http://127.0.0.1:8000", // your FastAPI backend
+  baseURL: "https://portfolia-awd7.onrender.com", // your FastAPI backend
 });
 
 API.interceptors.request.use((config) => {

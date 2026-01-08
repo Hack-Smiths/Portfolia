@@ -6,7 +6,7 @@ export async function addAchievementAPI(
   const token = localStorage.getItem('token'); // adjust to where your token is stored
 
   const res = await fetch(
-    `https://portfolia-production.up.railway.app/achievements/${type}`,
+    `https://portfolia-awd7.onrender.com/achievements/${type}`,
     {
       method: 'POST',
       headers: {

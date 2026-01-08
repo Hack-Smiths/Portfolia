@@ -1,5 +1,5 @@
 // src/utils/projectApi.ts
-const API_URL = "https://portfolia-production.up.railway.app/";
+const API_URL = "https://portfolia-awd7.onrender.com";
 
 export async function getAllProjects() {
   const token = localStorage.getItem("token");
