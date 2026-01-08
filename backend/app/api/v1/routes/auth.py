@@ -6,9 +6,9 @@ from app.models.user import User
 from app.utils.auth import hash_password, verify_password, create_access_token
 from app.database import get_db
 from app.models.profile import Profile
-
+from app.schemas.auth import SignupResponse
 router = APIRouter()
-@router.post("/signup", response_model=UserResponse)
+@router.post("/signup", response_model=SignupResponse)
 def signup(user: UserCreate, db: Session = Depends(get_db)):
     # Check if user already exists
     existing_user = db.query(User).filter(User.email == user.email).first()
@@ -47,7 +47,7 @@ def signup(user: UserCreate, db: Session = Depends(get_db)):
 
     db.add(profile)
     db.commit()
-    
+
     access_token = create_access_token(
         data={"sub": new_user.email}
     )

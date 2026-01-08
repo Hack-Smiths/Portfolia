@@ -85,6 +85,7 @@ const Auth = () => {
 
       const data = await res.json();
       localStorage.setItem("token", data.access_token); // store JWT token
+      // setUser(data.user);
       window.location.href = "/dashboard";
     } catch (err) {
       setSignupError("Something went wrong during signup");
