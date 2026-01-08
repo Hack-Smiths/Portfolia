@@ -129,11 +129,8 @@ npm run dev
 
 | Name     | Role                                     |
 | -------- | ---------------------------------------- |
-| Riyaz    | Backend Lead + LLM Architect             |
+| Riyaz    | Frontend + Backend Lead + LLM Architect  |
 | Ramitha  | Backend API Integration + AI             |
-| Mani     | UI/UX Designer (Figma + Tailwind)        |
-| Asik     | Frontend Developer (Next.js)             |
-| Subeshan | AI Prompt Engineering & Skills Extractor |
 
 ---
 
