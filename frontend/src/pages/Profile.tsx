@@ -9,11 +9,25 @@ import { useAuthContext } from '@/contexts/AuthContext';
 import { getProfile, saveProfile } from '@/utils/api'; // Adjust the import based on your API structure
 import { set } from 'date-fns';
 
+type ProfileData = {
+  name: string;
+  email: string;
+  title: string;
+  location: string;
+  bio: string;
+  github: string;
+  linkedin: string;
+  website: string;
+  avatar: string;
+};
+
 const Profile = () => {
-  const {user} = useAuthContext();
+  const { user } = useAuthContext();
+
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
-  const [profileData, setProfileData] = useState({
+
+  const [profileData, setProfileData] = useState<ProfileData>({
     name: "",
     email: "",
     title: "",
@@ -22,16 +36,19 @@ const Profile = () => {
     github: "",
     linkedin: "",
     website: "",
-    avatar: ""
+    avatar: "",
   });
+
+  // Fetch profile on load
   useEffect(() => {
     if (!user) return;
+
     getProfile()
       .then((data) => {
-        if (Object.keys(data).length === 0) {
-          // No profile yet, set empty defaults
+        if (!data || Object.keys(data).length === 0) {
+          // No profile yet → initialize from auth user
           setProfileData({
-            name: user.username,
+            name: user.full_name || user.username,
             email: user.email,
             title: "",
             location: "",
@@ -45,22 +62,49 @@ const Profile = () => {
           setProfileData(data);
         }
       })
+      .catch((err) => {
+        console.error("Failed to load profile:", err);
+      })
       .finally(() => setLoading(false));
   }, [user]);
 
-  const handleSave = () => {
+  // Enable edit mode
+  const handleEdit = () => {
+    setIsEditing(true);
+  };
+
+  // Cancel editing
+  const handleCancel = () => {
     setIsEditing(false);
-    saveProfile(profileData)
-      .then((data) => setProfileData(data)) // ✅ renamed saved -> data
-      .catch((err) => console.error(err));
   };
 
-  const handleInputChange = (field: string, value: string) => {
-    setProfileData(prev => ({ ...prev, [field]: value }));
+  // Save profile
+  const handleSave = async () => {
+    if (!user) return;
+
+    try {
+      const savedProfile = await saveProfile(profileData);
+      setProfileData(savedProfile);
+      setIsEditing(false);
+    } catch (err) {
+      console.error("Failed to save profile:", err);
+    }
   };
 
+  // Generic input handler
+  const handleInputChange = (field: keyof ProfileData, value: string) => {
+    setProfileData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  // Avatar update handler
   const handleAvatarChange = (newAvatar: string) => {
-    setProfileData(prev => ({ ...prev, avatar: newAvatar }));
+    setProfileData((prev) => ({
+      ...prev,
+      avatar: newAvatar,
+    }));
   };
 
   return (

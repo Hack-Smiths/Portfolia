@@ -16,6 +16,7 @@ const Auth = () => {
     password: ''
   });
   const [signupForm, setSignupForm] = useState({
+    fullname: '',
     name: '',
     email: '',
     password: '',
@@ -69,6 +70,7 @@ const Auth = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
+          full_name: signupForm.fullname,
           username: signupForm.name,
           email: signupForm.email,
           password: signupForm.password,
@@ -178,6 +180,24 @@ const Auth = () => {
                       id="signup-name"
                       type="text"
                       placeholder="John Doe"
+                      className="pl-10"
+                      value={signupForm.fullname}
+                      onChange={(e) => setSignupForm({...signupForm, fullname: e.target.value})}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="signup-name" className="text-sm font-medium">
+                    User Name
+                  </Label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-foreground-muted" />
+                    <Input
+                      id="signup-name"
+                      type="text"
+                      placeholder="John"
                       className="pl-10"
                       value={signupForm.name}
                       onChange={(e) => setSignupForm({...signupForm, name: e.target.value})}
