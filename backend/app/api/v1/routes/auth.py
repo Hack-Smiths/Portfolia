@@ -1,6 +1,7 @@
 # app/api/v1/routes/auth.py
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from app.schemas.user import UserCreate, UserLogin, UserResponse
 from app.models.user import User
 from app.utils.auth import hash_password, verify_password, create_access_token
@@ -14,6 +15,10 @@ def signup(user: UserCreate, db: Session = Depends(get_db)):
     existing_user = db.query(User).filter(User.email == user.email).first()
     if existing_user:
         raise HTTPException(status_code=400, detail="Email already registered")
+
+    # Check if username already exists
+    if db.query(User).filter(User.username == user.username.lower()).first():
+        raise HTTPException(status_code=409, detail="Username already taken")
 
     # Store lowercase username
     username_lower = user.username.lower()
@@ -78,3 +83,10 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
         "username": db_user.username
     })
     return {"access_token": token, "token_type": "bearer"}
+
+
+@router.get("/check-username/{username}")
+def check_username(username: str, db: Session = Depends(get_db)):
+    username_lower = username.lower()
+    exists = db.query(User).filter(User.username == username_lower).first()
+    return {"available": not exists, "username": username}

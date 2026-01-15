@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, User, ArrowRight } from 'lucide-react';
+import { Mail, Lock, User, ArrowRight, Check, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -22,6 +22,32 @@ const Auth = () => {
     password: '',
     confirmPassword: ''
   });
+  const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
+  const [checkingUsername, setCheckingUsername] = useState(false);
+
+  useEffect(() => {
+    const checkUsername = async () => {
+      if (!signupForm.name || signupForm.name.length < 3) {
+        setUsernameAvailable(null);
+        return;
+      }
+      setCheckingUsername(true);
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/check-username/${signupForm.name}`);
+        const data = await res.json();
+        setUsernameAvailable(data.available);
+      } catch (err) {
+        setUsernameAvailable(null);
+      } finally {
+        setCheckingUsername(false);
+      }
+    };
+
+    const timeoutId = setTimeout(checkUsername, 500);
+    return () => clearTimeout(timeoutId);
+  }, [signupForm.name]);
+
+
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -199,12 +225,24 @@ const Auth = () => {
                       id="signup-name"
                       type="text"
                       placeholder="John"
-                      className="pl-10"
+                      className="pl-10 pr-10"
                       value={signupForm.name}
                       onChange={(e) => setSignupForm({ ...signupForm, name: e.target.value })}
                       required
                     />
+                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                      {checkingUsername ? (
+                        <Loader2 className="w-4 h-4 animate-spin text-foreground-muted" />
+                      ) : usernameAvailable === true ? (
+                        <Check className="w-4 h-4 text-green-500" />
+                      ) : usernameAvailable === false ? (
+                        <X className="w-4 h-4 text-red-500" />
+                      ) : null}
+                    </div>
                   </div>
+                  {usernameAvailable === false && (
+                    <p className="text-xs text-red-500 mt-1">Username is already taken</p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
