@@ -1,5 +1,5 @@
 # app/models/user.py
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, Boolean
 from app.utils.database import Base
 from sqlalchemy.orm import relationship
 
@@ -11,6 +11,11 @@ class User(Base):
     full_name = Column(String, nullable=False)  # keep original case
     email = Column(String, unique=True, index=True)
     hashed_password = Column(String)
+    
+    # Portfolio settings
+    is_public = Column(Boolean, default=True, nullable=False)
+    theme_preference = Column(String, default="classic", nullable=True)
+    analytics_enabled = Column(Boolean, default=False, nullable=False)
 
     projects = relationship("Project", back_populates="owner")
     work_experiences = relationship("WorkExperience", back_populates="owner")

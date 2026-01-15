@@ -277,3 +277,57 @@ export async function deleteSkill(id: number) {
   if (!res.ok) throw new Error("Failed to delete skill");
   return true;
 }
+
+// ---------------- PUBLIC PORTFOLIO ----------------
+
+export async function getPublicPortfolio(username: string) {
+  const res = await fetch(`${BASE_URL}/api/portfolio/${encodeURIComponent(username)}`, {
+    method: "GET",
+    // No authentication required for public portfolios
+  });
+
+  if (!res.ok) {
+    const error: any = new Error("Failed to fetch public portfolio");
+    error.status = res.status;
+    throw error;
+  }
+
+  return await res.json();
+}
+
+export async function checkPortfolioPublic(username: string) {
+  const res = await fetch(`${BASE_URL}/api/portfolio/${encodeURIComponent(username)}/public-check`, {
+    method: "GET",
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to check portfolio status");
+  }
+
+  return await res.json();
+}
+
+export async function updatePrivacySettings(settings: {
+  is_public?: boolean;
+  theme_preference?: string;
+  analytics_enabled?: boolean;
+}) {
+  const token = localStorage.getItem("token");
+  if (!token) throw new Error("No token found");
+
+  const res = await fetch(`${BASE_URL}/profile/`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(settings),
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to update privacy settings");
+  }
+
+  return await res.json();
+}
+

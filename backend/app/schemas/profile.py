@@ -16,7 +16,10 @@ class ProfileCreate(ProfileBase):
     pass
 
 class ProfileUpdate(ProfileBase):
-    pass
+    # Privacy and preference settings (stored on User model)
+    is_public: Optional[bool] = None
+    theme_preference: Optional[str] = None
+    analytics_enabled: Optional[bool] = None
 
 class ProfileOut(ProfileBase):
     id: int
