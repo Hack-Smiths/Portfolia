@@ -1,7 +1,7 @@
 
 
 from fastapi import FastAPI
-from app.api.v1.routes import summary, user, auth, project, achievements, skills, profile, preview, portfolio_public
+from app.api.v1.routes import summary, user, auth, project, achievements, skills, profile, preview, portfolio_public, cron
 from fastapi.middleware.cors import CORSMiddleware
 from app.models.user import User
 from app.models.project import Project  # This ensures both classes are registered
@@ -21,9 +21,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
+app.include_router(cron.router)
 app.include_router(summary.router, tags=["GitHub Summary"])
+
 # app.include_router(github.router, prefix="/api/v1/github", tags=["GitHub"])
 app.include_router(auth.router, tags=['Auth'])
 app.include_router(user.router, tags=['Auth'])
