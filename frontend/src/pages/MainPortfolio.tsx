@@ -477,7 +477,7 @@ const MainPortfolio = ({ portfolioData: propData, isPublicView = false }: MainPo
                         </div>
 
                         <div className="space-y-3">
-                          {categorySkills.map((skill, skillIndex) => {
+                          {(categorySkills as typeof portfolioData.skills).map((skill, skillIndex) => {
                             const skillLevel = skill.level || 70;
                             const getStarLevel = (level: number) => {
                               if (level >= 85) return 'professional';
