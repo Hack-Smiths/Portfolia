@@ -1,5 +1,5 @@
 // src/utils/projectApi.ts
-const API_URL = "https://portfolia-awd7.onrender.com";
+const API_URL = import.meta.env.VITE_API_BASE_URL;
 
 export async function getAllProjects() {
   const token = localStorage.getItem("token");

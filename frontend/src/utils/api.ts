@@ -1,6 +1,6 @@
 // src/utils/api.ts
 
-const BASE_URL = "https://portfolia-awd7.onrender.com";
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export async function getCurrentUser() {
   const token = localStorage.getItem("token");

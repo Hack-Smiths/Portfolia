@@ -6,7 +6,7 @@ export async function addAchievementAPI(
   const token = localStorage.getItem('token'); // adjust to where your token is stored
 
   const res = await fetch(
-    `https://portfolia-awd7.onrender.com/achievements/${type}`,
+    `${import.meta.env.VITE_API_BASE_URL}/achievements/${type}`,
     {
       method: 'POST',
       headers: {

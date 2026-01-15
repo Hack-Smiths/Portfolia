@@ -27,7 +27,7 @@ const Auth = () => {
     e.preventDefault();
     setLoginError('');
     try {
-      const res = await fetch("https://portfolia-awd7.onrender.com/login", {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -64,7 +64,7 @@ const Auth = () => {
     }
 
     try {
-      const res = await fetch("https://portfolia-awd7.onrender.com/signup", {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/signup`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -130,7 +130,7 @@ const Auth = () => {
                       placeholder="your@email.com"
                       className="pl-10"
                       value={loginForm.email}
-                      onChange={(e) => setLoginForm({...loginForm, email: e.target.value})}
+                      onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })}
                       required
                     />
                   </div>
@@ -148,7 +148,7 @@ const Auth = () => {
                       placeholder="••••••••"
                       className="pl-10"
                       value={loginForm.password}
-                      onChange={(e) => setLoginForm({...loginForm, password: e.target.value})}
+                      onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
                       required
                     />
                   </div>
@@ -183,7 +183,7 @@ const Auth = () => {
                       placeholder="John Doe"
                       className="pl-10"
                       value={signupForm.fullname}
-                      onChange={(e) => setSignupForm({...signupForm, fullname: e.target.value})}
+                      onChange={(e) => setSignupForm({ ...signupForm, fullname: e.target.value })}
                       required
                     />
                   </div>
@@ -201,7 +201,7 @@ const Auth = () => {
                       placeholder="John"
                       className="pl-10"
                       value={signupForm.name}
-                      onChange={(e) => setSignupForm({...signupForm, name: e.target.value})}
+                      onChange={(e) => setSignupForm({ ...signupForm, name: e.target.value })}
                       required
                     />
                   </div>
@@ -219,7 +219,7 @@ const Auth = () => {
                       placeholder="your@email.com"
                       className="pl-10"
                       value={signupForm.email}
-                      onChange={(e) => setSignupForm({...signupForm, email: e.target.value})}
+                      onChange={(e) => setSignupForm({ ...signupForm, email: e.target.value })}
                       required
                     />
                   </div>
@@ -237,7 +237,7 @@ const Auth = () => {
                       placeholder="••••••••"
                       className="pl-10"
                       value={signupForm.password}
-                      onChange={(e) => setSignupForm({...signupForm, password: e.target.value})}
+                      onChange={(e) => setSignupForm({ ...signupForm, password: e.target.value })}
                       required
                     />
                   </div>
@@ -255,7 +255,7 @@ const Auth = () => {
                       placeholder="••••••••"
                       className="pl-10"
                       value={signupForm.confirmPassword}
-                      onChange={(e) => setSignupForm({...signupForm, confirmPassword: e.target.value})}
+                      onChange={(e) => setSignupForm({ ...signupForm, confirmPassword: e.target.value })}
                       required
                     />
                   </div>
