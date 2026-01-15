@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Download, Link2, Share2, Palette, Eye, QrCode, Copy, CheckCircle, Globe, Mail, Github, Linkedin, MessageCircle, Facebook } from 'lucide-react';
+import { Download, Link2, Share2, Palette, Eye, QrCode, Copy, CheckCircle, Globe, Mail, Github, Linkedin, MessageCircle, Facebook, FileText, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { pdf } from '@react-pdf/renderer';
 import { usePortfolio } from '@/contexts/PortfolioContext';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -11,8 +12,12 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useToast } from '@/hooks/use-toast';
 import { getPortfolioPreview } from '@/utils/api';
+import { ClassicResumePDF } from '@/components/pdf/ClassicResumePDF';
+import { ModernResumePDF } from '@/components/pdf/ModernResumePDF';
+import { mapPortfolioToResume, generatePDFFilename } from '@/utils/pdfMapper';
 
 // Portfolio Hero Section Preview Component
 const PortfolioHeroPreview = ({ template, profile }) => {
@@ -152,6 +157,17 @@ const Export = () => {
   const [portfolioData, setPortfolioData] = useState(null);
   const [isLoadingPortfolio, setIsLoadingPortfolio] = useState(true);
 
+  // PDF Export State
+  const [pdfTemplate, setPdfTemplate] = useState<'classic' | 'modern'>('classic');
+  const [pdfSections, setPdfSections] = useState({
+    includeAbout: true,
+    includeProjects: true,
+    includeSkills: true,
+    includeExperience: true,
+    includeCertificates: true,
+  });
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+
   // Generate dynamic portfolio URL
   const username = user?.username || 'user';
   const portfolioUrl = `https://portfolia-ai.vercel.app/portfolio/${username}`;
@@ -203,13 +219,54 @@ const Export = () => {
     });
   };
 
-  const handleDownloadPDF = () => {
-    // Dummy PDF download
-    console.log('Downloading PDF...');
-    toast({
-      title: "Coming soon!",
-      description: "PDF export feature is under development",
-    });
+  const handleDownloadPDF = async () => {
+    if (!portfolioData) {
+      toast({
+        title: "No data available",
+        description: "Please wait for portfolio data to load",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsGeneratingPDF(true);
+
+    try {
+      // Map portfolio data to resume format
+      const resumeData = mapPortfolioToResume(portfolioData);
+
+      // Select the appropriate PDF template component
+      const PDFComponent = pdfTemplate === 'classic'
+        ? <ClassicResumePDF data={resumeData} sections={pdfSections} />
+        : <ModernResumePDF data={resumeData} sections={pdfSections} />;
+
+      // Generate PDF blob
+      const blob = await pdf(PDFComponent).toBlob();
+
+      // Create download link
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = generatePDFFilename(username);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      toast({
+        title: "PDF Downloaded!",
+        description: `Your ${pdfTemplate} resume has been downloaded successfully`,
+      });
+    } catch (error) {
+      console.error('PDF generation error:', error);
+      toast({
+        title: "PDF Generation Failed",
+        description: "Failed to generate PDF. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingPDF(false);
+    }
   };
 
   const handleDownloadQR = async () => {
@@ -364,6 +421,92 @@ const Export = () => {
                     />
                   </div>
                 ))}
+              </div>
+            </Card>
+
+            {/* PDF Export Section */}
+            <Card className="glass-card animate-slide-in-up">
+              <div className="flex items-center space-x-2 mb-6">
+                <FileText className="w-5 h-5 text-primary" />
+                <h2 className="text-xl font-semibold">PDF Resume Export</h2>
+              </div>
+
+              <div className="space-y-6">
+                {/* PDF Template Selector */}
+                <div>
+                  <Label className="text-sm font-medium mb-3 block">Choose PDF Template</Label>
+                  <RadioGroup value={pdfTemplate} onValueChange={(value: 'classic' | 'modern') => setPdfTemplate(value)}>
+                    <div className="space-y-3">
+                      <div className={`flex items-center space-x-3 p-3 rounded-lg border-2 cursor-pointer transition-all ${pdfTemplate === 'classic' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
+                        }`} onClick={() => setPdfTemplate('classic')}>
+                        <RadioGroupItem value="classic" id="pdf-classic" />
+                        <div className="flex-1">
+                          <Label htmlFor="pdf-classic" className="font-medium cursor-pointer">Classic Resume</Label>
+                          <p className="text-xs text-foreground-muted">Single column, ATS-optimized, black & white</p>
+                        </div>
+                      </div>
+
+                      <div className={`flex items-center space-x-3 p-3 rounded-lg border-2 cursor-pointer transition-all ${pdfTemplate === 'modern' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
+                        }`} onClick={() => setPdfTemplate('modern')}>
+                        <RadioGroupItem value="modern" id="pdf-modern" />
+                        <div className="flex-1">
+                          <Label htmlFor="pdf-modern" className="font-medium cursor-pointer">Modern Resume</Label>
+                          <p className="text-xs text-foreground-muted">Two-column layout, subtle colors, visual</p>
+                        </div>
+                      </div>
+                    </div>
+                  </RadioGroup>
+                </div>
+
+                {/* Section Selection */}
+                <div>
+                  <Label className="text-sm font-medium mb-3 block">Include Sections</Label>
+                  <div className="space-y-3">
+                    {Object.entries({
+                      includeAbout: 'Professional Summary',
+                      includeSkills: 'Skills',
+                      includeExperience: 'Experience',
+                      includeProjects: 'Projects',
+                      includeCertificates: 'Certifications'
+                    }).map(([key, label]) => (
+                      <div key={key} className="flex items-center justify-between">
+                        <Label htmlFor={`pdf-${key}`} className="text-sm font-medium cursor-pointer">
+                          {label}
+                        </Label>
+                        <Switch
+                          id={`pdf-${key}`}
+                          checked={pdfSections[key]}
+                          onCheckedChange={(checked) =>
+                            setPdfSections(prev => ({ ...prev, [key]: checked }))
+                          }
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Download Button */}
+                <Button
+                  className="w-full btn-primary"
+                  onClick={handleDownloadPDF}
+                  disabled={isGeneratingPDF || isLoadingPortfolio}
+                >
+                  {isGeneratingPDF ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Generating PDF...
+                    </>
+                  ) : (
+                    <>
+                      <Download className="w-4 h-4 mr-2" />
+                      Download Resume PDF
+                    </>
+                  )}
+                </Button>
+
+                <p className="text-xs text-center text-foreground-muted">
+                  PDF will be ATS-friendly and ready for job applications
+                </p>
               </div>
             </Card>
 
