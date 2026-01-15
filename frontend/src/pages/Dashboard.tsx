@@ -17,27 +17,27 @@ const Dashboard = () => {
   const [isProjectsAdded, setIsProjectsAdded] = useState(false);
   const [isSkillsAdded, setIsSkillsAdded] = useState(false);
   const [isAchievementsAdded, setIsAchievementsAdded] = useState(false);
-  const completionProgress = [ isProfileInfoComplete, isProjectsAdded, isSkillsAdded, isAchievementsAdded, ].filter(Boolean).length * 25;
+  const completionProgress = [isProfileInfoComplete, isProjectsAdded, isSkillsAdded, isAchievementsAdded,].filter(Boolean).length * 25;
 
   const stats = [
-    { 
-      label: 'Total Projects', 
-      value: '0', 
+    {
+      label: 'Total Projects',
+      value: '0',
       icon: Github,
       color: 'text-electric',
       bgColor: 'bg-electric/10'
     },
-    { 
-      label: 'Total Skills', 
+    {
+      label: 'Total Skills',
       value: '0',
       icon: Brain,
       color: 'text-pulse',
       bgColor: 'bg-pulse/10'
     },
-    { 
-      label: 'Total Achievements', 
-      value: '0', 
-      icon: Award, 
+    {
+      label: 'Total Achievements',
+      value: '0',
+      icon: Award,
       color: 'text-success',
       bgColor: 'bg-success/10'
     }
@@ -164,8 +164,16 @@ const Dashboard = () => {
               </p>
             </div>
             <div className="flex space-x-3">
-              <ResumeUploadDialog>
-                <Button 
+              <ResumeUploadDialog
+                onUploadSuccess={() => {
+                  // Show success status
+                  setUploadStatus('success');
+                  // Hide after 5 seconds
+                  setTimeout(() => setUploadStatus(null), 5000);
+                  // Optionally reload dashboard data here
+                }}
+              >
+                <Button
                   className="btn-primary"
                   disabled={uploadStatus === 'uploading'}
                 >
@@ -175,20 +183,19 @@ const Dashboard = () => {
               </ResumeUploadDialog>
             </div>
           </div>
-          
+
           {uploadStatus && (
-            <div className={`mt-4 p-4 rounded-lg border ${
-              uploadStatus === 'success' 
-                ? 'bg-success/10 border-success/20 text-success' 
+            <div className={`mt-4 p-4 rounded-lg border ${uploadStatus === 'success'
+                ? 'bg-success/10 border-success/20 text-success'
                 : 'bg-warning/10 border-warning/20 text-warning'
-            }`}>
+              }`}>
               <div className="flex items-center">
                 {uploadStatus === 'success' ? (
                   <CheckCircle className="w-4 h-4 mr-2" />
                 ) : (
                   <Clock className="w-4 h-4 mr-2 animate-spin" />
                 )}
-                {uploadStatus === 'success' 
+                {uploadStatus === 'success'
                   ? 'Resume parsed successfully! Auto-categorized 3 achievements, 5 skills, and 2 projects across portfolio sections.'
                   : 'Analyzing your resume with AI and auto-categorizing content...'
                 }
@@ -324,9 +331,9 @@ const Dashboard = () => {
                 </div>
               )}
               <div className="mt-6 pt-4 border-t border-border">
-                <Button 
-                  variant="outline" 
-                  className="w-full" 
+                <Button
+                  variant="outline"
+                  className="w-full"
                   onClick={() => setShowAllActivities(!showAllActivities)}
                 >
                   {showAllActivities ? 'Show Less' : 'View All Activity'}

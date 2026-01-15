@@ -41,9 +41,9 @@ const Achievements = () => {
           getAchievementsAPI("awards")             // GET /achievements/awards
         ]);
         setLocalAchievements({
-          internships: internshipsRes,
-          certificates: certificatesRes,
-          awards: awardsRes
+          internships: internshipsRes || [],
+          certificates: certificatesRes || [],
+          awards: awardsRes || []
         });
       } catch (err) {
         console.error("Failed to fetch achievements:", err);
@@ -69,7 +69,7 @@ const Achievements = () => {
       ...prev,
       internships: [...prev.internships, created],
     }));
-    
+
     setOpenInternshipForm(false);
   };
 
@@ -178,8 +178,8 @@ const Achievements = () => {
       // Map your local types to API route segments
       const apiType =
         type === 'internship' ? 'work-experience' :
-        type === 'certificate' ? 'certificates' :
-        'awards';
+          type === 'certificate' ? 'certificates' :
+            'awards';
 
       const updatedFromServer = await updateAchievementAPI(apiType, updatedAchievement.id, updatedAchievement);
 
@@ -188,9 +188,9 @@ const Achievements = () => {
         [type === 'internship' ? 'internships' :
           type === 'certificate' ? 'certificates' : 'awards']:
           prev[type === 'internship' ? 'internships' :
-              type === 'certificate' ? 'certificates' : 'awards'].map(item =>
-            item.id === updatedFromServer.id ? updatedFromServer : item
-          )
+            type === 'certificate' ? 'certificates' : 'awards'].map(item =>
+              item.id === updatedFromServer.id ? updatedFromServer : item
+            )
       }));
 
       toast({ title: `${type.charAt(0).toUpperCase() + type.slice(1)} updated successfully`, variant: 'default' });
@@ -210,7 +210,7 @@ const Achievements = () => {
         <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/30 via-purple-50/20 to-pink-50/30 dark:from-slate-900 dark:via-purple-900/10 dark:to-slate-900" />
         <div className="mesh-bg absolute inset-0" />
       </div>
-      
+
       <div className="container mx-auto px-4 py-8 relative z-10">
         {/* Header */}
         <div className="mb-8 animate-fade-in">
@@ -241,16 +241,16 @@ const Achievements = () => {
                 <DialogHeader>
                   <DialogTitle>Add Work Experience</DialogTitle>
                 </DialogHeader>
-                  <InternshipForm 
-                    onAdd={handleAddInternship} 
-                    onCloseInternshipForm={() => setOpenInternshipForm(false)}
-                  />
+                <InternshipForm
+                  onAdd={handleAddInternship}
+                  onCloseInternshipForm={() => setOpenInternshipForm(false)}
+                />
               </DialogContent>
             </Dialog>
           </div>
 
           <div className="space-y-4">
-            {localAchievements.internships.map((internship, index) => (
+            {localAchievements.internships?.map((internship, index) => (
               <Card key={internship.id} className="glass-card interactive animate-slide-in-right group hover:shadow-xl transition-all duration-300" style={{ animationDelay: `${index * 100}ms` }}>
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
@@ -271,17 +271,17 @@ const Achievements = () => {
                     </div>
                   </div>
                   <div className="flex space-x-1">
-                    <Button 
-                      size="sm" 
-                      variant="ghost" 
+                    <Button
+                      size="sm"
+                      variant="ghost"
                       className="w-8 h-8 p-0"
                       onClick={() => handleEditInternship(internship)}
                     >
                       <Edit3 className="w-4 h-4" />
                     </Button>
-                    <Button 
-                      size="sm" 
-                      variant="ghost" 
+                    <Button
+                      size="sm"
+                      variant="ghost"
                       className="w-8 h-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
                       onClick={() => handleDeleteInternship(internship.id)}
                     >
@@ -289,11 +289,11 @@ const Achievements = () => {
                     </Button>
                   </div>
                 </div>
-                
+
                 <p className="text-foreground-muted text-sm mb-4">{internship.description}</p>
-                
+
                 <div className="flex flex-wrap gap-2">
-                  {internship.skills.map((skill, skillIndex) => (
+                  {internship.skills?.map((skill, skillIndex) => (
                     <Badge key={skillIndex} variant="secondary" className="text-xs bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 transition-colors">
                       {skill}
                     </Badge>
@@ -323,8 +323,8 @@ const Achievements = () => {
                   <DialogHeader>
                     <DialogTitle>Add Certificate</DialogTitle>
                   </DialogHeader>
-                  <CertificateForm 
-                    onAdd={handleAddCertificate} 
+                  <CertificateForm
+                    onAdd={handleAddCertificate}
                     onCloseCertificateForm={() => setOpenCertificateForm(false)}
                   />
                 </DialogContent>
@@ -332,7 +332,7 @@ const Achievements = () => {
             </div>
 
             <div className="space-y-4">
-              {localAchievements.certificates.map((cert, index) => (
+              {localAchievements.certificates?.map((cert, index) => (
                 <Card key={cert.id} className="glass-card interactive animate-slide-in-up group hover:shadow-xl transition-all duration-300" style={{ animationDelay: `${index * 150}ms` }}>
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1">
@@ -340,17 +340,17 @@ const Achievements = () => {
                       <p className="text-foreground-muted text-sm">{cert.issuer} • {cert.year}</p>
                     </div>
                     <div className="flex space-x-1">
-                      <Button 
-                        size="sm" 
-                        variant="ghost" 
+                      <Button
+                        size="sm"
+                        variant="ghost"
                         className="w-8 h-8 p-0"
                         onClick={() => handleEditCertificate(cert)}
                       >
                         <Edit3 className="w-4 h-4" />
                       </Button>
-                      <Button 
-                        size="sm" 
-                        variant="ghost" 
+                      <Button
+                        size="sm"
+                        variant="ghost"
                         className="w-8 h-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
                         onClick={() => handleDeleteCertificate(cert.id)}
                       >
@@ -391,16 +391,16 @@ const Achievements = () => {
                   <DialogHeader>
                     <DialogTitle>Add Highlight</DialogTitle>
                   </DialogHeader>
-                    <AwardForm 
-                      onAdd={handleAddAward} 
-                      onCloseAwardForm={() => setOpenAwardForm(false)}
-                    />
+                  <AwardForm
+                    onAdd={handleAddAward}
+                    onCloseAwardForm={() => setOpenAwardForm(false)}
+                  />
                 </DialogContent>
               </Dialog>
             </div>
 
             <div className="space-y-4">
-              {localAchievements.awards.map((award, index) => (
+              {localAchievements.awards?.map((award, index) => (
                 <Card key={award.id} className="glass-card interactive animate-slide-in-up group hover:shadow-xl transition-all duration-300" style={{ animationDelay: `${index * 150}ms` }}>
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1">
@@ -408,17 +408,17 @@ const Achievements = () => {
                       <p className="text-foreground-muted text-sm">{award.organization} • {award.year}</p>
                     </div>
                     <div className="flex space-x-1">
-                      <Button 
-                        size="sm" 
-                        variant="ghost" 
+                      <Button
+                        size="sm"
+                        variant="ghost"
                         className="w-8 h-8 p-0"
                         onClick={() => handleEditAward(award)}
                       >
                         <Edit3 className="w-4 h-4" />
                       </Button>
-                      <Button 
-                        size="sm" 
-                        variant="ghost" 
+                      <Button
+                        size="sm"
+                        variant="ghost"
                         className="w-8 h-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
                         onClick={() => handleDeleteAward(award.id)}
                       >
@@ -444,7 +444,7 @@ const Achievements = () => {
         onSave={handleSaveEdit}
         type={editDialog.type}
       />
-      
+
       <AIAssistant />
     </div>
   );
@@ -482,7 +482,7 @@ const Achievements = () => {
           const closeButton = document.querySelector('[data-state="open"] button[aria-label="Close"]') as HTMLButtonElement;
           closeButton?.click();
         }, 100);
-        
+
         onCloseInternshipForm();
       }
     };
