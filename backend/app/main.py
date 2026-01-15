@@ -11,7 +11,10 @@ app = FastAPI()
 
 origins = [
     "https://portfolia-ai.vercel.app",  # your deployed frontend
-    "http://localhost:8080",         # optional, for local testing
+    "http://localhost:8080",             # local frontend (localhost)
+    "http://127.0.0.1:8080",            # local frontend (127.0.0.1)
+    "http://localhost:5173",            # vite default port
+    "http://127.0.0.1:5173",            # vite default port (127.0.0.1)
 ]
 
 app.add_middleware(

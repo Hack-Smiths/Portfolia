@@ -6,9 +6,10 @@ interface ProfileHeaderProps {
   onEdit: () => void;
   onSave: () => void;
   onCancel: () => void;
+  isSaveDisabled?: boolean;
 }
 
-const ProfileHeader = ({ isEditing, onEdit, onSave, onCancel }: ProfileHeaderProps) => {
+const ProfileHeader = ({ isEditing, onEdit, onSave, onCancel, isSaveDisabled }: ProfileHeaderProps) => {
   return (
     <div className="flex items-center justify-between mb-8 animate-fade-in">
       <div>
@@ -26,7 +27,11 @@ const ProfileHeader = ({ isEditing, onEdit, onSave, onCancel }: ProfileHeaderPro
               <X className="w-4 h-4 mr-2" />
               Cancel
             </Button>
-            <Button className="btn-primary" onClick={onSave}>
+            <Button
+              className="btn-primary"
+              onClick={onSave}
+              disabled={isSaveDisabled}
+            >
               <Save className="w-4 h-4 mr-2" />
               Save Changes
             </Button>
