@@ -71,6 +71,13 @@ interface ResumeDataEditorProps {
         certifications: Set<number>;
         achievements: Set<number>;
     }) => void;
+    duplicateItems?: {
+        work_experience: Set<number>;
+        projects: Set<number>;
+        skills: Set<number>;
+        certifications: Set<number>;
+        achievements: Set<number>;
+    };
 }
 
 const SKILL_CATEGORIES = [
@@ -85,7 +92,7 @@ const SKILL_CATEGORIES = [
     'Soft Skills'
 ];
 
-const ResumeDataEditor: React.FC<ResumeDataEditorProps> = ({ data, onDataChange, selectedItems, onSelectionChange }) => {
+const ResumeDataEditor: React.FC<ResumeDataEditorProps> = ({ data, onDataChange, selectedItems, onSelectionChange, duplicateItems }) => {
     const updateField = (field: keyof ExtractedData, value: any) => {
         onDataChange({ ...data, [field]: value });
     };
@@ -144,7 +151,7 @@ const ResumeDataEditor: React.FC<ResumeDataEditorProps> = ({ data, onDataChange,
 
     return (
         <div className="space-y-3">
-            <Accordion type="multiple" defaultValue={['personal', 'work', 'projects', 'skills']} className="w-full space-y-3">
+            <Accordion type="multiple" defaultValue={['personal']} className="w-full space-y-3">
 
                 {/* Personal Information Section */}
                 <AccordionItem value="personal" className="border rounded-lg bg-blue-50/50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-900">
@@ -310,9 +317,16 @@ const ResumeDataEditor: React.FC<ResumeDataEditorProps> = ({ data, onDataChange,
                                             <div className="space-y-3 pr-8">
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                                     <div>
-                                                        <label className="text-xs font-medium text-muted-foreground mb-1 block">
-                                                            Job Title
-                                                        </label>
+                                                        <div className="flex justify-between items-center mb-1">
+                                                            <label className="text-xs font-medium text-muted-foreground block">
+                                                                Job Title
+                                                            </label>
+                                                            {duplicateItems?.work_experience?.has(index) && (
+                                                                <Badge variant="outline" className="text-amber-500 border-amber-500 text-[10px] h-5">
+                                                                    Duplicate
+                                                                </Badge>
+                                                            )}
+                                                        </div>
                                                         <Input
                                                             value={work.title}
                                                             onChange={(e) => updateArrayItem('work_experience', index, { ...work, title: e.target.value })}
@@ -434,9 +448,16 @@ const ResumeDataEditor: React.FC<ResumeDataEditorProps> = ({ data, onDataChange,
 
                                             <div className="space-y-3 pr-8">
                                                 <div>
-                                                    <label className="text-xs font-medium text-muted-foreground mb-1 block">
-                                                        Project Title
-                                                    </label>
+                                                    <div className="flex justify-between items-center mb-1">
+                                                        <label className="text-xs font-medium text-muted-foreground block">
+                                                            Project Title
+                                                        </label>
+                                                        {duplicateItems?.projects?.has(index) && (
+                                                            <Badge variant="outline" className="text-amber-500 border-amber-500 text-[10px] h-5">
+                                                                Duplicate
+                                                            </Badge>
+                                                        )}
+                                                    </div>
                                                     <Input
                                                         value={project.title}
                                                         onChange={(e) => updateArrayItem('projects', index, { ...project, title: e.target.value })}
@@ -615,7 +636,7 @@ const ResumeDataEditor: React.FC<ResumeDataEditorProps> = ({ data, onDataChange,
                                                         />
                                                         <Badge
                                                             variant="secondary"
-                                                            className="gap-1 bg-orange-100 dark:bg-orange-900 text-orange-900 dark:text-orange-100 px-3 py-1"
+                                                            className={`gap-1 px-3 py-1 ${duplicateItems?.skills?.has(globalIndex) ? 'bg-amber-100 text-amber-900 border-amber-500 border' : 'bg-orange-100 dark:bg-orange-900 text-orange-900 dark:text-orange-100'}`}
                                                         >
                                                             <input
                                                                 type="text"
@@ -721,9 +742,16 @@ const ResumeDataEditor: React.FC<ResumeDataEditorProps> = ({ data, onDataChange,
                                             <div className="space-y-3 pr-8">
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                                     <div>
-                                                        <label className="text-xs font-medium text-muted-foreground mb-1 block">
-                                                            Certification Name
-                                                        </label>
+                                                        <div className="flex justify-between items-center mb-1">
+                                                            <label className="text-xs font-medium text-muted-foreground block">
+                                                                Certification Name
+                                                            </label>
+                                                            {duplicateItems?.certifications?.has(index) && (
+                                                                <Badge variant="outline" className="text-amber-500 border-amber-500 text-[10px] h-5">
+                                                                    Duplicate
+                                                                </Badge>
+                                                            )}
+                                                        </div>
                                                         <Input
                                                             value={cert.name}
                                                             onChange={(e) => updateArrayItem('certifications', index, { ...cert, name: e.target.value })}
@@ -836,9 +864,16 @@ const ResumeDataEditor: React.FC<ResumeDataEditorProps> = ({ data, onDataChange,
                                             <div className="space-y-3 pr-8">
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                                     <div>
-                                                        <label className="text-xs font-medium text-muted-foreground mb-1 block">
-                                                            Achievement Title
-                                                        </label>
+                                                        <div className="flex justify-between items-center mb-1">
+                                                            <label className="text-xs font-medium text-muted-foreground block">
+                                                                Achievement Title
+                                                            </label>
+                                                            {duplicateItems?.achievements?.has(index) && (
+                                                                <Badge variant="outline" className="text-amber-500 border-amber-500 text-[10px] h-5">
+                                                                    Duplicate
+                                                                </Badge>
+                                                            )}
+                                                        </div>
                                                         <Input
                                                             value={achievement.title}
                                                             onChange={(e) => updateArrayItem('achievements', index, { ...achievement, title: e.target.value })}

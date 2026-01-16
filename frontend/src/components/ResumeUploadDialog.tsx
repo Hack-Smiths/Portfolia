@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { FileText, Sparkles, Upload, Loader2, CheckCircle, AlertCircle, X } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { uploadResume, confirmResume } from '@/utils/api';
+import { uploadResume, confirmResume, getExistingPortfolioData } from '@/utils/api';
 import ResumeDataEditor from './ResumeDataEditor';
 
 interface ResumeUploadDialogProps {
@@ -107,23 +107,103 @@ const ResumeUploadDialog: React.FC<ResumeUploadDialogProps> = ({ children, onUpl
     setFile(selectedFile);
   };
 
+
+
+  const [duplicates, setDuplicates] = useState<{
+    work_experience: Set<number>;
+    projects: Set<number>;
+    skills: Set<number>;
+    certifications: Set<number>;
+    achievements: Set<number>;
+  }>({
+    work_experience: new Set(),
+    projects: new Set(),
+    skills: new Set(),
+    certifications: new Set(),
+    achievements: new Set()
+  });
+
   const handleUpload = async () => {
     if (!file) return;
 
     setUploading(true);
     try {
-      const response = await uploadResume(file);
+      // Fetch existing data and upload resume in parallel
+      const [uploadResponse, existingData] = await Promise.all([
+        uploadResume(file),
+        getExistingPortfolioData().catch(() => null) // specific error handling for existing data
+      ]);
+
+      const response = uploadResponse;
+
       setExtractedData(response.extracted_data);
       setEditedData(response.extracted_data); // Initialize edited data with extracted data
       setResumeId(response.resume_id);
 
-      // Initialize selection state - select all items by default
+      // Calculate duplicates
+
+      const newDuplicates = {
+        work_experience: new Set<number>(),
+        projects: new Set<number>(),
+        skills: new Set<number>(),
+        certifications: new Set<number>(),
+        achievements: new Set<number>()
+      };
+
+      if (existingData) {
+        // Check Projects
+        response.extracted_data.projects.forEach((item: any, index: number) => {
+          if (existingData.projects.some((e: any) => e.title?.toLowerCase() === item.title?.toLowerCase())) {
+            newDuplicates.projects.add(index);
+          }
+        });
+
+        // Check Skills
+        response.extracted_data.skills.forEach((item: any, index: number) => {
+          if (existingData.skills.some((e: any) => e.name?.toLowerCase() === item.name?.toLowerCase())) {
+            newDuplicates.skills.add(index);
+          }
+        });
+
+        // Check Work Experience
+        response.extracted_data.work_experience.forEach((item: any, index: number) => {
+          if (existingData.work_experience.some((e: any) =>
+            e.title?.toLowerCase() === item.title?.toLowerCase() &&
+            e.company?.toLowerCase() === item.company?.toLowerCase()
+          )) {
+            newDuplicates.work_experience.add(index);
+          }
+        });
+
+        // Check Certifications
+        response.extracted_data.certifications.forEach((item: any, index: number) => {
+          if (existingData.certifications.some((e: any) =>
+            e.name?.toLowerCase() === item.name?.toLowerCase() &&
+            e.issuer?.toLowerCase() === item.issuer?.toLowerCase()
+          )) {
+            newDuplicates.certifications.add(index);
+          }
+        });
+
+        // Check Achievements
+        response.extracted_data.achievements.forEach((item: any, index: number) => {
+          if (existingData.achievements.some((e: any) =>
+            e.title?.toLowerCase() === item.title?.toLowerCase()
+          )) {
+            newDuplicates.achievements.add(index);
+          }
+        });
+      }
+
+      setDuplicates(newDuplicates);
+
+      // Initialize selection state - select all items except duplicates
       setSelectedItems({
-        work_experience: new Set(response.extracted_data.work_experience.map((_, i) => i)),
-        projects: new Set(response.extracted_data.projects.map((_, i) => i)),
-        skills: new Set(response.extracted_data.skills.map((_, i) => i)),
-        certifications: new Set(response.extracted_data.certifications.map((_, i) => i)),
-        achievements: new Set(response.extracted_data.achievements.map((_, i) => i))
+        work_experience: new Set(response.extracted_data.work_experience.map((_: any, i: number) => i).filter((i: number) => !newDuplicates.work_experience.has(i))),
+        projects: new Set(response.extracted_data.projects.map((_: any, i: number) => i).filter((i: number) => !newDuplicates.projects.has(i))),
+        skills: new Set(response.extracted_data.skills.map((_: any, i: number) => i).filter((i: number) => !newDuplicates.skills.has(i))),
+        certifications: new Set(response.extracted_data.certifications.map((_: any, i: number) => i).filter((i: number) => !newDuplicates.certifications.has(i))),
+        achievements: new Set(response.extracted_data.achievements.map((_: any, i: number) => i).filter((i: number) => !newDuplicates.achievements.has(i)))
       });
 
       toast({
@@ -174,22 +254,12 @@ const ResumeUploadDialog: React.FC<ResumeUploadDialogProps> = ({ children, onUpl
         selectedItems.achievements.size;
 
       toast({
-        title: 'Resume imported successfully!',
-        description: `Imported ${totalSelected} selected items to your portfolio.`,
+        title: 'Uploaded successfully',
+        description: 'Your resume data has been imported into your portfolio. Duplicates were excluded.',
       });
 
       // Reset and close
-      setFile(null);
-      setExtractedData(null);
-      setEditedData(null);
-      setResumeId(null);
-      setSelectedItems({
-        work_experience: new Set(),
-        projects: new Set(),
-        skills: new Set(),
-        certifications: new Set(),
-        achievements: new Set()
-      });
+      resetState();
       setIsOpen(false);
 
       if (onUploadSuccess) {
@@ -207,11 +277,18 @@ const ResumeUploadDialog: React.FC<ResumeUploadDialogProps> = ({ children, onUpl
     }
   };
 
-  const handleCancel = () => {
+  const resetState = () => {
     setFile(null);
     setExtractedData(null);
     setEditedData(null);
     setResumeId(null);
+    setDuplicates({
+      work_experience: new Set(),
+      projects: new Set(),
+      skills: new Set(),
+      certifications: new Set(),
+      achievements: new Set()
+    });
     setSelectedItems({
       work_experience: new Set(),
       projects: new Set(),
@@ -219,16 +296,27 @@ const ResumeUploadDialog: React.FC<ResumeUploadDialogProps> = ({ children, onUpl
       certifications: new Set(),
       achievements: new Set()
     });
+  };
+
+  const handleOpenChange = (open: boolean) => {
+    setIsOpen(open);
+    if (!open) {
+      setTimeout(() => resetState(), 300); // Small delay to allow animation to finish
+    }
+  };
+
+  const handleCancel = () => {
     setIsOpen(false);
+    resetState();
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-hidden flex flex-col p-0">
+        <DialogHeader className="p-6 pb-2">
           <DialogTitle className="flex items-center space-x-2">
             <div className="w-8 h-8 rounded-lg bg-gradient-primary flex items-center justify-center">
               <FileText className="w-5 h-5 text-white" />
@@ -240,7 +328,7 @@ const ResumeUploadDialog: React.FC<ResumeUploadDialogProps> = ({ children, onUpl
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6 overflow-y-auto flex-1 pr-2">
+        <div className="space-y-6 overflow-y-auto flex-1 px-6 pb-6">
           {!extractedData ? (
             <>
               {/* File Upload Area */}
@@ -364,41 +452,47 @@ const ResumeUploadDialog: React.FC<ResumeUploadDialogProps> = ({ children, onUpl
               )}
 
               {/* Action Buttons */}
-              <div className="flex gap-3 pt-2">
-                <Button
-                  onClick={handleConfirm}
-                  disabled={confirming}
-                  className="btn-primary flex-1"
-                >
-                  {confirming ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Importing...
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle className="w-4 h-4 mr-2" />
-                      Confirm & Import
-                    </>
-                  )}
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={handleCancel}
-                  disabled={confirming}
-                >
-                  Cancel
-                </Button>
-              </div>
 
-              <p className="text-xs text-muted-foreground text-center">
-                After importing, you can continue editing in your profile and portfolio sections
-              </p>
             </div>
           )}
         </div>
+
+        {/* Fixed Action Buttons Footer */}
+        {extractedData && (
+          <div className="p-6 border-t bg-background mt-auto z-10">
+            <div className="flex gap-3 mb-2">
+              <Button
+                onClick={handleConfirm}
+                disabled={confirming}
+                className="btn-primary flex-1 shadow-lg"
+              >
+                {confirming ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Importing...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="w-4 h-4 mr-2" />
+                    Confirm & Import
+                  </>
+                )}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleCancel}
+                disabled={confirming}
+              >
+                Cancel
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground text-center">
+              Only selected items will be imported
+            </p>
+          </div>
+        )}
       </DialogContent>
-    </Dialog>
+    </Dialog >
   );
 };
 
