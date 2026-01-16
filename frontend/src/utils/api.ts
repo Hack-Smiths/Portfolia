@@ -331,3 +331,58 @@ export async function updatePrivacySettings(settings: {
   return await res.json();
 }
 
+// ---------------- AI ENHANCE ----------------
+
+export type AIEnhanceLength = "short" | "medium" | "long";
+
+export interface AIEnhanceProjectRequest {
+  title: string;
+  description: string;
+  tech_stack: string[];
+  length: AIEnhanceLength;
+  tones: string[]; // length 1–2
+}
+
+export interface AIEnhanceVariant {
+  id: number;
+  text: string;
+}
+
+export interface AIEnhanceProjectResponse {
+  variants: AIEnhanceVariant[];
+}
+
+export async function enhanceProjectDescription(
+  payload: AIEnhanceProjectRequest
+): Promise<AIEnhanceVariant[]> {
+  const token = localStorage.getItem("token");
+  if (!token) throw new Error("No token found");
+
+  try {
+    const res = await fetch(`${BASE_URL}/api/v1/ai/enhance/project`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      const message =
+        errorData?.detail ||
+        "AI enhancement failed. Please try again.";
+      throw new Error(message);
+    }
+
+    const data: AIEnhanceProjectResponse = await res.json();
+    return data.variants;
+  } catch (error: any) {
+    // Re-throw with normalized error message
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error("AI enhancement failed. Please try again.");
+  }
+}
