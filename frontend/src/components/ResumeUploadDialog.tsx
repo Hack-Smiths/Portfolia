@@ -5,6 +5,7 @@ import { FileText, Sparkles, Upload, Loader2, CheckCircle, AlertCircle, X } from
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { uploadResume, confirmResume } from '@/utils/api';
+import ResumeDataEditor from './ResumeDataEditor';
 
 interface ResumeUploadDialogProps {
   children: React.ReactNode;
@@ -59,8 +60,24 @@ const ResumeUploadDialog: React.FC<ResumeUploadDialogProps> = ({ children, onUpl
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [extractedData, setExtractedData] = useState<ExtractedData | null>(null);
+  const [editedData, setEditedData] = useState<ExtractedData | null>(null);
   const [resumeId, setResumeId] = useState<number | null>(null);
   const [confirming, setConfirming] = useState(false);
+
+  // Selection state for selective import
+  const [selectedItems, setSelectedItems] = useState<{
+    work_experience: Set<number>;
+    projects: Set<number>;
+    skills: Set<number>;
+    certifications: Set<number>;
+    achievements: Set<number>;
+  }>({
+    work_experience: new Set(),
+    projects: new Set(),
+    skills: new Set(),
+    certifications: new Set(),
+    achievements: new Set()
+  });
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -97,7 +114,17 @@ const ResumeUploadDialog: React.FC<ResumeUploadDialogProps> = ({ children, onUpl
     try {
       const response = await uploadResume(file);
       setExtractedData(response.extracted_data);
+      setEditedData(response.extracted_data); // Initialize edited data with extracted data
       setResumeId(response.resume_id);
+
+      // Initialize selection state - select all items by default
+      setSelectedItems({
+        work_experience: new Set(response.extracted_data.work_experience.map((_, i) => i)),
+        projects: new Set(response.extracted_data.projects.map((_, i) => i)),
+        skills: new Set(response.extracted_data.skills.map((_, i) => i)),
+        certifications: new Set(response.extracted_data.certifications.map((_, i) => i)),
+        achievements: new Set(response.extracted_data.achievements.map((_, i) => i))
+      });
 
       toast({
         title: 'Resume uploaded successfully!',
@@ -126,21 +153,43 @@ const ResumeUploadDialog: React.FC<ResumeUploadDialogProps> = ({ children, onUpl
   };
 
   const handleConfirm = async () => {
-    if (!resumeId || !extractedData) return;
+    if (!resumeId || !editedData) return;
 
     setConfirming(true);
     try {
-      await confirmResume(resumeId, extractedData);
+      // Filter data to only include selected items
+      const selectedData = {
+        ...editedData,
+        work_experience: editedData.work_experience.filter((_, i) => selectedItems.work_experience.has(i)),
+        projects: editedData.projects.filter((_, i) => selectedItems.projects.has(i)),
+        skills: editedData.skills.filter((_, i) => selectedItems.skills.has(i)),
+        certifications: editedData.certifications.filter((_, i) => selectedItems.certifications.has(i)),
+        achievements: editedData.achievements.filter((_, i) => selectedItems.achievements.has(i))
+      };
+
+      await confirmResume(resumeId, selectedData);
+
+      const totalSelected = selectedItems.work_experience.size + selectedItems.projects.size +
+        selectedItems.skills.size + selectedItems.certifications.size +
+        selectedItems.achievements.size;
 
       toast({
         title: 'Resume imported successfully!',
-        description: `Auto-categorized ${extractedData.achievements.length} achievements, ${extractedData.skills.length} skills, and ${extractedData.projects.length} projects.`,
+        description: `Imported ${totalSelected} selected items to your portfolio.`,
       });
 
       // Reset and close
       setFile(null);
       setExtractedData(null);
+      setEditedData(null);
       setResumeId(null);
+      setSelectedItems({
+        work_experience: new Set(),
+        projects: new Set(),
+        skills: new Set(),
+        certifications: new Set(),
+        achievements: new Set()
+      });
       setIsOpen(false);
 
       if (onUploadSuccess) {
@@ -161,7 +210,15 @@ const ResumeUploadDialog: React.FC<ResumeUploadDialogProps> = ({ children, onUpl
   const handleCancel = () => {
     setFile(null);
     setExtractedData(null);
+    setEditedData(null);
     setResumeId(null);
+    setSelectedItems({
+      work_experience: new Set(),
+      projects: new Set(),
+      skills: new Set(),
+      certifications: new Set(),
+      achievements: new Set()
+    });
     setIsOpen(false);
   };
 
@@ -170,7 +227,7 @@ const ResumeUploadDialog: React.FC<ResumeUploadDialogProps> = ({ children, onUpl
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2">
             <div className="w-8 h-8 rounded-lg bg-gradient-primary flex items-center justify-center">
@@ -183,7 +240,7 @@ const ResumeUploadDialog: React.FC<ResumeUploadDialogProps> = ({ children, onUpl
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6">
+        <div className="space-y-6 overflow-y-auto flex-1 pr-2">
           {!extractedData ? (
             <>
               {/* File Upload Area */}
@@ -291,45 +348,23 @@ const ResumeUploadDialog: React.FC<ResumeUploadDialogProps> = ({ children, onUpl
                     Data extracted successfully!
                   </p>
                   <p className="text-xs text-green-700 dark:text-green-300 mt-1">
-                    Review the information below and confirm to import into your portfolio.
+                    Review and edit the information below, then confirm to import into your portfolio.
                   </p>
                 </div>
               </div>
 
-              {/* Extracted Data Preview */}
-              <div className="space-y-3 p-4 bg-muted/30 rounded-lg max-h-64 overflow-y-auto">
-                <div>
-                  <p className="text-xs font-medium text-muted-foreground mb-1">Name</p>
-                  <p className="text-sm">{extractedData.name || 'Not found'}</p>
-                </div>
-                <div>
-                  <p className="text-xs font-medium text-muted-foreground mb-1">Title</p>
-                  <p className="text-sm">{extractedData.title || 'Not found'}</p>
-                </div>
-                <div>
-                  <p className="text-xs font-medium text-muted-foreground mb-1">Work Experience</p>
-                  <p className="text-sm">{extractedData.work_experience?.length || 0} entry(s) found</p>
-                </div>
-                <div>
-                  <p className="text-xs font-medium text-muted-foreground mb-1">Projects</p>
-                  <p className="text-sm">{extractedData.projects?.length || 0} project(s) found</p>
-                </div>
-                <div>
-                  <p className="text-xs font-medium text-muted-foreground mb-1">Skills</p>
-                  <p className="text-sm">{extractedData.skills?.length || 0} skill(s) found</p>
-                </div>
-                <div>
-                  <p className="text-xs font-medium text-muted-foreground mb-1">Certifications</p>
-                  <p className="text-sm">{extractedData.certifications?.length || 0} certification(s) found</p>
-                </div>
-                <div>
-                  <p className="text-xs font-medium text-muted-foreground mb-1">Achievements</p>
-                  <p className="text-sm">{extractedData.achievements?.length || 0} achievement(s) found</p>
-                </div>
-              </div>
+              {/* Resume Data Editor */}
+              {editedData && (
+                <ResumeDataEditor
+                  data={editedData}
+                  onDataChange={setEditedData}
+                  selectedItems={selectedItems}
+                  onSelectionChange={setSelectedItems}
+                />
+              )}
 
               {/* Action Buttons */}
-              <div className="flex gap-3">
+              <div className="flex gap-3 pt-2">
                 <Button
                   onClick={handleConfirm}
                   disabled={confirming}
@@ -357,7 +392,7 @@ const ResumeUploadDialog: React.FC<ResumeUploadDialogProps> = ({ children, onUpl
               </div>
 
               <p className="text-xs text-muted-foreground text-center">
-                After importing, you can edit all details in your profile and portfolio sections
+                After importing, you can continue editing in your profile and portfolio sections
               </p>
             </div>
           )}

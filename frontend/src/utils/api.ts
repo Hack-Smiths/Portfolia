@@ -401,3 +401,22 @@ export async function confirmResume(resumeId: number, approvedData: any) {
   return await res.json();
 }
 
+export async function getExistingPortfolioData() {
+  const token = localStorage.getItem("token");
+  if (!token) throw new Error("No token found");
+
+  const res = await fetch(`${BASE_URL}/api/portfolio/existing`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch existing portfolio data");
+  }
+
+  return await res.json();
+}
+
+

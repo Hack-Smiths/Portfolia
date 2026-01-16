@@ -49,12 +49,63 @@ import AIEditAssistant from "@/components/AIEditAssistant";
 import { useAuthContext } from '@/contexts/AuthContext';
 import { getPortfolioPreview } from "@/utils/api";
 
+interface Skill {
+  name: string;
+  level: number;
+  category: string;
+}
+
+interface Project {
+  id: string;
+  title: string;
+  description: string;
+  tech: string[];
+  features?: string[];
+  demo: string;
+  repo: string;
+  stars: number;
+  featured?: boolean;
+}
+
+interface Achievement {
+  title: string;
+  issuer: string;
+  date: string;
+  description: string;
+  type: 'internship' | 'award';
+}
+
+interface Certificate {
+  title: string;
+  issuer: string;
+  date: string;
+  credentialId: string;
+}
+
+interface PortfolioData {
+  username: string;
+  name: string;
+  title: string;
+  tagline: string;
+  location: string;
+  email: string;
+  github: string;
+  linkedin: string;
+  about: string;
+  avatar?: string;
+  theme_preference: string;
+  projects: Project[];
+  skills: Skill[];
+  achievements: Achievement[];
+  certificates: Certificate[];
+}
+
 const Portfolio = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [currentTemplate, setCurrentTemplate] = useState('classic');
   const [editingSection, setEditingSection] = useState<string | null>(null);
   const { user, loading } = useAuthContext();
-  const [portfolioData, setPortfolioData] = useState(null);
+  const [portfolioData, setPortfolioData] = useState<PortfolioData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [categorySkills, setCategorySkills] = useState<{ name: string; level: number }[]>([]);
   const [skills, setSkills] = useState<{ name: string; level: number }[]>([]);
@@ -134,7 +185,7 @@ const Portfolio = () => {
     }
     acc[skill.category].push(skill);
     return acc;
-  }, {} as Record<string, typeof portfolioData.skills>);
+  }, {} as Record<string, Skill[]>);
 
   const EditButton = ({ section }: { section: string }) => (
     isEditMode && (
@@ -205,8 +256,8 @@ const Portfolio = () => {
                 variant={currentTemplate === key ? "default" : "outline"}
                 onClick={() => setCurrentTemplate(key)}
                 className={`w-12 h-12 p-0 rounded-lg transition-all duration-300 ${currentTemplate === key
-                    ? `bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg`
-                    : `bg-white/30 backdrop-blur-sm border-white/30 hover:bg-white/50`
+                  ? `bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg`
+                  : `bg-white/30 backdrop-blur-sm border-white/30 hover:bg-white/50`
                   }`}
                 title={template.name}
               >
@@ -562,8 +613,8 @@ const Portfolio = () => {
                                     <Star
                                       key={i}
                                       className={`w-4 h-4 ${i < starCount
-                                          ? 'text-primary fill-primary'
-                                          : 'text-muted-foreground'
+                                        ? 'text-primary fill-primary'
+                                        : 'text-muted-foreground'
                                         }`}
                                     />
                                   ))}
@@ -642,8 +693,8 @@ const Portfolio = () => {
                               <Badge
                                 variant="outline"
                                 className={`${achievement.type === 'internship'
-                                    ? 'border-blue-500/30 text-blue-600 bg-blue-500/10'
-                                    : 'border-yellow-500/30 text-yellow-600 bg-yellow-500/10'
+                                  ? 'border-blue-500/30 text-blue-600 bg-blue-500/10'
+                                  : 'border-yellow-500/30 text-yellow-600 bg-yellow-500/10'
                                   } px-3 py-1 rounded-lg font-medium`}
                               >
                                 {achievement.type === 'internship' ? '💼 Internship' : '🏆 Award'}
@@ -708,8 +759,8 @@ const Portfolio = () => {
                                 <Badge
                                   variant="outline"
                                   className={`${achievement.type === 'internship'
-                                      ? 'border-blue-500/30 text-blue-600 bg-blue-500/10'
-                                      : 'border-yellow-500/30 text-yellow-600 bg-yellow-500/10'
+                                    ? 'border-blue-500/30 text-blue-600 bg-blue-500/10'
+                                    : 'border-yellow-500/30 text-yellow-600 bg-yellow-500/10'
                                     } px-3 py-1 rounded-lg font-medium`}
                                 >
                                   {achievement.type === 'internship' ? '💼 Internship' : '🏆 Award'}
@@ -1067,8 +1118,8 @@ const Portfolio = () => {
                                   <Star
                                     key={i}
                                     className={`w-4 h-4 ${i < starCount
-                                        ? 'text-orange-500 fill-orange-500'
-                                        : 'text-slate-300 dark:text-slate-600'
+                                      ? 'text-orange-500 fill-orange-500'
+                                      : 'text-slate-300 dark:text-slate-600'
                                       }`}
                                   />
                                 ))}
@@ -1454,8 +1505,8 @@ const Portfolio = () => {
                                 <Star
                                   key={i}
                                   className={`w-4 h-4 ${i < Math.ceil(skill.level / 20)
-                                      ? 'text-electric fill-electric'
-                                      : 'text-white/20'
+                                    ? 'text-electric fill-electric'
+                                    : 'text-white/20'
                                     }`}
                                 />
                               ))}
