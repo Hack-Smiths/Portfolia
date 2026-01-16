@@ -22,7 +22,7 @@ from app.schemas.resume import (
     ResumeOut
 )
 from app.utils.resume_extractor import extract_text
-from app.utils.resume_parser import parse_resume_with_ai_sync
+from app.utils.groq_resume_parser import parse_resume_with_groq  # Groq LLM parser
 import os
 import logging
 from io import BytesIO
@@ -92,8 +92,12 @@ async def upload_resume(
         )
     
     # Extract text from file
+    import time
+    extraction_start = time.time()
     logger.info(f"Extracting text from {file_ext} file: {file.filename}")
     resume_text = extract_text(BytesIO(file_bytes), file_ext)
+    extraction_time = time.time() - extraction_start
+    logger.info(f"⏱️ TEXT EXTRACTION took {extraction_time:.2f} seconds")
     
     if not resume_text:
         raise HTTPException(
@@ -103,10 +107,14 @@ async def upload_resume(
     
     logger.info(f"Extracted {len(resume_text)} characters from resume")
     
-    # Parse resume with AI (using OpenRouter)
+    # Parse resume with Groq LLM (fast and reliable)
     try:
-        logger.info("Parsing resume with OpenRouter AI...")
-        extracted_data = parse_resume_with_ai_sync(resume_text)
+        llm_start = time.time()
+        logger.info("Parsing resume with Groq LLM...")
+        extracted_data = parse_resume_with_groq(resume_text)
+        llm_time = time.time() - llm_start
+        logger.info(f"⏱️ GROQ PARSING took {llm_time:.2f} seconds")
+        logger.info(f"⏱️ TOTAL TIME: {extraction_time + llm_time:.2f} seconds (Extraction: {extraction_time:.2f}s, Groq: {llm_time:.2f}s)")
     except ValueError as e:
         # Validation or JSON parsing error
         logger.error(f"Resume parsing validation error: {str(e)}")
