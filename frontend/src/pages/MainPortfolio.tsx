@@ -177,7 +177,7 @@ const MainPortfolio = ({ portfolioData: propData, isPublicView = false }: MainPo
                   {/* Professional Avatar */}
                   <div className="flex-shrink-0 relative">
                     <Avatar className="w-48 h-48 lg:w-56 lg:h-56 mx-auto ring-4 ring-border shadow-xl">
-                      <AvatarImage src="/placeholder.svg" alt={portfolioData.name} className="object-cover" />
+                      <AvatarImage src={portfolioData.avatar || "/placeholder.svg"} alt={portfolioData.name} className="object-cover" />
                       <AvatarFallback className="text-5xl font-bold bg-primary text-primary-foreground">
                         {portfolioData.name.split(' ').map(n => n[0]).join('')}
                       </AvatarFallback>
@@ -477,7 +477,7 @@ const MainPortfolio = ({ portfolioData: propData, isPublicView = false }: MainPo
                         </div>
 
                         <div className="space-y-3">
-                          {categorySkills.map((skill, skillIndex) => {
+                          {(categorySkills as typeof portfolioData.skills).map((skill, skillIndex) => {
                             const skillLevel = skill.level || 70;
                             const getStarLevel = (level: number) => {
                               if (level >= 85) return 'professional';
@@ -498,8 +498,8 @@ const MainPortfolio = ({ portfolioData: propData, isPublicView = false }: MainPo
                                     <Star
                                       key={i}
                                       className={`w-4 h-4 ${i < starCount
-                                          ? 'text-primary fill-primary'
-                                          : 'text-muted-foreground'
+                                        ? 'text-primary fill-primary'
+                                        : 'text-muted-foreground'
                                         }`}
                                     />
                                   ))}
@@ -578,8 +578,8 @@ const MainPortfolio = ({ portfolioData: propData, isPublicView = false }: MainPo
                             <Badge
                               variant="outline"
                               className={`${achievement.type === 'internship'
-                                  ? 'border-blue-500/30 text-blue-600 bg-blue-500/10'
-                                  : 'border-yellow-500/30 text-yellow-600 bg-yellow-500/10'
+                                ? 'border-blue-500/30 text-blue-600 bg-blue-500/10'
+                                : 'border-yellow-500/30 text-yellow-600 bg-yellow-500/10'
                                 } px-3 py-1 rounded-lg font-medium`}
                             >
                               {achievement.type === 'internship' ? '💼 Internship' : '🏆 Award'}
@@ -647,8 +647,8 @@ const MainPortfolio = ({ portfolioData: propData, isPublicView = false }: MainPo
                               <Badge
                                 variant="outline"
                                 className={`${achievement.type === 'internship'
-                                    ? 'border-blue-500/30 text-blue-600 bg-blue-500/10'
-                                    : 'border-yellow-500/30 text-yellow-600 bg-yellow-500/10'
+                                  ? 'border-blue-500/30 text-blue-600 bg-blue-500/10'
+                                  : 'border-yellow-500/30 text-yellow-600 bg-yellow-500/10'
                                   } px-3 py-1 rounded-lg font-medium`}
                               >
                                 {achievement.type === 'internship' ? '💼 Internship' : '🏆 Award'}

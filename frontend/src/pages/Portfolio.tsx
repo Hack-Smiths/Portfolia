@@ -6,11 +6,11 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
-import { 
-  Github, 
-  Linkedin, 
-  Mail, 
-  ExternalLink, 
+import {
+  Github,
+  Linkedin,
+  Mail,
+  ExternalLink,
   Download,
   Copy,
   Star,
@@ -47,14 +47,65 @@ import Navbar from "@/components/Navbar";
 import AIAssistant from "@/components/AIAssistant";
 import AIEditAssistant from "@/components/AIEditAssistant";
 import { useAuthContext } from '@/contexts/AuthContext';
-import { getPortfolioPreview } from "@/utils/api"; 
+import { getPortfolioPreview } from "@/utils/api";
+
+interface Skill {
+  name: string;
+  level: number;
+  category: string;
+}
+
+interface Project {
+  id: string;
+  title: string;
+  description: string;
+  tech: string[];
+  features?: string[];
+  demo: string;
+  repo: string;
+  stars: number;
+  featured?: boolean;
+}
+
+interface Achievement {
+  title: string;
+  issuer: string;
+  date: string;
+  description: string;
+  type: 'internship' | 'award';
+}
+
+interface Certificate {
+  title: string;
+  issuer: string;
+  date: string;
+  credentialId: string;
+}
+
+interface PortfolioData {
+  username: string;
+  name: string;
+  title: string;
+  tagline: string;
+  location: string;
+  email: string;
+  github: string;
+  linkedin: string;
+  about: string;
+  avatar?: string;
+  theme_preference: string;
+  projects: Project[];
+  skills: Skill[];
+  achievements: Achievement[];
+  certificates: Certificate[];
+}
 
 const Portfolio = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [currentTemplate, setCurrentTemplate] = useState('classic');
   const [editingSection, setEditingSection] = useState<string | null>(null);
   const { user, loading } = useAuthContext();
-  const [portfolioData, setPortfolioData] = useState(null);
+  const [portfolioData, setPortfolioData] = useState<PortfolioData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [categorySkills, setCategorySkills] = useState<{ name: string; level: number }[]>([]);
   const [skills, setSkills] = useState<{ name: string; level: number }[]>([]);
@@ -134,7 +185,7 @@ const Portfolio = () => {
     }
     acc[skill.category].push(skill);
     return acc;
-  }, {} as Record<string, typeof portfolioData.skills>);
+  }, {} as Record<string, Skill[]>);
 
   const EditButton = ({ section }: { section: string }) => (
     isEditMode && (
@@ -152,7 +203,7 @@ const Portfolio = () => {
   return (
     <div className={`min-h-screen transition-all duration-700 ${currentStyles.background}`}>
       <Navbar />
-      
+
       {/* Portfolio Header - Floating */}
       <header className={`fixed top-20 left-1/2 transform -translate-x-1/2 z-40 transition-all duration-700 backdrop-blur-xl bg-white/90 dark:bg-slate-900/90 rounded-2xl shadow-2xl border border-white/20 dark:border-slate-700/20 w-[95%] max-w-4xl`}>
         <div className="px-3 sm:px-6 py-3 sm:py-4">
@@ -169,7 +220,7 @@ const Portfolio = () => {
                 <p className="font-semibold text-sm text-foreground">Preview</p>
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-2 sm:space-x-3">
               <Button
                 variant={isEditMode ? "default" : "outline"}
@@ -204,11 +255,10 @@ const Portfolio = () => {
                 size="sm"
                 variant={currentTemplate === key ? "default" : "outline"}
                 onClick={() => setCurrentTemplate(key)}
-                className={`w-12 h-12 p-0 rounded-lg transition-all duration-300 ${
-                  currentTemplate === key 
-                    ? `bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg` 
-                    : `bg-white/30 backdrop-blur-sm border-white/30 hover:bg-white/50`
-                }`}
+                className={`w-12 h-12 p-0 rounded-lg transition-all duration-300 ${currentTemplate === key
+                  ? `bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg`
+                  : `bg-white/30 backdrop-blur-sm border-white/30 hover:bg-white/50`
+                  }`}
                 title={template.name}
               >
                 {template.icon}
@@ -219,15 +269,15 @@ const Portfolio = () => {
       </div>
 
       <main className="pt-32 pb-20">
-        
+
         {/* Template 1: Professional Clean Design */}
         {currentTemplate === 'classic' && (
           <div className="space-y-6 relative">
             {/* Subtle Background Pattern */}
             <div className="fixed inset-0 pointer-events-none z-0">
-              <div className="absolute inset-0" style={{ 
+              <div className="absolute inset-0" style={{
                 backgroundImage: `radial-gradient(circle at 25% 25%, hsl(var(--primary) / 0.03) 0%, transparent 50%), 
-                                  radial-gradient(circle at 75% 75%, hsl(var(--primary) / 0.02) 0%, transparent 50%)` 
+                                  radial-gradient(circle at 75% 75%, hsl(var(--primary) / 0.02) 0%, transparent 50%)`
               }} />
             </div>
 
@@ -238,52 +288,52 @@ const Portfolio = () => {
                   {/* Professional Avatar */}
                   <div className="flex-shrink-0 relative">
                     <Avatar className="w-48 h-48 lg:w-56 lg:h-56 mx-auto ring-4 ring-border shadow-xl">
-                      <AvatarImage src="/placeholder.svg" alt={portfolioData.name} className="object-cover" />
+                      <AvatarImage src={portfolioData.avatar || "/placeholder.svg"} alt={portfolioData.name} className="object-cover" />
                       <AvatarFallback className="text-5xl font-bold bg-primary text-primary-foreground">
                         {portfolioData.name.split(' ').map(n => n[0]).join('')}
                       </AvatarFallback>
                     </Avatar>
-                    
+
                     {/* Professional Status Badge */}
                     <div className="absolute -bottom-4 -right-4 bg-green-500 text-white px-4 py-2 rounded-full text-sm font-medium shadow-lg flex items-center space-x-2">
                       <div className="w-2 h-2 bg-white rounded-full"></div>
                       <span>Available</span>
                     </div>
                   </div>
-                  
+
                   {/* Professional Typography */}
                   <div className="flex-1 text-center lg:text-left space-y-6">
                     <div className="space-y-4">
                       <h1 className="text-5xl lg:text-7xl font-bold text-foreground leading-tight">
                         {portfolioData.name}
                       </h1>
-                      
+
                       <div className="space-y-2">
                         <p className="text-2xl lg:text-3xl font-medium text-muted-foreground">
                           {portfolioData.title}
                         </p>
                         <div className="w-24 h-1 bg-primary mx-auto lg:mx-0 rounded-full" />
                       </div>
-                      
+
                       <p className="text-lg text-muted-foreground max-w-2xl mx-auto lg:mx-0 leading-relaxed">
                         {portfolioData.tagline}
                       </p>
                     </div>
-                    
+
                     {/* Clean Contact Info */}
                     <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
                       <div className="bg-card border border-border px-4 py-2 rounded-lg flex items-center space-x-2 shadow-sm">
                         <MapPin className="w-4 h-4 text-muted-foreground" />
                         <span className="text-foreground">{portfolioData.location}</span>
                       </div>
-                      <a 
+                      <a
                         href={`mailto:${portfolioData.email}`}
                         className="bg-card border border-border px-4 py-2 rounded-lg flex items-center space-x-2 shadow-sm hover:shadow-md transition-shadow"
                       >
                         <Mail className="w-4 h-4 text-muted-foreground" />
                         <span className="text-foreground">{portfolioData.email}</span>
                       </a>
-                      <a 
+                      <a
                         href={`${portfolioData.github}`}
                         className="bg-card border border-border px-4 py-2 rounded-lg flex items-center space-x-2 shadow-sm hover:shadow-md transition-shadow"
                         target="_blank"
@@ -292,7 +342,7 @@ const Portfolio = () => {
                         <Github className="w-4 h-4 text-muted-foreground" />
                         <span className="text-foreground">{portfolioData.github}</span>
                       </a>
-                      <a 
+                      <a
                         href={`${portfolioData.linkedin}`}
                         className="bg-card border border-border px-4 py-2 rounded-lg flex items-center space-x-2 shadow-sm hover:shadow-md transition-shadow"
                         target="_blank"
@@ -302,20 +352,20 @@ const Portfolio = () => {
                         <span className="text-foreground">{portfolioData.linkedin}</span>
                       </a>
                     </div>
-                    
+
                     {/* Professional CTA Buttons */}
                     <div className="flex flex-wrap gap-4 justify-center lg:justify-start pt-6">
-                      <Button 
-                        size="lg" 
+                      <Button
+                        size="lg"
                         className="bg-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300"
                         onClick={copyPortfolioLink}
                       >
                         <Copy className="w-5 h-5 mr-3" />
                         Share Portfolio
                       </Button>
-                      <Button 
-                        size="lg" 
-                        variant="outline" 
+                      <Button
+                        size="lg"
+                        variant="outline"
                         className="shadow-lg hover:shadow-xl transition-all duration-300"
                       >
                         <Download className="w-5 h-5 mr-3" />
@@ -375,10 +425,10 @@ const Portfolio = () => {
                   </div>
                   <div className="w-20 h-1 bg-primary mx-auto rounded-full" />
                 </div>
-                
+
                 <Card className="bg-card border border-border shadow-lg hover:shadow-xl transition-all duration-300 relative">
                   <EditButton section="About Me" />
-                  
+
                   <div className="p-8">
                     <div className="max-w-3xl mx-auto">
                       <p className="text-lg text-muted-foreground leading-relaxed text-center">
@@ -405,12 +455,12 @@ const Portfolio = () => {
                     Showcasing innovation through code with cutting-edge technology
                   </p>
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative">
                   <EditButton section="Projects" />
                   {portfolioData.projects.map((project, index) => (
-                    <Card 
-                      key={project.id} 
+                    <Card
+                      key={project.id}
                       className="bg-card border border-border shadow-lg hover:shadow-xl transition-all duration-300 group"
                     >
                       <div className="p-6">
@@ -425,7 +475,7 @@ const Portfolio = () => {
                             </Badge>
                           )}
                         </div>
-                        
+
                         <div className="flex items-center justify-between mb-3">
                           <h3 className="text-xl font-semibold text-foreground">
                             {project.title}
@@ -435,16 +485,16 @@ const Portfolio = () => {
                             <span className="text-foreground">{project.stars}</span>
                           </div>
                         </div>
-                        
+
                         <p className="text-muted-foreground text-sm leading-relaxed mb-4">
                           {project.description}
                         </p>
-                        
+
                         {/* Tech Stack */}
                         <div className="flex flex-wrap gap-2 mb-4">
                           {project.tech.map((tech: string, i: number) => (
-                            <Badge 
-                              key={i} 
+                            <Badge
+                              key={i}
                               variant="secondary"
                               className="text-xs"
                             >
@@ -471,10 +521,10 @@ const Portfolio = () => {
 
                         {/* Action Buttons */}
                         <div className="flex gap-2">
-                          <Button 
-                            size="sm" 
+                          <Button
+                            size="sm"
                             variant="outline"
-                            className="flex-1" 
+                            className="flex-1"
                             asChild
                           >
                             <a href={project.demo} target="_blank" rel="noopener noreferrer">
@@ -482,9 +532,9 @@ const Portfolio = () => {
                               Demo
                             </a>
                           </Button>
-                          <Button 
-                            size="sm" 
-                            className="flex-1" 
+                          <Button
+                            size="sm"
+                            className="flex-1"
                             asChild
                           >
                             <a href={project.repo} target="_blank" rel="noopener noreferrer">
@@ -515,12 +565,12 @@ const Portfolio = () => {
                     Expertise across the full development spectrum
                   </p>
                 </div>
-                
+
                 <div className="grid md:grid-cols-2 gap-8 relative px-4">
                   <EditButton section="Skills" />
                   {Object.entries(skillsByCategory).map(([category, categorySkills], categoryIndex) => (
-                    <Card 
-                      key={category} 
+                    <Card
+                      key={category}
                       className="bg-card border border-border shadow-lg hover:shadow-xl transition-all duration-300 mx-4"
                     >
                       <div className="p-6">
@@ -540,7 +590,7 @@ const Portfolio = () => {
                             <div className="w-12 h-0.5 bg-primary rounded-full mt-1" />
                           </div>
                         </div>
-                        
+
                         <div className="space-y-3">
                           {categorySkills.map((skill, skillIndex) => {
                             const skillLevel = skill.level || 70;
@@ -551,22 +601,21 @@ const Portfolio = () => {
                             };
                             const starLevel = getStarLevel(skillLevel);
                             const starCount = starLevel === 'professional' ? 3 : starLevel === 'intermediate' ? 2 : 1;
-                            
+
                             return (
-                              <div 
+                              <div
                                 key={skillIndex}
                                 className="flex items-center justify-between p-3 bg-secondary/50 rounded-lg"
                               >
                                 <span className="font-medium text-foreground">{skill.name}</span>
                                 <div className="flex items-center space-x-1">
                                   {[...Array(3)].map((_, i) => (
-                                    <Star 
-                                      key={i} 
-                                      className={`w-4 h-4 ${
-                                        i < starCount 
-                                          ? 'text-primary fill-primary' 
-                                          : 'text-muted-foreground'
-                                      }`} 
+                                    <Star
+                                      key={i}
+                                      className={`w-4 h-4 ${i < starCount
+                                        ? 'text-primary fill-primary'
+                                        : 'text-muted-foreground'
+                                        }`}
                                     />
                                   ))}
                                 </div>
@@ -596,15 +645,15 @@ const Portfolio = () => {
                     Celebrating moments of growth and recognition in my journey
                   </p>
                 </div>
-                
+
                 <div className="relative">
                   <EditButton section="Achievements" />
-                  
+
                   {/* Mobile Cards Layout */}
                   <div className="block md:hidden">
                     <div className="grid gap-6">
                       {portfolioData.achievements.map((achievement, index) => (
-                        <Card 
+                        <Card
                           key={index}
                           className="bg-card border border-border shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden animate-fade-in"
                           style={{ animationDelay: `${index * 200}ms` }}
@@ -613,12 +662,12 @@ const Portfolio = () => {
                             <div className="flex items-start space-x-4 mb-4">
                               {/* Icon */}
                               <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center shadow-lg">
-                                {achievement.type === 'internship' ? 
-                                  <Briefcase className="w-6 h-6 text-primary" /> : 
+                                {achievement.type === 'internship' ?
+                                  <Briefcase className="w-6 h-6 text-primary" /> :
                                   <Trophy className="w-6 h-6 text-primary" />
                                 }
                               </div>
-                              
+
                               <div className="flex-1">
                                 <h3 className="text-xl font-bold text-foreground mb-2">
                                   {achievement.title}
@@ -628,26 +677,25 @@ const Portfolio = () => {
                                   <span>{achievement.issuer}</span>
                                 </div>
                               </div>
-                              
+
                               <Badge className="bg-primary/10 text-primary px-3 py-1 rounded-lg shadow-lg text-sm">
                                 <Calendar className="w-4 h-4 mr-1" />
                                 {achievement.date}
                               </Badge>
                             </div>
-                            
+
                             <p className="text-muted-foreground leading-relaxed mb-4">
                               {achievement.description}
                             </p>
-                            
+
                             {/* Achievement Type Badge */}
                             <div className="flex justify-end">
-                              <Badge 
-                                variant="outline" 
-                                className={`${
-                                  achievement.type === 'internship' 
-                                    ? 'border-blue-500/30 text-blue-600 bg-blue-500/10' 
-                                    : 'border-yellow-500/30 text-yellow-600 bg-yellow-500/10'
-                                } px-3 py-1 rounded-lg font-medium`}
+                              <Badge
+                                variant="outline"
+                                className={`${achievement.type === 'internship'
+                                  ? 'border-blue-500/30 text-blue-600 bg-blue-500/10'
+                                  : 'border-yellow-500/30 text-yellow-600 bg-yellow-500/10'
+                                  } px-3 py-1 rounded-lg font-medium`}
                               >
                                 {achievement.type === 'internship' ? '💼 Internship' : '🏆 Award'}
                               </Badge>
@@ -662,24 +710,24 @@ const Portfolio = () => {
                   <div className="hidden md:block relative">
                     {/* Animated Timeline Line */}
                     <div className="absolute left-8 top-0 bottom-0 w-1 bg-primary rounded-full" />
-                    
+
                     <div className="space-y-12">
                       {portfolioData.achievements.map((achievement, index) => (
-                        <div 
-                          key={index} 
+                        <div
+                          key={index}
                           className="relative flex items-start group"
                           style={{ animationDelay: `${index * 300}ms` }}
                         >
                           {/* Timeline Marker */}
                           <div className="relative z-10 mr-8">
                             <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-500 transform hover:scale-105">
-                              {achievement.type === 'internship' ? 
-                                <Briefcase className="w-8 h-8 text-primary-foreground" /> : 
+                              {achievement.type === 'internship' ?
+                                <Briefcase className="w-8 h-8 text-primary-foreground" /> :
                                 <Trophy className="w-8 h-8 text-primary-foreground" />
                               }
                             </div>
                           </div>
-                          
+
                           {/* Achievement Card */}
                           <Card className="flex-1 bg-card border border-border shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
                             <div className="relative z-10 p-8">
@@ -695,26 +743,25 @@ const Portfolio = () => {
                                     </div>
                                   </div>
                                 </div>
-                                
+
                                 <Badge className="bg-primary/10 text-primary px-4 py-2 rounded-xl shadow-lg">
                                   <Calendar className="w-4 h-4 mr-2" />
                                   {achievement.date}
                                 </Badge>
                               </div>
-                              
+
                               <p className="text-muted-foreground leading-relaxed">
                                 {achievement.description}
                               </p>
-                              
+
                               {/* Achievement Type Badge */}
                               <div className="mt-6 flex justify-end">
-                                <Badge 
-                                  variant="outline" 
-                                  className={`${
-                                    achievement.type === 'internship' 
-                                      ? 'border-blue-500/30 text-blue-600 bg-blue-500/10' 
-                                      : 'border-yellow-500/30 text-yellow-600 bg-yellow-500/10'
-                                  } px-3 py-1 rounded-lg font-medium`}
+                                <Badge
+                                  variant="outline"
+                                  className={`${achievement.type === 'internship'
+                                    ? 'border-blue-500/30 text-blue-600 bg-blue-500/10'
+                                    : 'border-yellow-500/30 text-yellow-600 bg-yellow-500/10'
+                                    } px-3 py-1 rounded-lg font-medium`}
                                 >
                                   {achievement.type === 'internship' ? '💼 Internship' : '🏆 Award'}
                                 </Badge>
@@ -749,14 +796,14 @@ const Portfolio = () => {
                           Verified
                         </Badge>
                       </div>
-                      
+
                       <h3 className="text-lg font-bold text-foreground mb-2">
                         {cert.title}
                       </h3>
-                      
+
                       <p className="text-primary font-medium mb-2">{cert.issuer}</p>
                       <p className="text-sm text-muted-foreground mb-3">{cert.date}</p>
-                      
+
                       <div className="text-sm text-muted-foreground mb-4">
                         <p className="mb-2">Professional certification demonstrating expertise in cloud computing fundamentals and best practices.</p>
                         <div className="flex items-center space-x-2">
@@ -764,7 +811,7 @@ const Portfolio = () => {
                           <code className="px-2 py-1 bg-secondary rounded text-xs">{cert.credentialId}</code>
                         </div>
                       </div>
-                      
+
                       <Button variant="outline" size="sm" className="w-full">
                         <ExternalLink className="w-4 h-4 mr-2" />
                         View Certificate
@@ -801,7 +848,7 @@ const Portfolio = () => {
         {/* Template 2: Elegant Professional Design */}
         {currentTemplate === 'creative' && (
           <div className="relative bg-gradient-to-br from-orange-50 via-white to-red-50 dark:from-slate-900 dark:via-orange-950 dark:to-slate-900">
-            
+
             {/* Elegant Hero Section */}
             <section className="relative flex items-center justify-center overflow-hidden pt-6 pb-12">
               {/* Sophisticated Background */}
@@ -810,7 +857,7 @@ const Portfolio = () => {
                 <div className="absolute bottom-0 right-0 w-96 h-96 bg-red-500/20 rounded-full blur-3xl"></div>
                 <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl"></div>
               </div>
-              
+
               <div className="relative z-10 max-w-7xl mx-auto px-6 py-8">
                 <div className="grid lg:grid-cols-2 gap-16 items-center">
                   {/* Elegant Text Content */}
@@ -820,13 +867,13 @@ const Portfolio = () => {
                         <div className="w-2 h-2 bg-orange-500 rounded-full mr-3 animate-pulse"></div>
                         <span className="text-sm font-medium text-orange-800 dark:text-orange-200">Available for opportunities</span>
                       </div>
-                      
+
                       <h1 className="text-6xl lg:text-7xl font-bold leading-tight">
                         <span className="bg-gradient-to-r from-slate-900 via-orange-900 to-slate-900 dark:from-white dark:via-orange-100 dark:to-white bg-clip-text text-transparent">
                           {portfolioData.name}
                         </span>
                       </h1>
-                      
+
                       <div className="space-y-4">
                         <p className="text-2xl lg:text-3xl font-semibold text-slate-700 dark:text-slate-300">
                           {portfolioData.title}
@@ -834,23 +881,23 @@ const Portfolio = () => {
                         <div className="w-32 h-1 bg-gradient-to-r from-orange-500 to-red-600 rounded-full"></div>
                       </div>
                     </div>
-                    
+
                     <p className="text-xl text-slate-600 dark:text-slate-400 leading-relaxed max-w-xl">
                       {portfolioData.tagline}
                     </p>
-                    
+
                     {/* Elegant Contact Row */}
                     <div className="flex flex-wrap gap-4">
-                      <Button 
-                        size="lg" 
+                      <Button
+                        size="lg"
                         className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white shadow-xl hover:shadow-2xl transition-all duration-300 rounded-xl px-8"
                       >
                         <Mail className="w-5 h-5 mr-3" />
                         Get In Touch
                       </Button>
-                      <Button 
-                        size="lg" 
-                        variant="outline" 
+                      <Button
+                        size="lg"
+                        variant="outline"
                         className="border-2 border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl px-8"
                       >
                         <Download className="w-5 h-5 mr-3" />
@@ -858,7 +905,7 @@ const Portfolio = () => {
                       </Button>
                     </div>
                   </div>
-                  
+
                   {/* Elegant Profile Section */}
                   <div className="relative">
                     <div className="relative z-10 bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-2xl border border-slate-200 dark:border-slate-700">
@@ -869,13 +916,13 @@ const Portfolio = () => {
                             {portfolioData.name.split(' ').map(n => n[0]).join('')}
                           </AvatarFallback>
                         </Avatar>
-                        
+
                         <div className="space-y-3">
                           <div className="flex items-center justify-center space-x-2 text-slate-600 dark:text-slate-400">
                             <MapPin className="w-4 h-4" />
                             <span>{portfolioData.location}</span>
                           </div>
-                          
+
                           <div className="flex justify-center space-x-4">
                             <a href={`https://github.com/${portfolioData.github}`} className="p-3 bg-slate-100 dark:bg-slate-700 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">
                               <Github className="w-5 h-5" />
@@ -890,7 +937,7 @@ const Portfolio = () => {
                         </div>
                       </div>
                     </div>
-                    
+
                     {/* Floating Elements */}
                     <div className="absolute -top-4 -left-4 w-24 h-24 bg-orange-500/20 rounded-full blur-xl"></div>
                     <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-red-500/20 rounded-full blur-xl"></div>
@@ -907,14 +954,14 @@ const Portfolio = () => {
                   <h2 className="text-4xl font-bold text-slate-900 dark:text-white mb-4">About Me</h2>
                   <div className="w-24 h-1 bg-gradient-to-r from-orange-500 to-red-600 rounded-full mx-auto mb-6"></div>
                 </div>
-                
+
                 <div className="bg-white dark:bg-slate-800 rounded-3xl p-10 shadow-2xl border border-slate-200 dark:border-slate-700">
                   <div className="grid lg:grid-cols-2 gap-12 items-center">
                     <div>
                       <p className="text-lg text-slate-700 dark:text-slate-300 leading-relaxed mb-8">
                         {portfolioData.about}
                       </p>
-                      
+
                       <div className="grid md:grid-cols-2 gap-6">
                         <div className="space-y-4">
                           <h4 className="font-semibold text-slate-900 dark:text-white flex items-center">
@@ -927,7 +974,7 @@ const Portfolio = () => {
                             <li>• Open Source Contributions</li>
                           </ul>
                         </div>
-                        
+
                         <div className="space-y-4">
                           <h4 className="font-semibold text-slate-900 dark:text-white flex items-center">
                             <Lightbulb className="w-5 h-5 mr-2 text-red-500" />
@@ -941,7 +988,7 @@ const Portfolio = () => {
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="flex justify-center">
                       <div className="relative">
                         <div className="w-64 h-64 bg-gradient-to-br from-orange-100 to-red-100 dark:from-orange-900/30 dark:to-red-900/30 rounded-3xl flex items-center justify-center">
@@ -967,12 +1014,12 @@ const Portfolio = () => {
                   <p className="text-xl text-slate-600 dark:text-slate-400">Crafting digital experiences with cutting-edge technology</p>
                   <div className="w-24 h-1 bg-gradient-to-r from-orange-500 to-red-600 rounded-full mx-auto mt-6"></div>
                 </div>
-                
+
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                   {portfolioData.projects.map((project) => (
                     <div key={project.id} className="group relative">
                       <div className="bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-xl border border-slate-200 dark:border-slate-700 transition-all duration-500 hover:shadow-2xl hover:-translate-y-2">
-                        
+
                         {/* Project Content */}
                         <div className="p-6">
                           <div className="flex items-start justify-between mb-4">
@@ -986,10 +1033,10 @@ const Portfolio = () => {
                               </div>
                             )}
                           </div>
-                          
+
                           <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3">{project.title}</h3>
                           <p className="text-slate-600 dark:text-slate-400 mb-4 line-clamp-2">{project.description}</p>
-                          
+
                           {/* Features Section */}
                           <div className="mb-4">
                             <h4 className="text-sm font-semibold text-slate-900 dark:text-white mb-2">Key Features:</h4>
@@ -1006,7 +1053,7 @@ const Portfolio = () => {
                               )}
                             </div>
                           </div>
-                          
+
                           {/* Tech Stack */}
                           <div className="flex flex-wrap gap-2 mb-6">
                             {project.tech.slice(0, 3).map((tech) => (
@@ -1020,7 +1067,7 @@ const Portfolio = () => {
                               </span>
                             )}
                           </div>
-                          
+
                           {/* Action Buttons */}
                           <div className="flex space-x-3">
                             <Button size="sm" className="flex-1 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white">
@@ -1048,7 +1095,7 @@ const Portfolio = () => {
                   <p className="text-xl text-slate-600 dark:text-slate-400">Expertise across the full technology stack</p>
                   <div className="w-24 h-1 bg-gradient-to-r from-orange-500 to-red-600 rounded-full mx-auto mt-6"></div>
                 </div>
-                
+
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                   {Object.entries(skillsByCategory).map(([category, skills]) => (
                     <div key={category} className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-xl border border-slate-200 dark:border-slate-700">
@@ -1062,19 +1109,18 @@ const Portfolio = () => {
                             return 1;
                           };
                           const starCount = getStarLevel(skillLevel);
-                          
+
                           return (
                             <div key={skill.name} className="flex justify-between items-center">
                               <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{skill.name}</span>
                               <div className="flex items-center space-x-1">
                                 {[...Array(3)].map((_, i) => (
-                                  <Star 
-                                    key={i} 
-                                    className={`w-4 h-4 ${
-                                      i < starCount 
-                                        ? 'text-orange-500 fill-orange-500' 
-                                        : 'text-slate-300 dark:text-slate-600'
-                                    }`} 
+                                  <Star
+                                    key={i}
+                                    className={`w-4 h-4 ${i < starCount
+                                      ? 'text-orange-500 fill-orange-500'
+                                      : 'text-slate-300 dark:text-slate-600'
+                                      }`}
                                   />
                                 ))}
                               </div>
@@ -1097,7 +1143,7 @@ const Portfolio = () => {
                   <p className="text-xl text-slate-600 dark:text-slate-400">Milestones that shaped my journey</p>
                   <div className="w-24 h-1 bg-gradient-to-r from-orange-500 to-red-600 rounded-full mx-auto mt-6"></div>
                 </div>
-                
+
                 {/* Mobile/Tablet: Grid Layout */}
                 <div className="block lg:hidden">
                   <div className="grid md:grid-cols-2 gap-6">
@@ -1117,18 +1163,18 @@ const Portfolio = () => {
                     ))}
                   </div>
                 </div>
-                
+
                 {/* Desktop: Timeline Layout */}
                 <div className="hidden lg:block relative max-w-5xl mx-auto">
                   {/* Vertical Line */}
                   <div className="absolute left-1/2 transform -translate-x-1/2 w-0.5 h-full bg-gradient-to-b from-orange-500 to-red-600 rounded-full"></div>
-                  
+
                   <div className="space-y-16">
                     {portfolioData.achievements.map((achievement, index) => (
                       <div key={index} className="relative flex items-center">
                         {/* Timeline Dot */}
                         <div className="absolute left-1/2 transform -translate-x-1/2 w-4 h-4 bg-gradient-to-r from-orange-500 to-red-600 rounded-full border-4 border-white dark:border-slate-900 shadow-lg z-10"></div>
-                        
+
                         {/* Content positioned left or right */}
                         <div className={`w-full flex ${index % 2 === 0 ? 'justify-start pr-8' : 'justify-end pl-8'}`}>
                           <div className={`w-5/12 ${index % 2 === 0 ? 'text-right' : 'text-left'}`}>
@@ -1163,7 +1209,7 @@ const Portfolio = () => {
                   <p className="text-xl text-slate-600 dark:text-slate-400">Professional credentials and continuous learning</p>
                   <div className="w-24 h-1 bg-gradient-to-r from-orange-500 to-red-600 rounded-full mx-auto mt-6"></div>
                 </div>
-                
+
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                   {portfolioData.certificates.map((cert, index) => (
                     <div key={index} className="bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-xl border border-slate-200 dark:border-slate-700 hover:shadow-2xl transition-all duration-300 group">
@@ -1171,11 +1217,11 @@ const Portfolio = () => {
                         <div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-red-600 rounded-2xl mx-auto mb-6 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                           <GraduationCap className="w-8 h-8 text-white" />
                         </div>
-                        
+
                         <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-3">{cert.title}</h3>
                         <p className="text-orange-600 dark:text-orange-400 font-medium mb-2">{cert.issuer}</p>
                         <p className="text-slate-500 dark:text-slate-400 text-sm mb-2">{cert.date}</p>
-                        
+
                         <div className="text-sm text-slate-600 dark:text-slate-400 mb-4">
                           <p className="mb-2">Professional certification demonstrating expertise in cloud computing fundamentals and best practices.</p>
                           <div className="flex items-center justify-center space-x-2 mb-2">
@@ -1186,7 +1232,7 @@ const Portfolio = () => {
                             <span className="font-medium">ID:</span> {cert.credentialId}
                           </div>
                         </div>
-                        
+
                         <Button variant="outline" size="sm" className="w-full border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700">
                           <ExternalLink className="w-4 h-4 mr-2" />
                           View Certificate
@@ -1220,7 +1266,7 @@ const Portfolio = () => {
                   />
                 ))}
               </div>
-              
+
               {/* Nebula Gradients */}
               <div className="absolute top-0 left-0 w-96 h-96 bg-electric/10 rounded-full blur-3xl animate-pulse-slow"></div>
               <div className="absolute bottom-0 right-0 w-96 h-96 bg-pulse/10 rounded-full blur-3xl animate-pulse-slow" style={{ animationDelay: '1s' }}></div>
@@ -1234,7 +1280,7 @@ const Portfolio = () => {
                   <h2 className="text-6xl font-black text-gradient-primary mb-6">About Me</h2>
                   <div className="w-48 h-2 bg-gradient-primary mx-auto rounded-full glow-electric"></div>
                 </div>
-                
+
                 <div className="grid lg:grid-cols-2 gap-16 items-center">
                   {/* Enhanced Profile Section */}
                   <div className="relative">
@@ -1246,7 +1292,7 @@ const Portfolio = () => {
                             {portfolioData.name.split(' ').map(n => n[0]).join('')}
                           </AvatarFallback>
                         </Avatar>
-                        
+
                         <div className="space-y-4">
                           <h1 className="text-4xl lg:text-5xl font-black text-gradient-primary">
                             {portfolioData.name}
@@ -1256,7 +1302,7 @@ const Portfolio = () => {
                           </p>
                           <div className="w-32 h-1 bg-gradient-primary mx-auto rounded-full glow-electric"></div>
                         </div>
-                        
+
                         {/* AI Badge */}
                         <div className="bg-gradient-primary px-6 py-3 rounded-full text-white text-sm font-bold shadow-lg glow-primary inline-block">
                           <Sparkles className="w-5 h-5 inline mr-2" />
@@ -1265,7 +1311,7 @@ const Portfolio = () => {
                       </div>
                     </div>
                   </div>
-                  
+
                   {/* Professional Content */}
                   <div className="space-y-8">
                     <div className="glass-card p-8 rounded-3xl border border-electric/20 shadow-2xl backdrop-blur-xl bg-white/5">
@@ -1276,11 +1322,11 @@ const Portfolio = () => {
                           </div>
                           <h3 className="text-2xl font-bold text-white">Professional Profile</h3>
                         </div>
-                        
+
                         <p className="text-lg text-white/80 leading-relaxed">
                           {portfolioData.about}
                         </p>
-                        
+
                         <div className="grid md:grid-cols-2 gap-6 pt-6">
                           <div className="space-y-4">
                             <h4 className="font-bold text-white flex items-center">
@@ -1302,7 +1348,7 @@ const Portfolio = () => {
                               </li>
                             </ul>
                           </div>
-                          
+
                           <div className="space-y-4">
                             <h4 className="font-bold text-white flex items-center">
                               <Lightbulb className="w-5 h-5 mr-3 text-pulse" />
@@ -1324,7 +1370,7 @@ const Portfolio = () => {
                             </ul>
                           </div>
                         </div>
-                        
+
                         <div className="flex flex-wrap gap-4 pt-6">
                           <Button className="bg-gradient-primary text-white px-6 py-3 rounded-xl font-bold hover:glow-primary transition-all duration-300">
                             <Download className="w-5 h-5 mr-2" />
@@ -1349,19 +1395,19 @@ const Portfolio = () => {
                   <h2 className="text-4xl font-black text-gradient-primary mb-4">Projects</h2>
                   <div className="w-32 h-1 bg-gradient-primary mx-auto rounded-full glow-electric"></div>
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 relative">
                   <EditButton section="Projects" />
                   {portfolioData.projects.map((project, index) => (
-                    <div 
-                      key={project.id} 
+                    <div
+                      key={project.id}
                       className="group animate-fade-in h-full"
                       style={{ animationDelay: `${index * 200}ms` }}
                     >
                       <div className="glass-card p-8 rounded-3xl border border-electric/20 shadow-2xl backdrop-blur-xl bg-white/5 hover:bg-white/10 transition-all duration-700 hover:scale-105 hover:shadow-electric/50 h-full flex flex-col">
                         {/* Holographic Shimmer Effect */}
                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-electric/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 pointer-events-none rounded-3xl"></div>
-                        
+
                         <div className="relative z-10 flex flex-col h-full">
                           <div className="flex items-start justify-between mb-6">
                             <div className="w-14 h-14 glass rounded-2xl flex items-center justify-center glow-electric">
@@ -1374,15 +1420,15 @@ const Portfolio = () => {
                               </div>
                             )}
                           </div>
-                          
+
                           <h3 className="text-xl font-black text-white mb-4 group-hover:text-gradient-primary transition-all duration-300">
                             {project.title}
                           </h3>
-                          
+
                           <p className="text-white/70 text-sm mb-6 leading-relaxed flex-grow">
                             {project.description}
                           </p>
-                          
+
                           <div className="space-y-4 mt-auto">
                             <div className="flex flex-wrap gap-2 mb-4">
                               {project.tech.map((tech: string, i: number) => (
@@ -1394,7 +1440,7 @@ const Portfolio = () => {
 
                             {/* Action Buttons */}
                             <div className="flex gap-3">
-                              <Button 
+                              <Button
                                 className="flex-1 bg-gradient-primary text-white border-0 rounded-xl px-4 py-2 text-sm font-bold hover:glow-primary transition-all duration-300"
                                 asChild
                               >
@@ -1403,8 +1449,8 @@ const Portfolio = () => {
                                   Demo
                                 </a>
                               </Button>
-                              <Button 
-                                variant="outline" 
+                              <Button
+                                variant="outline"
                                 className="border-2 border-electric/50 text-electric hover:bg-electric/20 rounded-xl px-4 py-2 text-sm font-bold hover:glow-electric transition-all duration-300"
                                 asChild
                               >
@@ -1429,12 +1475,12 @@ const Portfolio = () => {
                   <h2 className="text-4xl font-black text-gradient-primary mb-4">Skills</h2>
                   <div className="w-32 h-1 bg-gradient-primary mx-auto rounded-full glow-electric"></div>
                 </div>
-                
+
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 relative">
                   <EditButton section="Skills" />
                   {Object.entries(skillsByCategory).map(([category, categorySkills], categoryIndex) => (
-                    <div 
-                      key={category} 
+                    <div
+                      key={category}
                       className="glass-card p-8 rounded-3xl border border-electric/20 shadow-2xl backdrop-blur-xl bg-white/5 hover:bg-white/10 transition-all duration-700 hover:scale-105 hover:shadow-electric/50 animate-fade-in"
                       style={{ animationDelay: `${categoryIndex * 200}ms` }}
                     >
@@ -1445,24 +1491,23 @@ const Portfolio = () => {
                         </div>
                         <h3 className="text-xl font-bold text-white">{category}</h3>
                       </div>
-                      
+
                       {/* Skills Grid */}
                       <div className="space-y-4">
                         {categorySkills.map((skill, skillIndex) => (
-                          <div 
+                          <div
                             key={skillIndex}
                             className="flex justify-between items-center p-3 rounded-xl bg-white/5 border border-electric/10 hover:border-electric/30 transition-all duration-300"
                           >
                             <span className="text-white font-medium">{skill.name}</span>
                             <div className="flex items-center space-x-1">
                               {[...Array(5)].map((_, i) => (
-                                <Star 
-                                  key={i} 
-                                  className={`w-4 h-4 ${
-                                    i < Math.ceil(skill.level / 20) 
-                                      ? 'text-electric fill-electric' 
-                                      : 'text-white/20'
-                                  }`} 
+                                <Star
+                                  key={i}
+                                  className={`w-4 h-4 ${i < Math.ceil(skill.level / 20)
+                                    ? 'text-electric fill-electric'
+                                    : 'text-white/20'
+                                    }`}
                                 />
                               ))}
                             </div>
@@ -1482,12 +1527,12 @@ const Portfolio = () => {
                   <h2 className="text-4xl font-black text-gradient-primary mb-4">Achievements</h2>
                   <div className="w-32 h-1 bg-gradient-primary mx-auto rounded-full glow-electric"></div>
                 </div>
-                
+
                 <div className="grid md:grid-cols-2 gap-8 relative">
                   <EditButton section="Achievements" />
                   {portfolioData.achievements.map((achievement, index) => (
-                    <div 
-                      key={index} 
+                    <div
+                      key={index}
                       className="glass-card p-8 rounded-3xl border border-electric/20 shadow-2xl backdrop-blur-xl bg-white/5 hover:bg-white/10 transition-all duration-700 hover:scale-105 hover:shadow-lg animate-fade-in"
                       style={{ animationDelay: `${index * 200}ms` }}
                     >
@@ -1503,7 +1548,7 @@ const Portfolio = () => {
                             </div>
                           </div>
                         </div>
-                        
+
                         <div className="space-y-4">
                           <h3 className="text-2xl font-black text-white">{achievement.title}</h3>
                           <div className="flex items-center space-x-2">
@@ -1512,7 +1557,7 @@ const Portfolio = () => {
                           </div>
                           <p className="text-white/80 leading-relaxed">{achievement.description}</p>
                         </div>
-                        
+
                         <div className="pt-4 border-t border-electric/20">
                           <div className="flex items-center justify-between text-sm">
                             <div className="flex items-center space-x-2">
@@ -1539,12 +1584,12 @@ const Portfolio = () => {
                   <h2 className="text-4xl font-black text-gradient-primary mb-4">Certifications</h2>
                   <div className="w-32 h-1 bg-gradient-primary mx-auto rounded-full glow-electric"></div>
                 </div>
-                
+
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 relative">
                   <EditButton section="Certificates" />
                   {portfolioData.certificates.map((cert, index) => (
-                    <div 
-                      key={index} 
+                    <div
+                      key={index}
                       className="glass-card p-8 rounded-3xl border border-electric/20 shadow-2xl backdrop-blur-xl bg-white/5 hover:bg-white/10 transition-all duration-700 hover:scale-105 hover:shadow-lg animate-fade-in"
                       style={{ animationDelay: `${index * 200}ms` }}
                     >
@@ -1558,7 +1603,7 @@ const Portfolio = () => {
                             Verified
                           </div>
                         </div>
-                        
+
                         <div className="space-y-3">
                           <h3 className="text-xl font-black text-white">{cert.title}</h3>
                           <div className="flex items-center space-x-2">
@@ -1567,7 +1612,7 @@ const Portfolio = () => {
                           </div>
                           <p className="text-white/60 text-sm">{cert.date}</p>
                         </div>
-                        
+
                         <div className="space-y-3">
                           <p className="text-white/70 text-sm leading-relaxed">
                             Professional certification demonstrating expertise in cloud computing fundamentals and best practices.
@@ -1577,9 +1622,9 @@ const Portfolio = () => {
                             <code className="bg-white/10 px-2 py-1 rounded text-electric">{cert.credentialId}</code>
                           </div>
                         </div>
-                        
-                        <Button 
-                          variant="outline" 
+
+                        <Button
+                          variant="outline"
                           className="w-full border-2 border-electric/50 text-electric hover:bg-electric/20 rounded-xl font-bold transition-all duration-300"
                         >
                           <ExternalLink className="w-4 h-4 mr-2" />

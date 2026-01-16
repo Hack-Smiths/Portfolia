@@ -2,7 +2,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import func
-from app.dependencies.auth_user import get_db
+from app.dependencies.auth_user import get_db, get_current_user
 from app.models.user import User
 from app.models.profile import Profile
 from app.models.project import Project
@@ -182,3 +182,48 @@ def check_portfolio_public(username: str, db: Session = Depends(get_db)):
         "is_public": user.is_public,
         "username": user.username  # Return actual casing
     }
+
+
+@router.get("/existing")
+def get_existing_portfolio_data(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Get existing portfolio data for duplicate detection during resume import.
+    Authenticated endpoint - requires valid user session.
+    
+    Returns simplified data for comparison:
+        - projects: list of project titles
+        - skills: list of skill names
+        - work_experience: list of {title, company}
+        - certifications: list of {name, issuer}
+        - achievements: list of {title, issuer}
+    
+    Used by resume upload flow to detect duplicates before import.
+    """
+    
+    # Fetch existing data
+    projects = db.query(Project).filter(Project.owner_id == current_user.id).all()
+    skills = db.query(Skill).filter(Skill.user_id == current_user.id).all()
+    work_exp = db.query(WorkExperience).filter(WorkExperience.user_id == current_user.id).all()
+    certs = db.query(Certificate).filter(Certificate.user_id == current_user.id).all()
+    achievements = db.query(Award).filter(Award.user_id == current_user.id).all()
+    
+    return {
+        "projects": [{"title": p.title} for p in projects],
+        "skills": [{"name": s.name} for s in skills],
+        "work_experience": [
+            {"title": w.title, "company": w.organization} 
+            for w in work_exp
+        ],
+        "certifications": [
+            {"name": c.title, "issuer": c.issuer} 
+            for c in certs
+        ],
+        "achievements": [
+            {"title": a.title, "issuer": a.organization} 
+            for a in achievements
+        ]
+    }
+

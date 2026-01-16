@@ -17,6 +17,6 @@ class Profile(Base):
     github = Column(String, default="")
     linkedin = Column(String, default="")
     website = Column(String, default="")
-    avatar = Column(String, default="")
+    avatar = Column(Text, default="")  # Changed to Text to support base64 image data
 
     user = relationship("User", back_populates="profile")

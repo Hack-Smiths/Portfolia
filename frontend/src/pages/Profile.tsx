@@ -10,8 +10,8 @@ import ProfileAvatar from '@/components/ProfileAvatar';
 import ProfileStats from '@/components/ProfileStats';
 import ProfileForm from '@/components/ProfileForm';
 import { useAuthContext } from '@/contexts/AuthContext';
-import { getProfile, saveProfile, updatePrivacySettings } from '@/utils/api'; // Adjust the import based on your API structure
-import { set } from 'date-fns';
+import { getProfile, saveProfile, updatePrivacySettings } from '@/utils/api';
+import { validateProfileForm } from '@/utils/validation';
 
 type ProfileData = {
   name: string;
@@ -34,6 +34,8 @@ const Profile = () => {
   const [isPublic, setIsPublic] = useState(true);
   const [analyticsEnabled, setAnalyticsEnabled] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [selectedAvatarFile, setSelectedAvatarFile] = useState<File | null>(null);
 
   const [profileData, setProfileData] = useState<ProfileData>({
     name: "",
@@ -84,18 +86,82 @@ const Profile = () => {
   // Cancel editing
   const handleCancel = () => {
     setIsEditing(false);
+    setValidationErrors({});
+    setSelectedAvatarFile(null);
+    // Reload profile data to reset any changes
+    if (user) {
+      getProfile()
+        .then((data) => {
+          if (data && Object.keys(data).length > 0) {
+            setProfileData(data);
+          }
+        })
+        .catch((err) => console.error("Failed to reload profile:", err));
+    }
   };
 
   // Save profile
   const handleSave = async () => {
     if (!user) return;
 
+    // Validate all fields before saving
+    const errors = validateProfileForm({
+      title: profileData.title,
+      location: profileData.location,
+      bio: profileData.bio,
+      github: profileData.github,
+      linkedin: profileData.linkedin,
+      website: profileData.website,
+    });
+
+    // If there are validation errors, show toast and focus first invalid field
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      toast({
+        title: "Validation Error",
+        description: "Please fix the errors before saving",
+        variant: "destructive",
+      });
+
+      // Focus first invalid field
+      const firstErrorField = Object.keys(errors)[0];
+      const element = document.getElementById(firstErrorField);
+      element?.focus();
+      return;
+    }
+
     try {
+      // TODO: Backend integration for avatar upload
+      // When backend endpoint is ready, uncomment and wire up:
+      // if (selectedAvatarFile) {
+      //   const formData = new FormData();
+      //   formData.append('avatar', selectedAvatarFile);
+      //   formData.append('profileData', JSON.stringify(profileData));
+      //   const savedProfile = await uploadProfileWithAvatar(formData);
+      //   setProfileData(savedProfile);
+      // } else {
+      //   const savedProfile = await saveProfile(profileData);
+      //   setProfileData(savedProfile);
+      // }
+
+      // For now, just save profile data without avatar file
       const savedProfile = await saveProfile(profileData);
       setProfileData(savedProfile);
       setIsEditing(false);
+      setValidationErrors({});
+      setSelectedAvatarFile(null);
+
+      toast({
+        title: "Success",
+        description: "Profile updated successfully",
+      });
     } catch (err) {
       console.error("Failed to save profile:", err);
+      toast({
+        title: "Error",
+        description: "Failed to save profile. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -108,11 +174,27 @@ const Profile = () => {
   };
 
   // Avatar update handler
-  const handleAvatarChange = (newAvatar: string) => {
+  const handleAvatarChange = (newAvatar: string, file?: File) => {
     setProfileData((prev) => ({
       ...prev,
       avatar: newAvatar,
     }));
+    // Store the file for later upload
+    if (file) {
+      setSelectedAvatarFile(file);
+    } else {
+      setSelectedAvatarFile(null);
+    }
+  };
+
+  // Check if form is valid (for disabling save button)
+  const isFormValid = () => {
+    // Professional title is required
+    if (!profileData.title || profileData.title.trim().length < 3) {
+      return false;
+    }
+    // Check if there are any validation errors
+    return Object.keys(validationErrors).length === 0;
   };
 
   return (
@@ -122,7 +204,8 @@ const Profile = () => {
           isEditing={isEditing}
           onEdit={() => setIsEditing(true)}
           onSave={handleSave}
-          onCancel={() => setIsEditing(false)}
+          onCancel={handleCancel}
+          isSaveDisabled={isEditing && !isFormValid()}
         />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -282,6 +365,8 @@ const Profile = () => {
               profileData={profileData}
               isEditing={isEditing}
               onInputChange={handleInputChange}
+              validationErrors={validationErrors}
+              onValidationChange={setValidationErrors}
             />
           </div>
         </div>

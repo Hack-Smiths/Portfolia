@@ -386,3 +386,92 @@ export async function enhanceProjectDescription(
     throw new Error("AI enhancement failed. Please try again.");
   }
 }
+
+// ---------------- RESUME UPLOAD ----------------
+
+export async function uploadResume(file: File) {
+  const token = localStorage.getItem("token");
+  if (!token) throw new Error("No token found");
+
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const res = await fetch(`${BASE_URL}/api/v1/resumes/upload`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const error: any = new Error("Failed to upload resume");
+    error.response = { status: res.status, data: await res.json().catch(() => ({})) };
+    throw error;
+  }
+
+  return await res.json();
+}
+
+export async function getDraftResume() {
+  const token = localStorage.getItem("token");
+  if (!token) throw new Error("No token found");
+
+  const res = await fetch(`${BASE_URL}/api/v1/resumes/draft`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch draft resume");
+  }
+
+  return await res.json();
+}
+
+export async function confirmResume(resumeId: number, approvedData: any) {
+  const token = localStorage.getItem("token");
+  if (!token) throw new Error("No token found");
+
+  const res = await fetch(`${BASE_URL}/api/v1/resumes/confirm`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      resume_id: resumeId,
+      approved_data: approvedData,
+    }),
+  });
+
+  if (!res.ok) {
+    const error: any = new Error("Failed to confirm resume");
+    error.response = { status: res.status, data: await res.json().catch(() => ({})) };
+    throw error;
+  }
+
+  return await res.json();
+}
+
+export async function getExistingPortfolioData() {
+  const token = localStorage.getItem("token");
+  if (!token) throw new Error("No token found");
+
+  const res = await fetch(`${BASE_URL}/api/portfolio/existing`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch existing portfolio data");
+  }
+
+  return await res.json();
+}
+
+
