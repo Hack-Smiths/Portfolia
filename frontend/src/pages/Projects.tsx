@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Github, Plus, Edit3, Trash2, ExternalLink, Star, GitBranch, Code, Sparkles } from 'lucide-react';
+import { Github, Plus, Edit3, Trash2, ExternalLink, Star, GitBranch, Code, Sparkles, Maximize2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import AIAssistant from '@/components/AIAssistant';
 import { AIEnhanceModal } from '@/components/AIEnhanceModal';
+import { ProjectDetailsModal } from '@/components/ProjectDetailsModal';
 import { usePortfolio } from '@/contexts/PortfolioContext';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { getUserProjects as getUserProjectsAPI, addProject as addProjectAPI, updateProject as updateProjectAPI, deleteProject as deleteProjectAPI, fetchGithubSummary as fetchGithubSummaryAPI } from '@/utils/api';
@@ -23,6 +24,8 @@ const Projects = () => {
   const [openGithub, setOpenGithub] = useState(false);
   const [aiModalOpen, setAiModalOpen] = useState(false);
   const [selectedProjectForAI, setSelectedProjectForAI] = useState<Project | null>(null);
+  const [projectDetailsOpen, setProjectDetailsOpen] = useState(false);
+  const [selectedProjectForDetails, setSelectedProjectForDetails] = useState<Project | null>(null);
 
   const { projects, addProject, deleteProject, updateProject } = usePortfolio();
 
@@ -209,6 +212,30 @@ const Projects = () => {
             >
               <Trash2 className="w-4 h-4" />
             </Button>
+
+            <a href={project.link} target="_blank" rel="noopener noreferrer">
+              <Button
+                size="sm"
+                variant="ghost"
+                className="w-8 h-8 p-0"
+                title="Open project"
+              >
+                <ExternalLink className="w-4 h-4" />
+              </Button>
+            </a>
+
+            <Button
+              size="sm"
+              variant="ghost"
+              className="w-8 h-8 p-0"
+              title="Enlarge card"
+              onClick={() => {
+                setSelectedProjectForDetails(project);
+                setProjectDetailsOpen(true);
+              }}
+            >
+              <Maximize2 className="w-4 h-4" />
+            </Button>
           </div>
         </div>
 
@@ -258,28 +285,20 @@ const Projects = () => {
             <div className={`w-2 h-2 rounded-full ${project.status.saved ? 'bg-electric' : 'bg-muted'}`} />
           </div>
           <div className="flex-1" />
-          <a href={project.link} target="_blank" rel="noopener noreferrer">
-            <Button size="sm" variant="ghost" className="text-xs">
-              <ExternalLink className="w-3 h-3 mr-1" />
-              View
-            </Button>
-          </a>
-          {!project.status.aiSummary && (
-            <Button
-              size="sm"
-              className="btn-primary text-xs"
-              onClick={() => {
-                setSelectedProjectForAI({
-                  ...project,
-                  techStack: project.stack || [],
-                });
-                setAiModalOpen(true);
-              }}
-            >
-              <Sparkles className="w-3 h-3 mr-1" />
-              AI Enhance
-            </Button>
-          )}
+          <Button
+            size="sm"
+            className="btn-primary text-xs"
+            onClick={() => {
+              setSelectedProjectForAI({
+                ...project,
+                techStack: project.stack || [],
+              });
+              setAiModalOpen(true);
+            }}
+          >
+            <Sparkles className="w-3 h-3 mr-1" />
+            AI Enhance
+          </Button>
         </div>
       </div>
     </Card>
@@ -427,6 +446,15 @@ const Projects = () => {
               setError('Failed to save AI-enhanced description');
             }
           }}
+        />
+      )}
+
+      {/* Project Details Modal */}
+      {selectedProjectForDetails && (
+        <ProjectDetailsModal
+          isOpen={projectDetailsOpen}
+          onClose={() => setProjectDetailsOpen(false)}
+          project={selectedProjectForDetails}
         />
       )}
 
