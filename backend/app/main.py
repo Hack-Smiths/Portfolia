@@ -37,3 +37,5 @@ app.include_router(profile.router)
 app.include_router(preview.router)
 app.include_router(portfolio.router)
 app.include_router(resume.router, tags=["Resumes"])
+from app.api.v1.routes import contact
+app.include_router(contact.router)
