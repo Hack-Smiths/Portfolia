@@ -47,11 +47,14 @@ import Navbar from "@/components/Navbar";
 import AIAssistant from "@/components/AIAssistant";
 import AIEditAssistant from "@/components/AIEditAssistant";
 import { useAuthContext } from '@/contexts/AuthContext';
-import { getPortfolioPreview } from "@/utils/api";
+import { useToast } from "@/components/ui/use-toast";
+import { templates, TemplateType } from '@/utils/themes';
+import { getPortfolioPreview, updatePortfolioSettings } from "@/utils/api";
 
 const Portfolio = () => {
+  const { toast } = useToast();
   const [isEditMode, setIsEditMode] = useState(false);
-  const [currentTemplate, setCurrentTemplate] = useState('classic');
+  const [currentTemplate, setCurrentTemplate] = useState<TemplateType>('classic');
   const [editingSection, setEditingSection] = useState<string | null>(null);
   const { user, loading } = useAuthContext();
   const [portfolioData, setPortfolioData] = useState(null);
@@ -63,6 +66,9 @@ const Portfolio = () => {
       try {
         const data = await getPortfolioPreview(); // Call backend
         setPortfolioData(data);
+        if (data.theme_preference && templates[data.theme_preference as TemplateType]) {
+          setCurrentTemplate(data.theme_preference as TemplateType);
+        }
       } catch (error) {
         console.error("Error fetching portfolio preview:", error);
       } finally {
@@ -75,49 +81,12 @@ const Portfolio = () => {
   if (loading || isLoading) return <p>Loading...</p>;
 
   if (!portfolioData) return <p>No portfolio data found</p>;
-  const templates = {
-    classic: {
-      name: 'Classic Pro',
-      icon: <Briefcase className="w-4 h-4" />,
-      layout: 'corporate-clean',
-      styles: {
-        background: 'bg-gradient-to-br from-gray-50 via-blue-50 to-white dark:from-slate-900 dark:via-blue-950 dark:to-slate-900',
-        card: 'bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 shadow-lg hover:shadow-xl transition-all duration-300',
-        text: 'text-gray-900 dark:text-gray-100',
-        accent: 'bg-blue-600 hover:bg-blue-700 text-white transition-all duration-300',
-        glow: 'shadow-xl hover:shadow-2xl',
-        header: 'bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm border-gray-200 dark:border-slate-700',
-        mesh: 'opacity-5'
-      }
-    },
-    creative: {
-      name: 'Dev Terminal',
-      icon: <Code2 className="w-4 h-4" />,
-      layout: 'terminal-dev',
-      styles: {
-        background: 'bg-gradient-to-br from-orange-50 via-white to-red-50 dark:from-slate-900 dark:via-orange-950 dark:to-slate-900',
-        card: 'bg-white dark:bg-slate-800 border border-orange-200 dark:border-slate-700 shadow-lg hover:shadow-xl transition-all duration-300',
-        text: 'text-slate-900 dark:text-slate-100',
-        accent: 'bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white transition-all duration-300',
-        glow: 'shadow-lg hover:shadow-xl',
-        header: 'bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm border-orange-200 dark:border-slate-700',
-        mesh: 'opacity-10'
-      }
-    },
-    modern: {
-      name: 'Modern Grid',
-      icon: <Zap className="w-4 h-4" />,
-      layout: 'tech-sidebar',
-      styles: {
-        background: 'bg-gradient-to-br from-white via-gray-50 to-gray-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900',
-        card: 'bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 shadow-md hover:shadow-lg transition-all duration-300',
-        text: 'text-gray-900 dark:text-gray-100',
-        accent: 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg hover:shadow-indigo-500/30',
-        glow: 'shadow-lg hover:shadow-xl',
-        header: 'bg-white dark:bg-slate-800 border-gray-300 dark:border-slate-600',
-        mesh: 'opacity-10'
-      }
-    }
+  const handleTemplateChange = (templateKey: TemplateType) => {
+    setCurrentTemplate(templateKey);
+    toast({
+      title: "Theme Preview",
+      description: `Previewing ${templates[templateKey].name} theme. Go to Export to save.`,
+    });
   };
 
   const currentStyles = templates[currentTemplate].styles;
@@ -203,10 +172,10 @@ const Portfolio = () => {
                 key={key}
                 size="sm"
                 variant={currentTemplate === key ? "default" : "outline"}
-                onClick={() => setCurrentTemplate(key)}
+                onClick={() => handleTemplateChange(key as TemplateType)}
                 className={`w-12 h-12 p-0 rounded-lg transition-all duration-300 ${currentTemplate === key
-                    ? `bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg`
-                    : `bg-white/30 backdrop-blur-sm border-white/30 hover:bg-white/50`
+                  ? `bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg`
+                  : `bg-white/30 backdrop-blur-sm border-white/30 hover:bg-white/50`
                   }`}
                 title={template.name}
               >
@@ -562,8 +531,8 @@ const Portfolio = () => {
                                     <Star
                                       key={i}
                                       className={`w-4 h-4 ${i < starCount
-                                          ? 'text-primary fill-primary'
-                                          : 'text-muted-foreground'
+                                        ? 'text-primary fill-primary'
+                                        : 'text-muted-foreground'
                                         }`}
                                     />
                                   ))}
@@ -642,8 +611,8 @@ const Portfolio = () => {
                               <Badge
                                 variant="outline"
                                 className={`${achievement.type === 'internship'
-                                    ? 'border-blue-500/30 text-blue-600 bg-blue-500/10'
-                                    : 'border-yellow-500/30 text-yellow-600 bg-yellow-500/10'
+                                  ? 'border-blue-500/30 text-blue-600 bg-blue-500/10'
+                                  : 'border-yellow-500/30 text-yellow-600 bg-yellow-500/10'
                                   } px-3 py-1 rounded-lg font-medium`}
                               >
                                 {achievement.type === 'internship' ? '💼 Internship' : '🏆 Award'}
@@ -708,8 +677,8 @@ const Portfolio = () => {
                                 <Badge
                                   variant="outline"
                                   className={`${achievement.type === 'internship'
-                                      ? 'border-blue-500/30 text-blue-600 bg-blue-500/10'
-                                      : 'border-yellow-500/30 text-yellow-600 bg-yellow-500/10'
+                                    ? 'border-blue-500/30 text-blue-600 bg-blue-500/10'
+                                    : 'border-yellow-500/30 text-yellow-600 bg-yellow-500/10'
                                     } px-3 py-1 rounded-lg font-medium`}
                                 >
                                   {achievement.type === 'internship' ? '💼 Internship' : '🏆 Award'}
@@ -1067,8 +1036,8 @@ const Portfolio = () => {
                                   <Star
                                     key={i}
                                     className={`w-4 h-4 ${i < starCount
-                                        ? 'text-orange-500 fill-orange-500'
-                                        : 'text-slate-300 dark:text-slate-600'
+                                      ? 'text-orange-500 fill-orange-500'
+                                      : 'text-slate-300 dark:text-slate-600'
                                       }`}
                                   />
                                 ))}
@@ -1454,8 +1423,8 @@ const Portfolio = () => {
                                 <Star
                                   key={i}
                                   className={`w-4 h-4 ${i < Math.ceil(skill.level / 20)
-                                      ? 'text-electric fill-electric'
-                                      : 'text-white/20'
+                                    ? 'text-electric fill-electric'
+                                    : 'text-white/20'
                                     }`}
                                 />
                               ))}
