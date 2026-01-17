@@ -126,7 +126,7 @@ const Projects = () => {
         forks: projectData.githubForks ?? 0,
         link: projectData.githubLink ?? '',
         imported: true,
-        ai_summary: true,
+        ai_summary: false,
         saved: true,
       };
 
@@ -291,13 +291,13 @@ const Projects = () => {
             onClick={() => {
               setSelectedProjectForAI({
                 ...project,
-                techStack: project.stack || [],
+                stack: project.stack || [],
               });
               setAiModalOpen(true);
             }}
           >
             <Sparkles className="w-3 h-3 mr-1" />
-            AI Enhance
+            {project.status.aiSummary ? "Enhance Again" : "AI Enhance"}
           </Button>
         </div>
       </div>
@@ -439,11 +439,14 @@ const Projects = () => {
                 },
               };
 
-              // Update local state
+              // Update local state only on success
               setLocalProjects(localProjects.map(p => p.id === selectedProjectForAI.id ? mapped : p));
+
+              // Close modal only on success
+              setAiModalOpen(false);
             } catch (error) {
               console.error('Failed to apply AI enhancement:', error);
-              setError('Failed to save AI-enhanced description');
+              // User can retry or close manually
             }
           }}
         />
