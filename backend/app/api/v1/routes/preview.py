@@ -33,8 +33,9 @@ def get_portfolio_preview(db: Session = Depends(get_db), current_user: dict = De
         "email": profile.email if profile else current_user.email,
         "github": profile.github if profile else f"{current_user.username}-dev",
         "linkedin": profile.linkedin if profile else f"{current_user.username}-dev",
-        "avatar": profile.avatar if profile else "",  # Added avatar field
+        "avatar": profile.avatar if profile else "",
         "about": profile.bio if profile else "Aspiring full-stack developer with a passion for AI and machine learning.",
+        "theme_preference": current_user.theme_preference or "classic",
 
         "projects": [
             {

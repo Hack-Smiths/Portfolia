@@ -2,6 +2,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import func
+from sqlalchemy import func
 from app.dependencies.auth_user import get_db, get_current_user
 from app.models.user import User
 from app.models.profile import Profile
@@ -23,6 +24,37 @@ RESERVED_USERNAMES = {
     "login", "signup", "logout", "about", "contact", "help", 
     "terms", "privacy", "support", "blog", "docs", "faq"
 }
+
+
+
+@router.put("/settings")
+async def update_portfolio_settings(
+    settings: dict,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Update authenticated user's portfolio settings:
+    - is_public
+    - theme_preference
+    - analytics_enabled
+    """
+    if "theme_preference" in settings:
+        if settings["theme_preference"] not in ["classic", "creative", "modern"]:
+            raise HTTPException(
+                status_code=400, 
+                detail="Invalid theme preference"
+            )
+        current_user.theme_preference = settings["theme_preference"]
+        
+    if "is_public" in settings:
+        current_user.is_public = settings["is_public"]
+        
+    if "analytics_enabled" in settings:
+        current_user.analytics_enabled = settings["analytics_enabled"]
+        
+    db.commit()
+    return {"message": "Settings updated successfully"}
 
 
 @router.get("/{username}")

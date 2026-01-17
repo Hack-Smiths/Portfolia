@@ -11,7 +11,7 @@ const Navbar = () => {
   const location = useLocation();
   const isLandingPage = location.pathname === '/';
   const navigate = useNavigate();
-  const { user } = useAuthContext(); 
+  const { user } = useAuthContext();
   const handleLogout = () => {
     localStorage.removeItem('token'); // Clear the auth token
     navigate('/auth'); // Redirect to login/signup page
@@ -21,7 +21,7 @@ const Navbar = () => {
       <div className="container mx-auto px-0">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to={user? "/dashboard":"/"} className="flex items-center space-x-2">
+          <Link to={user ? "/dashboard" : "/"} className="flex items-center space-x-2">
             <img src="/programming.png" alt="Icon" className="w-7 h-7 object-contain" />
             <span className="font-space font-bold text-xl text-gradient-primary">
               PortFolia
@@ -32,42 +32,48 @@ const Navbar = () => {
           <div className="hidden md:flex items-center space-x-8">
             {!isLandingPage && (
               <div className="flex items-center space-x-6">
-                <Link 
-                  to="/dashboard" 
+                <Link
+                  to="/dashboard"
                   className="text-foreground-muted hover:text-foreground transition-colors"
                 >
                   Dashboard
                 </Link>
-                <Link 
-                  to="/projects" 
+                <Link
+                  to="/projects"
                   className="text-foreground-muted hover:text-foreground transition-colors"
                 >
                   Projects
                 </Link>
-                <Link 
-                  to="/skills" 
+                <Link
+                  to="/skills"
                   className="text-foreground-muted hover:text-foreground transition-colors"
                 >
                   Skills
                 </Link>
-                <Link 
-                  to="/achievements" 
+                <Link
+                  to="/achievements"
                   className="text-foreground-muted hover:text-foreground transition-colors"
                 >
                   Achievements
                 </Link>
-                <Link 
-                  to="/portfolio" 
+                <Link
+                  to="/portfolio"
                   className="text-foreground-muted hover:text-foreground transition-colors"
                 >
                   Portfolio
                 </Link>
-                
+                <Link
+                  to="/export"
+                  className="text-foreground-muted hover:text-foreground transition-colors"
+                >
+                  Export
+                </Link>
+
 
 
               </div>
             )}
-            
+
             {isLandingPage ? (
               <div className="flex items-center space-x-4">
                 <Link to="/auth">
@@ -92,7 +98,7 @@ const Navbar = () => {
                 />
               </>
             )}
-            
+
           </div>
 
           {/* Mobile Menu Button */}
@@ -112,43 +118,43 @@ const Navbar = () => {
             <div className="flex flex-col space-y-4">
               {!isLandingPage && (
                 <>
-                  <Link 
-                    to="/dashboard" 
+                  <Link
+                    to="/dashboard"
                     className="text-foreground-muted hover:text-foreground transition-colors"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Dashboard
                   </Link>
-                  <Link 
-                    to="/projects" 
+                  <Link
+                    to="/projects"
                     className="text-foreground-muted hover:text-foreground transition-colors"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Projects
                   </Link>
-                  <Link 
-                    to="/skills" 
+                  <Link
+                    to="/skills"
                     className="text-foreground-muted hover:text-foreground transition-colors"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Skills
                   </Link>
-                  <Link 
-                    to="/achievements" 
+                  <Link
+                    to="/achievements"
                     className="text-foreground-muted hover:text-foreground transition-colors"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Achievements
                   </Link>
-                  <Link 
-                    to="/portfolio" 
+                  <Link
+                    to="/portfolio"
                     className="text-foreground-muted hover:text-foreground transition-colors"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Portfolio
                   </Link>
-                  <Link 
-                    to="/profile" 
+                  <Link
+                    to="/profile"
                     className="text-foreground-muted hover:text-foreground transition-colors"
                     onClick={() => setIsMenuOpen(false)}
                   >
@@ -167,7 +173,7 @@ const Navbar = () => {
 
                 </>
               )}
-              
+
               {isLandingPage && (
                 <div className="flex flex-col space-y-3">
                   <Link to="/auth" onClick={() => setIsMenuOpen(false)}>

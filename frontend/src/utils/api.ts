@@ -456,22 +456,28 @@ export async function confirmResume(resumeId: number, approvedData: any) {
   return await res.json();
 }
 
-export async function getExistingPortfolioData() {
+
+export async function updatePortfolioSettings(settings: {
+  theme_preference?: string;
+  is_public?: boolean;
+  analytics_enabled?: boolean;
+}) {
   const token = localStorage.getItem("token");
   if (!token) throw new Error("No token found");
 
-  const res = await fetch(`${BASE_URL}/api/portfolio/existing`, {
-    method: "GET",
+  const res = await fetch(`${BASE_URL}/api/portfolio/settings`, {
+    method: "PUT",
     headers: {
+      "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
+    body: JSON.stringify(settings),
   });
 
   if (!res.ok) {
-    throw new Error("Failed to fetch existing portfolio data");
+    const error = await res.json().catch(() => ({}));
+    throw new Error(error.detail || "Failed to update settings");
   }
 
   return await res.json();
 }
-
-
