@@ -58,6 +58,9 @@ import { EditableTextarea } from "@/components/editable/EditableTextarea";
 import { EditableChipList } from "@/components/editable/EditableChipList";
 import { ProjectForm } from '@/components/forms/ProjectForm';
 import EditAchievementDialog, { Achievement as AchievementType } from '@/components/EditAchievementDialog';
+import { DeleteConfirmationDialog } from '@/components/DeleteConfirmationDialog';
+import { AddButton } from '@/components/AddButton';
+import AddItemDialog from '@/components/AddItemDialog';
 import { useToast } from "@/components/ui/use-toast";
 import { getEditorDraft, saveDraft, publishPortfolio, updateProject as updateProjectAPI, updateAchievementAPI } from "@/utils/api";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -153,6 +156,13 @@ const PortfolioEditor = () => {
     isOpen: boolean;
   }>({ item: null, type: 'internship', isOpen: false });
 
+  // Delete Confirmation State
+  const [deleteConfirm, setDeleteConfirm] = useState<{
+    type: 'project' | 'skill' | 'achievement' | 'certificate';
+    index: number;
+    name: string;
+  } | null>(null);
+
   // Handlers for reusing edit forms
   const handleSaveProject = async (updatedProject: Project) => {
     if (!portfolioData) return;
@@ -180,12 +190,45 @@ const PortfolioEditor = () => {
         )
       };
     } else if (type === 'certificate') {
-      // Certificates logic if needed, currently certificates are in portfolioData.certificates
-      // But the AchievementType might not match perfectly. Assuming specific mapping if strictly needed.
+      newPortfolioData = {
+        ...newPortfolioData,
+        certificates: portfolioData.certificates.map((c, i) =>
+          (String(i) === String(updatedAchievement.id) || c.title === updatedAchievement.title) ? { ...c, ...updatedAchievement } : c
+        )
+      };
     }
 
     setPortfolioData(newPortfolioData);
     setEditingAchievement(prev => ({ ...prev, isOpen: false }));
+  };
+
+  // Delete Confirmation Handler
+  const handleConfirmDelete = () => {
+    if (!deleteConfirm || !portfolioData) return;
+
+    const newData = { ...portfolioData };
+
+    switch (deleteConfirm.type) {
+      case 'project':
+        newData.projects.splice(deleteConfirm.index, 1);
+        toast({ title: "Project deleted", description: "Project removed from portfolio." });
+        break;
+      case 'skill':
+        newData.skills.splice(deleteConfirm.index, 1);
+        toast({ title: "Skill deleted", description: "Skill removed from portfolio." });
+        break;
+      case 'achievement':
+        newData.achievements.splice(deleteConfirm.index, 1);
+        toast({ title: "Achievement deleted", description: "Achievement removed from portfolio." });
+        break;
+      case 'certificate':
+        newData.certificates.splice(deleteConfirm.index, 1);
+        toast({ title: "Certificate deleted", description: "Certificate removed from portfolio." });
+        break;
+    }
+
+    setPortfolioData(newData);
+    setDeleteConfirm(null);
   };
 
   // Templates configuration - defined before useEffect to avoid initialization errors
@@ -856,12 +899,10 @@ const PortfolioEditor = () => {
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  const newData = { ...portfolioData };
-                                  newData.projects = newData.projects.filter((_, i) => i !== index);
-                                  setPortfolioData(newData);
-                                  toast({
-                                    title: "Project deleted",
-                                    description: "Project removed."
+                                  setDeleteConfirm({
+                                    type: 'project',
+                                    index,
+                                    name: project.title
                                   });
                                 }}
                                 className="p-2 text-muted-foreground/40 hover:text-destructive transition-colors"
@@ -954,6 +995,23 @@ const PortfolioEditor = () => {
                           </Card>
                         ))}
                       </div>
+
+                      <AddButton
+                        label="Add Project"
+                        onClick={() => {
+                          setEditingProject({
+                            id: Date.now().toString(),
+                            title: '',
+                            description: '',
+                            tech: [],
+                            features: [],
+                            demo: '',
+                            repo: '',
+                            stars: 0
+                          });
+                        }}
+                        className="mt-8"
+                      />
                     </div>
                   </section>
 
@@ -1049,13 +1107,14 @@ const PortfolioEditor = () => {
                                       <button
                                         onClick={(e) => {
                                           e.stopPropagation();
-                                          const newData = { ...portfolioData };
                                           const realIndex = portfolioData.skills.indexOf(skill);
                                           if (realIndex !== -1) {
-                                            newData.skills.splice(realIndex, 1);
-                                            setPortfolioData(newData);
+                                            setDeleteConfirm({
+                                              type: 'skill',
+                                              index: realIndex,
+                                              name: skill.name
+                                            });
                                           }
-                                          toast({ title: "Skill deleted", description: "Skill removed from portfolio." });
                                         }}
                                         className="text-muted-foreground/50 hover:text-destructive transition-colors p-1"
                                         title="Delete skill"
@@ -1070,6 +1129,28 @@ const PortfolioEditor = () => {
                           </Card>
                         ))}
                       </div>
+
+                      <AddItemDialog
+                        type="skill"
+                        onSave={(newSkill) => {
+                          const newData = { ...portfolioData };
+                          let numericLevel = 70;
+                          if (newSkill.level === 'Beginner') numericLevel = 45;
+                          if (newSkill.level === 'Intermediate') numericLevel = 75;
+                          if (newSkill.level === 'Expert') numericLevel = 95;
+
+                          newData.skills = [...newData.skills, { ...newSkill, level: numericLevel }];
+                          setPortfolioData(newData);
+                          toast({ title: "Skill added", description: `${newSkill.name} added to portfolio.` });
+                        }}
+                      >
+                        <AddButton
+                          label="Add Skill"
+                          size="sm"
+                          onClick={() => { }}
+                          className="mt-8"
+                        />
+                      </AddItemDialog>
                     </div>
                   </section>
 
@@ -1133,12 +1214,10 @@ const PortfolioEditor = () => {
                                   <button
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      const newData = { ...portfolioData };
-                                      newData.achievements = newData.achievements.filter((_, i) => i !== index);
-                                      setPortfolioData(newData);
-                                      toast({
-                                        title: "Achievement deleted",
-                                        description: "Removed from achievements."
+                                      setDeleteConfirm({
+                                        type: 'achievement',
+                                        index,
+                                        name: achievement.title
                                       });
                                     }}
                                     className="p-2 text-muted-foreground/40 hover:text-destructive transition-colors"
@@ -1308,6 +1387,24 @@ const PortfolioEditor = () => {
                           </div>
                         </div>
                       </div>
+
+                      <AddButton
+                        label="Add Achievement"
+                        onClick={() => {
+                          setEditingAchievement({
+                            item: {
+                              id: 0,
+                              title: '',
+                              organization: '',
+                              description: '',
+                              type: 'internship'
+                            } as AchievementType,
+                            type: 'internship',
+                            isOpen: true
+                          });
+                        }}
+                        className="mt-8"
+                      />
                     </div>
                   </section>
 
@@ -1354,12 +1451,10 @@ const PortfolioEditor = () => {
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  const newData = { ...portfolioData };
-                                  newData.certificates = newData.certificates.filter((_, i) => i !== index);
-                                  setPortfolioData(newData);
-                                  toast({
-                                    title: "Certificate deleted",
-                                    description: "Certificate removed."
+                                  setDeleteConfirm({
+                                    type: 'certificate',
+                                    index,
+                                    name: cert.title
                                   });
                                 }}
                                 className="p-2 text-muted-foreground/40 hover:text-destructive transition-colors"
@@ -1400,6 +1495,25 @@ const PortfolioEditor = () => {
                           </Card>
                         ))}
                       </div>
+
+                      <AddButton
+                        label="Add Certificate"
+                        onClick={() => {
+                          setEditingAchievement({
+                            item: {
+                              id: 0,
+                              title: '',
+                              issuer: '',
+                              date: '',
+                              credentialId: '',
+                              type: 'certificate'
+                            } as any,
+                            type: 'certificate',
+                            isOpen: true
+                          });
+                        }}
+                        className="mt-8"
+                      />
                     </div>
                   </section>
 
@@ -2559,6 +2673,16 @@ const PortfolioEditor = () => {
           achievement={editingAchievement.item}
           type={editingAchievement.type}
           onSave={handleSaveAchievement}
+        />
+      )}
+
+      {deleteConfirm && (
+        <DeleteConfirmationDialog
+          isOpen={!!deleteConfirm}
+          itemName={deleteConfirm.name}
+          itemType={deleteConfirm.type}
+          onConfirm={handleConfirmDelete}
+          onCancel={() => setDeleteConfirm(null)}
         />
       )}
 
