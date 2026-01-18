@@ -7,7 +7,7 @@ export async function getCurrentUser() {
 
   if (!token) throw new Error("No token found");
 
-  const res = await fetch(`${BASE_URL}/me`, {
+  const res = await fetch(`${BASE_URL}/api/v1/me`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,

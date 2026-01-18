@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { PortfolioProvider } from "./contexts/PortfolioContext";
+import { AuthProvider } from "./contexts/AuthContext";
 import Navbar from "./components/Navbar";
 import AIAssistant from "./components/AIAssistant";
 import Landing from "./pages/Landing";
@@ -63,9 +64,11 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <PortfolioProvider>
-          <AppContent />
-        </PortfolioProvider>
+        <AuthProvider>
+          <PortfolioProvider>
+            <AppContent />
+          </PortfolioProvider>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
