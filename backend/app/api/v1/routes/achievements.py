@@ -4,11 +4,12 @@ from typing import List
 from app import models, schemas
 from app.schemas import certificates, awards, work_experience
 from app.dependencies.auth_user import get_db, get_current_user
+from app.utils.security import validate_csrf
 
 router = APIRouter(prefix="/achievements", tags=["Achievements"])
 
 # ---------- WORK EXPERIENCE ----------
-@router.post("/work-experience", response_model=work_experience.WorkExperienceOut)
+@router.post("/work-experience", response_model=work_experience.WorkExperienceOut, dependencies=[Depends(validate_csrf)])
 def create_work_experience(
     data: work_experience.WorkExperienceCreate,
     db: Session = Depends(get_db),
@@ -27,7 +28,7 @@ def get_work_experiences(
 ):
     return db.query(models.WorkExperience).filter(models.WorkExperience.user_id == current_user.id).all()
 
-@router.put("/work-experience/{id}", response_model=work_experience.WorkExperienceOut)
+@router.put("/work-experience/{id}", response_model=work_experience.WorkExperienceOut, dependencies=[Depends(validate_csrf)])
 def update_work_experience(
     id: int,
     data: work_experience.WorkExperienceUpdate,
@@ -46,7 +47,7 @@ def update_work_experience(
     db.refresh(exp)
     return exp
 
-@router.delete("/work-experience/{id}")
+@router.delete("/work-experience/{id}", dependencies=[Depends(validate_csrf)])
 def delete_work_experience(
     id: int,
     db: Session = Depends(get_db),
@@ -64,7 +65,7 @@ def delete_work_experience(
 
 
 # ---------- CERTIFICATES ----------
-@router.post("/certificates", response_model=certificates.CertificateOut)
+@router.post("/certificates", response_model=certificates.CertificateOut, dependencies=[Depends(validate_csrf)])
 def create_certificate(
     data: certificates.CertificateCreate,
     db: Session = Depends(get_db),
@@ -83,7 +84,7 @@ def get_certificates(
 ):
     return db.query(models.Certificate).filter(models.Certificate.user_id == current_user.id).all()
 
-@router.put("/certificates/{id}", response_model=certificates.CertificateOut)
+@router.put("/certificates/{id}", response_model=certificates.CertificateOut, dependencies=[Depends(validate_csrf)])
 def update_certificate(
     id: int,
     data: certificates.CertificateUpdate,
@@ -102,7 +103,7 @@ def update_certificate(
     db.refresh(cert)
     return cert
 
-@router.delete("/certificates/{id}")
+@router.delete("/certificates/{id}", dependencies=[Depends(validate_csrf)])
 def delete_certificate(
     id: int,
     db: Session = Depends(get_db),
@@ -120,7 +121,7 @@ def delete_certificate(
 
 
 # ---------- AWARDS ----------
-@router.post("/awards", response_model=awards.AwardOut)
+@router.post("/awards", response_model=awards.AwardOut, dependencies=[Depends(validate_csrf)])
 def create_award(
     data: awards.AwardCreate,
     db: Session = Depends(get_db),
@@ -139,7 +140,7 @@ def get_awards(
 ):
     return db.query(models.Award).filter(models.Award.user_id == current_user.id).all()
 
-@router.put("/awards/{id}", response_model=awards.AwardOut)
+@router.put("/awards/{id}", response_model=awards.AwardOut, dependencies=[Depends(validate_csrf)])
 def update_award(
     id: int,
     data: awards.AwardUpdate,
@@ -158,7 +159,7 @@ def update_award(
     db.refresh(award)
     return award
 
-@router.delete("/awards/{id}")
+@router.delete("/awards/{id}", dependencies=[Depends(validate_csrf)])
 def delete_award(
     id: int,
     db: Session = Depends(get_db),

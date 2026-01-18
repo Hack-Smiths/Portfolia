@@ -1,6 +1,7 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 from typing import List, Optional
 from datetime import datetime
+from app.utils.security import sanitize_html
 
 class ProjectBase(BaseModel):
     title: str
@@ -14,6 +15,16 @@ class ProjectBase(BaseModel):
     imported: Optional[bool] = False
     ai_summary: Optional[bool] = False
     saved: Optional[bool] = False
+
+    @validator('title', 'description', 'type', 'link')
+    def sanitize_strings(cls, v):
+        return sanitize_html(v)
+
+    @validator('stack', 'features')
+    def sanitize_lists(cls, v):
+        if v:
+            return [sanitize_html(item) for item in v]
+        return v
 
 class ProjectCreate(ProjectBase):
     pass

@@ -23,22 +23,27 @@
     --card-border: 240 5.9% 90%;
 
     /* Brand Colors */
-    --electric: 280 100% 70%;        /* #b854ff - Electric Purple */
+    --electric: 280 100% 70%;
+    /* #b854ff - Electric Purple */
     --electric-glow: 280 100% 70% / 0.2;
-    --pulse: 258 90% 66%;            /* #a855f7 - Pulse Violet */
+    --pulse: 258 90% 66%;
+    /* #a855f7 - Pulse Violet */
     --pulse-glow: 258 90% 66% / 0.2;
-    --soft-red: 0 100% 65%;          /* #ff4d4d - Soft Red */
+    --soft-red: 0 100% 65%;
+    /* #ff4d4d - Soft Red */
     --soft-red-glow: 0 100% 65% / 0.2;
 
     /* Semantic Colors */
-    --primary: 258 90% 66%;          /* Pulse Violet */
+    --primary: 258 90% 66%;
+    /* Pulse Violet */
     --primary-foreground: 0 0% 100%;
     --primary-glow: 258 90% 66% / 0.15;
 
     --secondary: 240 4.8% 95.9%;
     --secondary-foreground: 240 5.9% 10%;
 
-    --accent: 280 100% 70%;          /* Electric Purple */
+    --accent: 280 100% 70%;
+    /* Electric Purple */
     --accent-foreground: 0 0% 100%;
     --accent-glow: 280 100% 70% / 0.15;
 
@@ -58,13 +63,13 @@
     --input: 240 5.9% 90%;
     --ring: 258 90% 66%;
 
-  /* Gradients */
-  --gradient-primary: linear-gradient(135deg, hsl(var(--electric)), hsl(var(--pulse)));
-  --gradient-purple: linear-gradient(135deg, hsl(280 100% 70%), hsl(258 90% 66%));
-  --gradient-purple-soft: linear-gradient(135deg, hsl(280 100% 70% / 0.1), hsl(258 90% 66% / 0.1));
-  --gradient-purple-vibrant: linear-gradient(135deg, hsl(280 100% 65%), hsl(258 90% 61%), hsl(270 95% 55%));
-  --gradient-soft: linear-gradient(135deg, hsl(var(--background)), hsl(var(--background-alt)));
-  --gradient-glow: linear-gradient(135deg, hsl(var(--electric-glow)), hsl(var(--pulse-glow)));
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--electric)), hsl(var(--pulse)));
+    --gradient-purple: linear-gradient(135deg, hsl(280 100% 70%), hsl(258 90% 66%));
+    --gradient-purple-soft: linear-gradient(135deg, hsl(280 100% 70% / 0.1), hsl(258 90% 66% / 0.1));
+    --gradient-purple-vibrant: linear-gradient(135deg, hsl(280 100% 65%), hsl(258 90% 61%), hsl(270 95% 55%));
+    --gradient-soft: linear-gradient(135deg, hsl(var(--background)), hsl(var(--background-alt)));
+    --gradient-glow: linear-gradient(135deg, hsl(var(--electric-glow)), hsl(var(--pulse-glow)));
 
     /* Shadows */
     --shadow-sm: 0 1px 2px 0 hsl(var(--foreground) / 0.05);
@@ -156,6 +161,7 @@
 }
 
 @layer components {
+
   /* Glass Components */
   .glass {
     @apply bg-white/60 backdrop-blur-xl border border-white/20;
@@ -279,10 +285,21 @@
     animation: orbit 600s linear infinite;
   }
 
-  .orbit-icon:nth-child(1) { animation-delay: 0s; }
-  .orbit-icon:nth-child(2) { animation-delay: -5s; }
-  .orbit-icon:nth-child(3) { animation-delay: -10s; }
-  .orbit-icon:nth-child(4) { animation-delay: -15s; }
+  .orbit-icon:nth-child(1) {
+    animation-delay: 0s;
+  }
+
+  .orbit-icon:nth-child(2) {
+    animation-delay: -5s;
+  }
+
+  .orbit-icon:nth-child(3) {
+    animation-delay: -10s;
+  }
+
+  .orbit-icon:nth-child(4) {
+    animation-delay: -15s;
+  }
 
   /* Portfolio Templates */
   .template-minimal {
@@ -310,9 +327,9 @@
     transform: perspective(1000px) rotateX(5deg) rotateY(5deg) rotateZ(2deg);
   }
 
-   /* Mesh Background */
+  /* Mesh Background */
   .mesh-bg {
-    background-image: 
+    background-image:
       radial-gradient(at 40% 20%, hsl(var(--primary)) 0px, transparent 50%),
       radial-gradient(at 80% 0%, hsl(var(--accent)) 0px, transparent 50%),
       radial-gradient(at 0% 50%, hsl(var(--electric)) 0px, transparent 50%),
@@ -342,7 +359,7 @@
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.15);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
   }
 
 
@@ -387,13 +404,26 @@
 
 /* Keyframes */
 @keyframes blink {
-  0%, 50% { border-color: hsl(var(--primary)); }
-  51%, 100% { border-color: transparent; }
+
+  0%,
+  50% {
+    border-color: hsl(var(--primary));
+  }
+
+  51%,
+  100% {
+    border-color: transparent;
+  }
 }
 
 @keyframes orbit {
-  0% { transform: rotate(0deg) translateX(150px) rotate(0deg); }
-  100% { transform: rotate(360deg) translateX(150px) rotate(-360deg); }
+  0% {
+    transform: rotate(0deg) translateX(150px) rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg) translateX(150px) rotate(-360deg);
+  }
 }
 
 @keyframes slideInUp {
@@ -401,6 +431,7 @@
     opacity: 0;
     transform: translateY(30px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -412,6 +443,7 @@
     opacity: 0;
     transform: translateX(30px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -419,8 +451,13 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes scaleIn {
@@ -428,6 +465,7 @@
     opacity: 0;
     transform: scale(0.9);
   }
+
   to {
     opacity: 1;
     transform: scale(1);
@@ -435,16 +473,33 @@
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-20px); }
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-20px);
+  }
 }
 
 @keyframes fillBar {
-  from { width: 0%; }
-  to { width: var(--width); }
+  from {
+    width: 0%;
+  }
+
+  to {
+    width: var(--width);
+  }
 }
 
 @keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(100%);
+  }
 }

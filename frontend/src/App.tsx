@@ -18,8 +18,11 @@ import Export from "./pages/Export";
 import Profile from "./pages/Profile";
 import MainPortfolio from "./pages/MainPortfolio";
 import PublicPortfolioPage from "./pages/PublicPortfolioPage";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 import PrivateRoute from "./components/PrivateRoute";
+
 const queryClient = new QueryClient();
 
 const AppContent = () => {
@@ -27,14 +30,19 @@ const AppContent = () => {
   const isDummyPortfolio = location.pathname === '/dummy-portfolio';
   const isMainPortfolio = location.pathname === '/main-portfolio';
   const isAuthPage = location.pathname === '/auth';
+  const isForgotPasswordPage = location.pathname === '/forgot-password';
+  const isResetPasswordPage = location.pathname === '/reset-password';
+  const isEntryPage = isAuthPage || isForgotPasswordPage || isResetPasswordPage;
   const isPublicPortfolio = location.pathname.startsWith('/portfolio/');
 
   return (
     <>
-      {!isDummyPortfolio && !isMainPortfolio && !isAuthPage && !isPublicPortfolio && <Navbar />}
+      {!isDummyPortfolio && !isMainPortfolio && !isEntryPage && !isPublicPortfolio && <Navbar />}
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/auth" element={<Auth />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
         <Route path="/projects" element={<PrivateRoute><Projects /></PrivateRoute>} />
         <Route path="/achievements" element={<PrivateRoute><Achievements /></PrivateRoute>} />
@@ -52,7 +60,7 @@ const AppContent = () => {
         <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
         <Route path="*" element={<NotFound />} />
       </Routes>
-      {!isDummyPortfolio && !isMainPortfolio && !isAuthPage && !isPublicPortfolio && <AIAssistant />}
+      {!isDummyPortfolio && !isMainPortfolio && !isEntryPage && !isPublicPortfolio && <AIAssistant />}
     </>
   );
 };

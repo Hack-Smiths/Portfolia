@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import API from '@/api/axios';
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -26,6 +27,16 @@ const Auth = () => {
   const [checkingUsername, setCheckingUsername] = useState(false);
 
   useEffect(() => {
+    // Fetch CSRF token on mount to ensure cookie is set
+    const initCSRF = async () => {
+      try {
+        await API.get('/csrf');
+      } catch (err) {
+        console.error('Initial CSRF fetch failed:', err);
+      }
+    };
+    initCSRF();
+
     const checkUsername = async () => {
       if (!signupForm.name || signupForm.name.length < 3) {
         setUsernameAvailable(null);
@@ -33,9 +44,8 @@ const Auth = () => {
       }
       setCheckingUsername(true);
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/check-username/${signupForm.name}`);
-        const data = await res.json();
-        setUsernameAvailable(data.available);
+        const res = await API.get(`/check-username/${signupForm.name}`);
+        setUsernameAvailable(res.data.available);
       } catch (err) {
         setUsernameAvailable(null);
       } finally {
@@ -53,29 +63,15 @@ const Auth = () => {
     e.preventDefault();
     setLoginError('');
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: loginForm.email,
-          password: loginForm.password,
-        }),
+      const res = await API.post('/login', {
+        email: loginForm.email,
+        password: loginForm.password,
       });
 
-      if (!res.ok) {
-        const errorData = await res.json();
-        setLoginError(errorData.detail || "Login failed");
-        return;
-      }
+      localStorage.setItem("token", res.data.access_token);
       window.location.href = "/dashboard";
-
-      const data = await res.json();
-      localStorage.setItem("token", data.access_token);
-      // navigate("/dashboard");
-    } catch (err) {
-      setLoginError("Something went wrong, Please try again");
+    } catch (err: any) {
+      setLoginError(err.response?.data?.detail || "Something went wrong, Please try again");
       console.error(err);
     }
   };
@@ -90,31 +86,17 @@ const Auth = () => {
     }
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/signup`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          full_name: signupForm.fullname,
-          username: signupForm.name,
-          email: signupForm.email,
-          password: signupForm.password,
-        }),
+      const res = await API.post('/signup', {
+        full_name: signupForm.fullname,
+        username: signupForm.name,
+        email: signupForm.email,
+        password: signupForm.password,
       });
 
-      if (!res.ok) {
-        const errorData = await res.json();
-        setSignupError(errorData.detail || "Signup failed");
-        return;
-      }
-
-      const data = await res.json();
-      localStorage.setItem("token", data.access_token); // store JWT token
-      // setUser(data.user);
+      localStorage.setItem("token", res.data.access_token);
       window.location.href = "/dashboard";
-    } catch (err) {
-      setSignupError("Something went wrong during signup");
+    } catch (err: any) {
+      setSignupError(err.response?.data?.detail || "Something went wrong during signup");
       console.error(err);
     }
   };
@@ -188,9 +170,9 @@ const Auth = () => {
                 </Button>
 
                 <div className="text-center">
-                  <a href="#" className="text-sm text-primary hover:underline">
+                  <Link to="/forgot-password" title="sm" className="text-sm text-primary hover:underline">
                     Forgot your password?
-                  </a>
+                  </Link>
                 </div>
               </form>
             </TabsContent>

@@ -1,7 +1,5 @@
-# app/api/v1/routes/portfolio.py
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
-from sqlalchemy import func
 from sqlalchemy import func
 from app.dependencies.auth_user import get_db, get_current_user
 from app.models.user import User
@@ -12,6 +10,7 @@ from app.models.certificates import Certificate
 from app.models.work_experience import WorkExperience
 from app.models.awards import Award
 from typing import Optional
+from app.utils.limiter import limiter
 
 router = APIRouter(prefix="/api/portfolio", tags=["Portfolio"])
 
@@ -58,7 +57,8 @@ async def update_portfolio_settings(
 
 
 @router.get("/{username}")
-def get_portfolio_by_username(username: str, db: Session = Depends(get_db)):
+@limiter.limit("100/minute")
+def get_portfolio_by_username(request: Request, username: str, db: Session = Depends(get_db)):
     """
     Get complete portfolio data by username.
     Public endpoint - no authentication required.
@@ -175,7 +175,8 @@ def get_portfolio_by_username(username: str, db: Session = Depends(get_db)):
 
 
 @router.get("/{username}/public-check")
-def check_portfolio_public(username: str, db: Session = Depends(get_db)):
+@limiter.limit("100/minute")
+def check_portfolio_public(request: Request, username: str, db: Session = Depends(get_db)):
     """
     Quick check if a portfolio exists and is public.
     Used for routing decisions on frontend.

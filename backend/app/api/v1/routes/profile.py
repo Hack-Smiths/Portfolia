@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from app import crud, schemas, dependencies
+from app import crud, schemas
 from app.crud import profile as crud_profile
 from app.dependencies.auth_user import get_db
 from app.schemas.profile import ProfileUpdate, ProfileOut
 from app.dependencies.auth_user import get_current_user
+from app.utils.security import validate_csrf
 
 router = APIRouter(prefix="/profile", tags=["Profile"])
 
@@ -18,7 +19,7 @@ def get_profile(
         return {}
     return profile
 
-@router.post("/", response_model=ProfileOut)
+@router.post("/", response_model=ProfileOut, dependencies=[Depends(validate_csrf)])
 def save_profile(
     profile_data: schemas.profile.ProfileUpdate,
     db: Session = Depends(get_db),
