@@ -51,13 +51,64 @@ import { useToast } from "@/components/ui/use-toast";
 import { templates, TemplateType } from '@/utils/themes';
 import { getPortfolioPreview, updatePortfolioSettings } from "@/utils/api";
 
+interface Skill {
+  name: string;
+  level: number;
+  category: string;
+}
+
+interface Project {
+  id: string;
+  title: string;
+  description: string;
+  tech: string[];
+  features?: string[];
+  demo: string;
+  repo: string;
+  stars: number;
+  featured?: boolean;
+}
+
+interface Achievement {
+  title: string;
+  issuer: string;
+  date: string;
+  description: string;
+  type: 'internship' | 'award';
+}
+
+interface Certificate {
+  title: string;
+  issuer: string;
+  date: string;
+  credentialId: string;
+}
+
+interface PortfolioData {
+  username: string;
+  name: string;
+  title: string;
+  tagline: string;
+  location: string;
+  email: string;
+  github: string;
+  linkedin: string;
+  about: string;
+  avatar?: string;
+  theme_preference: string;
+  projects: Project[];
+  skills: Skill[];
+  achievements: Achievement[];
+  certificates: Certificate[];
+}
+
 const Portfolio = () => {
   const { toast } = useToast();
   const [isEditMode, setIsEditMode] = useState(false);
   const [currentTemplate, setCurrentTemplate] = useState<TemplateType>('classic');
   const [editingSection, setEditingSection] = useState<string | null>(null);
   const { user, loading } = useAuthContext();
-  const [portfolioData, setPortfolioData] = useState(null);
+  const [portfolioData, setPortfolioData] = useState<PortfolioData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [categorySkills, setCategorySkills] = useState<{ name: string; level: number }[]>([]);
   const [skills, setSkills] = useState<{ name: string; level: number }[]>([]);
@@ -103,7 +154,7 @@ const Portfolio = () => {
     }
     acc[skill.category].push(skill);
     return acc;
-  }, {} as Record<string, typeof portfolioData.skills>);
+  }, {} as Record<string, Skill[]>);
 
   const EditButton = ({ section }: { section: string }) => (
     isEditMode && (

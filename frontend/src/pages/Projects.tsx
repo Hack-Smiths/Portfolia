@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Github, Plus, Edit3, Trash2, ExternalLink, Star, GitBranch, Code, Sparkles } from 'lucide-react';
+import { Github, Plus, Edit3, Trash2, ExternalLink, Star, GitBranch, Code, Sparkles, Maximize2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -9,6 +9,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import AIAssistant from '@/components/AIAssistant';
+import { AIEnhanceModal } from '@/components/AIEnhanceModal';
+import { ProjectDetailsModal } from '@/components/ProjectDetailsModal';
 import { usePortfolio } from '@/contexts/PortfolioContext';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { getUserProjects as getUserProjectsAPI, addProject as addProjectAPI, updateProject as updateProjectAPI, deleteProject as deleteProjectAPI, fetchGithubSummary as fetchGithubSummaryAPI } from '@/utils/api';
@@ -16,10 +18,14 @@ import type { Project } from '@/types/project';
 
 
 const Projects = () => {
-  const [openedit, setOpenEdit] = useState(false); 
-  const [selectedProject, setSelectedProject] = useState(null); 
-  const [openProject, setOpenProject] = useState(false); 
-  const [openGithub, setOpenGithub] = useState(false); 
+  const [openedit, setOpenEdit] = useState(false);
+  const [selectedProject, setSelectedProject] = useState(null);
+  const [openProject, setOpenProject] = useState(false);
+  const [openGithub, setOpenGithub] = useState(false);
+  const [aiModalOpen, setAiModalOpen] = useState(false);
+  const [selectedProjectForAI, setSelectedProjectForAI] = useState<Project | null>(null);
+  const [projectDetailsOpen, setProjectDetailsOpen] = useState(false);
+  const [selectedProjectForDetails, setSelectedProjectForDetails] = useState<Project | null>(null);
 
   const { projects, addProject, deleteProject, updateProject } = usePortfolio();
 
@@ -120,7 +126,7 @@ const Projects = () => {
         forks: projectData.githubForks ?? 0,
         link: projectData.githubLink ?? '',
         imported: true,
-        ai_summary: true,
+        ai_summary: false,
         saved: true,
       };
 
@@ -155,12 +161,12 @@ const Projects = () => {
     return true;
   });
 
-  const ProjectCard = ({ project }: {project: Project}) => (
+  const ProjectCard = ({ project }: { project: Project }) => (
     <Card className="glass-card interactive group overflow-hidden">
       <div className="w-12 h-12 bg-gradient-primary rounded-lg flex items-center justify-center mb-4 group-hover:glow-primary transition-all">
         <Code className="w-6 h-6 text-white" />
       </div>
-      
+
       <div className="space-y-3">
         <div className="flex items-start justify-between">
           <h3 className="text-lg font-semibold group-hover:text-primary transition-colors">
@@ -198,13 +204,37 @@ const Projects = () => {
               </DialogContent>
             </Dialog>
 
-            <Button 
-              size="sm" 
-              variant="ghost" 
+            <Button
+              size="sm"
+              variant="ghost"
               className="w-8 h-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
               onClick={() => handleDeleteProject(project.id)}
             >
               <Trash2 className="w-4 h-4" />
+            </Button>
+
+            <a href={project.link} target="_blank" rel="noopener noreferrer">
+              <Button
+                size="sm"
+                variant="ghost"
+                className="w-8 h-8 p-0"
+                title="Open project"
+              >
+                <ExternalLink className="w-4 h-4" />
+              </Button>
+            </a>
+
+            <Button
+              size="sm"
+              variant="ghost"
+              className="w-8 h-8 p-0"
+              title="Enlarge card"
+              onClick={() => {
+                setSelectedProjectForDetails(project);
+                setProjectDetailsOpen(true);
+              }}
+            >
+              <Maximize2 className="w-4 h-4" />
             </Button>
           </div>
         </div>
@@ -255,18 +285,20 @@ const Projects = () => {
             <div className={`w-2 h-2 rounded-full ${project.status.saved ? 'bg-electric' : 'bg-muted'}`} />
           </div>
           <div className="flex-1" />
-          <a href={project.link} target="_blank" rel="noopener noreferrer">
-            <Button size="sm" variant="ghost" className="text-xs">
-              <ExternalLink className="w-3 h-3 mr-1" />
-              View
-            </Button>
-          </a>
-          {!project.status.aiSummary && (
-            <Button size="sm" className="btn-primary text-xs">
-              <Sparkles className="w-3 h-3 mr-1" />
-              AI Enhance
-            </Button>
-          )}
+          <Button
+            size="sm"
+            className="btn-primary text-xs"
+            onClick={() => {
+              setSelectedProjectForAI({
+                ...project,
+                stack: project.stack || [],
+              });
+              setAiModalOpen(true);
+            }}
+          >
+            <Sparkles className="w-3 h-3 mr-1" />
+            {project.status.aiSummary ? "Enhance Again" : "AI Enhance"}
+          </Button>
         </div>
       </div>
     </Card>
@@ -288,7 +320,7 @@ const Projects = () => {
           <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/30 via-purple-50/20 to-pink-50/30 dark:from-slate-900 dark:via-purple-900/10 dark:to-slate-900" />
           <div className="mesh-bg absolute inset-0" />
         </div>
-        
+
         <div className="container mx-auto px-4 py-8 relative z-10"></div>
         {/* Header */}
         <div className="container mx-auto px-4 py-4 relative z-10">
@@ -313,8 +345,8 @@ const Projects = () => {
                   <DialogHeader>
                     <DialogTitle>Import from GitHub</DialogTitle>
                   </DialogHeader>
-                  <GitHubImportForm 
-                    onImport={handleImportFromGitHub} 
+                  <GitHubImportForm
+                    onImport={handleImportFromGitHub}
                     onClose={() => {
                       const dialog = document.querySelector('[role="dialog"]');
                       const closeButton = dialog?.querySelector('[aria-label="Close"]') as HTMLButtonElement;
@@ -323,25 +355,25 @@ const Projects = () => {
                   />
                 </DialogContent>
               </Dialog>
-            <Dialog open={openProject} onOpenChange={setOpenProject}>
-              <DialogTrigger asChild>
-                <Button variant="outline">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Project
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Add Project Manually</DialogTitle>
-                </DialogHeader>
-                <ManualProjectForm 
-                  onAdd={handleAddProject} 
-                  onCloseProject={() => setOpenProject(false)}
-                />
-              </DialogContent>
-            </Dialog>
+              <Dialog open={openProject} onOpenChange={setOpenProject}>
+                <DialogTrigger asChild>
+                  <Button variant="outline">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Project
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Add Project Manually</DialogTitle>
+                  </DialogHeader>
+                  <ManualProjectForm
+                    onAdd={handleAddProject}
+                    onCloseProject={() => setOpenProject(false)}
+                  />
+                </DialogContent>
+              </Dialog>
             </div>
-          
+
           </div>
         </div>
 
@@ -365,6 +397,69 @@ const Projects = () => {
         </Tabs>
 
       </div>
+
+      {/* AI Enhance Modal */}
+      {selectedProjectForAI && (
+        <AIEnhanceModal
+          isOpen={aiModalOpen}
+          onClose={() => setAiModalOpen(false)}
+          project={{
+            id: selectedProjectForAI.id,
+            title: selectedProjectForAI.title,
+            description: selectedProjectForAI.description || '',
+            techStack: selectedProjectForAI.stack || [],
+          }}
+          onApply={async (newDescription) => {
+            try {
+              // Build payload for update
+              const payload = {
+                title: selectedProjectForAI.title,
+                description: newDescription,
+                type: selectedProjectForAI.type || 'others',
+                stack: selectedProjectForAI.stack || [],
+                features: selectedProjectForAI.features || [],
+                stars: selectedProjectForAI.stars ?? 0,
+                forks: selectedProjectForAI.forks ?? 0,
+                link: selectedProjectForAI.link || '',
+                imported: selectedProjectForAI.status?.imported ?? selectedProjectForAI.imported ?? false,
+                ai_summary: true, // Mark as AI-enhanced
+                saved: true,
+              };
+
+              // Update via API
+              const updatedFromServer = await updateProjectAPI(selectedProjectForAI.id, payload);
+
+              // Map to UI format
+              const mapped = {
+                ...updatedFromServer,
+                status: {
+                  imported: Boolean(updatedFromServer.imported),
+                  aiSummary: Boolean(updatedFromServer.ai_summary),
+                  saved: Boolean(updatedFromServer.saved),
+                },
+              };
+
+              // Update local state only on success
+              setLocalProjects(localProjects.map(p => p.id === selectedProjectForAI.id ? mapped : p));
+
+              // Close modal only on success
+              setAiModalOpen(false);
+            } catch (error) {
+              console.error('Failed to apply AI enhancement:', error);
+              // User can retry or close manually
+            }
+          }}
+        />
+      )}
+
+      {/* Project Details Modal */}
+      {selectedProjectForDetails && (
+        <ProjectDetailsModal
+          isOpen={projectDetailsOpen}
+          onClose={() => setProjectDetailsOpen(false)}
+          project={selectedProjectForDetails}
+        />
+      )}
 
       <AIAssistant />
     </div>
@@ -455,48 +550,48 @@ const Projects = () => {
     );
   }
 
-function ManualProjectForm({ onAdd, onCloseProject }) {
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [stack, setStack] = useState('');
-  const [link, setUrl] = useState('');
-  const [features, setFeatures] = useState('');
-  const [submitting, setSubmitting] = useState(false);
-  const [err, setErr] = useState<string | null>(null);
+  function ManualProjectForm({ onAdd, onCloseProject }) {
+    const [title, setTitle] = useState('');
+    const [description, setDescription] = useState('');
+    const [stack, setStack] = useState('');
+    const [link, setUrl] = useState('');
+    const [features, setFeatures] = useState('');
+    const [submitting, setSubmitting] = useState(false);
+    const [err, setErr] = useState<string | null>(null);
 
-  const handleSubmit = async () => {
-    if (!title.trim() || !description.trim()) {
-      setErr('Title and description are required');
-      return;
-    }
+    const handleSubmit = async () => {
+      if (!title.trim() || !description.trim()) {
+        setErr('Title and description are required');
+        return;
+      }
 
-    const payload = {
-      title,
-      description,
-      stack: stack.split(',').map(s => s.trim()).filter(Boolean),
-      features: features.split(',').map(s => s.trim()).filter(Boolean),
-      link,
+      const payload = {
+        title,
+        description,
+        stack: stack.split(',').map(s => s.trim()).filter(Boolean),
+        features: features.split(',').map(s => s.trim()).filter(Boolean),
+        link,
+      };
+
+      try {
+        setSubmitting(true);
+        setErr(null);
+        await onAdd(payload); // <-- will call API & update parent state
+        // reset local fields
+        setTitle('');
+        setDescription('');
+        setStack('');
+        setFeatures('');
+        setUrl('');
+        // close dialog after success
+        onCloseProject();
+      } catch (e: any) {
+        console.error(e);
+        setErr(e?.message || 'Failed to add project');
+      } finally {
+        setSubmitting(false);
+      }
     };
-
-    try {
-      setSubmitting(true);
-      setErr(null);
-      await onAdd(payload); // <-- will call API & update parent state
-      // reset local fields
-      setTitle('');
-      setDescription('');
-      setStack('');
-      setFeatures('');
-      setUrl('');
-      // close dialog after success
-      onCloseProject();
-    } catch (e: any) {
-      console.error(e);
-      setErr(e?.message || 'Failed to add project');
-    } finally {
-      setSubmitting(false);
-    }
-  };
     const handleClose = () => {
       onCloseProject();
     };
@@ -505,17 +600,17 @@ function ManualProjectForm({ onAdd, onCloseProject }) {
       <div className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="project-title">Project Title</Label>
-          <Input 
-            id="project-title" 
-            placeholder="My Awesome Project" 
+          <Input
+            id="project-title"
+            placeholder="My Awesome Project"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
         </div>
         <div className="space-y-2">
           <Label htmlFor="project-description">Description</Label>
-          <Textarea 
-            id="project-description" 
+          <Textarea
+            id="project-description"
             placeholder="Describe your project..."
             rows={3}
             value={description}
@@ -524,33 +619,33 @@ function ManualProjectForm({ onAdd, onCloseProject }) {
         </div>
         <div className="space-y-2">
           <Label htmlFor="project-stack">Tech Stack (comma-separated)</Label>
-          <Input 
-            id="project-stack" 
-            placeholder="React, Node.js, MongoDB" 
+          <Input
+            id="project-stack"
+            placeholder="React, Node.js, MongoDB"
             value={stack}
             onChange={(e) => setStack(e.target.value)}
           />
         </div>
         <div className="space-y-2">
           <Label htmlFor="project-features">Key Features (comma-separated)</Label>
-          <Input 
-            id="project-features" 
-            placeholder="User Authentication, Real-time Updates, Payment Integration" 
+          <Input
+            id="project-features"
+            placeholder="User Authentication, Real-time Updates, Payment Integration"
             value={features}
             onChange={(e) => setFeatures(e.target.value)}
           />
         </div>
         <div className="space-y-2">
           <Label htmlFor="project-url">Project URL (optional)</Label>
-          <Input 
-            id="project-url" 
-            placeholder="https://myproject.com" 
+          <Input
+            id="project-url"
+            placeholder="https://myproject.com"
             value={link}
             onChange={(e) => setUrl(e.target.value)}
           />
         </div>
         <div className="flex space-x-3">
-          <Button 
+          <Button
             className="btn-primary flex-1"
             onClick={handleSubmit}
             disabled={!title || !description}
