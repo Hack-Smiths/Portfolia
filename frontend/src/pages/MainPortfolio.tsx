@@ -46,6 +46,8 @@ import {
 import { useAuthContext } from '@/contexts/AuthContext';
 import { getPortfolioPreview } from '@/utils/api';
 import { templates, TemplateType } from '@/utils/themes';
+import PortfolioNavbar from '@/components/portfolio/PortfolioNavbar';
+import ContactSection from '@/components/portfolio/ContactSection';
 
 interface MainPortfolioProps {
   portfolioData?: any;
@@ -58,6 +60,25 @@ const MainPortfolio = ({ portfolioData: propData, isPublicView = false }: MainPo
   const { user, loading } = useAuthContext();
   const [portfolioData, setPortfolioData] = useState(propData || null);
   const [isLoading, setIsLoading] = useState(!propData);
+  const [activeSection, setActiveSection] = useState('home');
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const sections = ['home', 'about', 'projects', 'skills', 'experience', 'contact'];
+      for (const section of sections) {
+        const element = document.getElementById(section);
+        if (element) {
+          const rect = element.getBoundingClientRect();
+          if (rect.top <= 100 && rect.bottom >= 100) {
+            setActiveSection(section);
+            break;
+          }
+        }
+      }
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     const templateParam = searchParams.get('template');
@@ -121,11 +142,20 @@ const MainPortfolio = ({ portfolioData: propData, isPublicView = false }: MainPo
   return (
     <div className={`min-h-screen transition-all duration-700 ${currentStyles.background}`}>
 
-      <main className="pt-2 pb-20">
+
+      {/* Public Navbar (Only if public view and data exists) */}
+      {isPublicView && portfolioData && (
+        <PortfolioNavbar
+          name={portfolioData.name.split(' ')[0]}
+          activeSection={activeSection}
+        />
+      )}
+
+      <main className="pt-0 pb-0">
 
         {/* Template 1: Professional Clean Design */}
         {currentTemplate === 'classic' && (
-          <div className="space-y-6 relative">
+          <div className="space-y-0 relative">
             {/* Subtle Background Pattern */}
             <div className="fixed inset-0 pointer-events-none z-0">
               <div className="absolute inset-0" style={{
@@ -135,7 +165,7 @@ const MainPortfolio = ({ portfolioData: propData, isPublicView = false }: MainPo
             </div>
 
             {/* Clean Professional Hero Section */}
-            <section className="relative min-h-screen flex items-center justify-center">
+            <section id="home" className="relative min-h-screen flex items-center justify-center pt-16">
               <div className="relative z-10 max-w-6xl mx-auto px-6 py-16">
                 <div className="flex flex-col lg:flex-row items-center gap-16">
                   {/* Professional Avatar */}
@@ -206,15 +236,14 @@ const MainPortfolio = ({ portfolioData: propData, isPublicView = false }: MainPo
                       </a>
                     </div>
 
-                    {/* Professional CTA Buttons */}
+                    {/* CTA to Contact Section */}
                     <div className="flex flex-wrap gap-4 justify-center lg:justify-start pt-6">
                       <Button
                         size="lg"
                         className="bg-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300"
-                        onClick={copyPortfolioLink}
+                        onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
                       >
-                        <Copy className="w-5 h-5 mr-3" />
-                        Share Portfolio
+                        Get In Touch
                       </Button>
                       <Button
                         size="lg"
@@ -230,44 +259,8 @@ const MainPortfolio = ({ portfolioData: propData, isPublicView = false }: MainPo
               </div>
             </section>
 
-            {/* Professional Stats Section */}
-            <section className="py-6 px-6 relative">
-              <div className="max-w-6xl mx-auto">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                  <Card className="bg-card border border-border shadow-lg hover:shadow-xl transition-all duration-300 p-6 text-center">
-                    <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
-                      <Code className="w-6 h-6 text-primary" />
-                    </div>
-                    <div className="text-3xl font-bold text-foreground mb-2">{portfolioData.projects.length}+</div>
-                    <div className="text-muted-foreground text-sm">Projects</div>
-                  </Card>
-                  <Card className="bg-card border border-border shadow-lg hover:shadow-xl transition-all duration-300 p-6 text-center">
-                    <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
-                      <Trophy className="w-6 h-6 text-primary" />
-                    </div>
-                    <div className="text-3xl font-bold text-foreground mb-2">{portfolioData.achievements.length}+</div>
-                    <div className="text-muted-foreground text-sm">Achievements</div>
-                  </Card>
-                  <Card className="bg-card border border-border shadow-lg hover:shadow-xl transition-all duration-300 p-6 text-center">
-                    <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
-                      <GraduationCap className="w-6 h-6 text-primary" />
-                    </div>
-                    <div className="text-3xl font-bold text-foreground mb-2">{portfolioData.certificates.length}+</div>
-                    <div className="text-muted-foreground text-sm">Certificates</div>
-                  </Card>
-                  <Card className="bg-card border border-border shadow-lg hover:shadow-xl transition-all duration-300 p-6 text-center">
-                    <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
-                      <BarChart3 className="w-6 h-6 text-primary" />
-                    </div>
-                    <div className="text-3xl font-bold text-foreground mb-2">{portfolioData.skills.length}+</div>
-                    <div className="text-muted-foreground text-sm">Skills</div>
-                  </Card>
-                </div>
-              </div>
-            </section>
-
             {/* Professional About Me Section */}
-            <section className="py-6 px-6 relative">
+            <section id="about" className="py-20 px-6 relative bg-muted/30">
               <div className="max-w-4xl mx-auto">
                 <div className="text-center mb-12">
                   <div className="flex items-center justify-center mb-4">
@@ -291,8 +284,45 @@ const MainPortfolio = ({ portfolioData: propData, isPublicView = false }: MainPo
               </div>
             </section>
 
+            {/* Professional Stats Section */}
+            <section className="py-12 px-6 relative">
+              <div className="max-w-6xl mx-auto">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                  <Card className="bg-card border border-border shadow-lg hover:shadow-xl transition-all duration-300 p-6 text-center">
+                    <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
+                      <Code className="w-6 h-6 text-primary" />
+                    </div>
+                    <div className="text-3xl font-bold text-foreground mb-2">{portfolioData.projects.length}+</div>
+                    <div className="text-muted-foreground text-sm">Projects</div>
+                  </Card>
+                  <Card className="bg-card border border-border shadow-lg hover:shadow-xl transition-all duration-300 p-6 text-center">
+                    <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
+                      <Trophy className="w-6 h-6 text-primary" />
+                    </div>
+                    <div className="text-3xl font-bold text-foreground mb-2">{portfolioData.achievements.length}+</div>
+                    <div className="text-muted-foreground text-sm">Achievements</div>
+                  </Card>
+                  <Card className="bg-card border border-border shadow-lg hover:shadow-xl transition-all duration-300 p-6 text-center">
+                    <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
+                      <GraduationCap className="w-6 h-6 text-primary" />
+                    </div>
+                    <div className="text-3xl font-bold text-foreground mb-2">{portfolioData.certificates.length}+</div>
+                    <div className="text-muted-foreground text-sm">Certifications</div>
+                  </Card>
+                  <Card className="bg-card border border-border shadow-lg hover:shadow-xl transition-all duration-300 p-6 text-center">
+                    <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
+                      <BarChart3 className="w-6 h-6 text-primary" />
+                    </div>
+                    <div className="text-3xl font-bold text-foreground mb-2">{portfolioData.skills.length}+</div>
+                    <div className="text-muted-foreground text-sm">Skills</div>
+                  </Card>
+                </div>
+              </div>
+            </section>
+
+
             {/* Professional Projects Section */}
-            <section className="py-20 px-6 relative">
+            <section id="projects" className="py-20 px-6 relative">
               <div className="max-w-6xl mx-auto">
                 <div className="text-center mb-12">
                   <div className="flex items-center justify-center mb-4">
@@ -401,7 +431,7 @@ const MainPortfolio = ({ portfolioData: propData, isPublicView = false }: MainPo
             </section>
 
             {/* Professional Skills Section */}
-            <section className="py-20 px-6 relative">
+            <section id="skills" className="py-20 px-6 relative bg-muted/30">
               <div className="max-w-6xl mx-auto">
                 <div className="text-center mb-12">
                   <div className="flex items-center justify-center mb-4">
@@ -479,223 +509,67 @@ const MainPortfolio = ({ portfolioData: propData, isPublicView = false }: MainPo
               </div>
             </section>
 
-            {/* Ultra-Premium Achievements Timeline - Animated Vertical Timeline */}
-            <section className="py-20 px-6 relative">
-              <div className="max-w-5xl mx-auto">
+            {/* Experience & Achievements Section */}
+            <section id="experience" className="py-20 px-6 relative">
+              <div className="max-w-6xl mx-auto">
                 <div className="text-center mb-16">
-                  <div className="flex items-center justify-center mb-6">
-                    <div className="w-16 h-16 bg-gradient-primary rounded-2xl flex items-center justify-center mr-4 glow-primary">
-                      <Trophy className="w-8 h-8 text-white" />
-                    </div>
-                    <h2 className="text-4xl font-black text-gradient-primary">Achievements & Milestones</h2>
-                  </div>
-                  <div className="w-32 h-1.5 bg-gradient-primary mx-auto rounded-full glow-primary mb-6" />
-                  <p className="text-xl text-foreground-muted max-w-2xl mx-auto">
-                    Celebrating moments of growth and recognition in my journey
-                  </p>
+                  <h2 className="text-4xl font-bold mb-4">Experience & Achievements</h2>
+                  <div className="w-24 h-1 bg-primary mx-auto rounded-full" />
                 </div>
 
-                {/* Mobile Cards Layout */}
-                <div className="block md:hidden">
-                  <div className="grid gap-6">
-                    {portfolioData.achievements.map((achievement, index) => (
-                      <Card
-                        key={index}
-                        className="glass-card group/card hover:glow-primary transition-all duration-700 border-electric/20 hover:border-electric/40 tilt overflow-hidden animate-fade-in"
-                        style={{ animationDelay: `${index * 200}ms` }}
-                      >
-                        {/* Hover Background Effect */}
-                        <div className="absolute inset-0 bg-gradient-to-r from-electric/5 via-pulse/5 to-accent/5 opacity-0 group-hover/card:opacity-100 transition-all duration-500 rounded-xl" />
-
-                        <div className="relative z-10 p-6">
-                          <div className="flex items-start space-x-4 mb-4">
-                            {/* Icon */}
-                            <div className="w-12 h-12 bg-gradient-primary rounded-xl flex items-center justify-center shadow-lg">
-                              {achievement.type === 'internship' ?
-                                <Briefcase className="w-6 h-6 text-white" /> :
-                                <Trophy className="w-6 h-6 text-white" />
-                              }
-                            </div>
-
-                            <div className="flex-1">
-                              <h3 className="text-xl font-bold text-foreground group-hover/card:text-gradient-primary transition-all duration-300 mb-2">
-                                {achievement.title}
-                              </h3>
-                              <div className="flex items-center space-x-2 text-accent font-semibold text-sm">
-                                <Building className="w-4 h-4" />
-                                <span>{achievement.issuer}</span>
-                              </div>
-                            </div>
-
-                            <Badge className="bg-gradient-to-r from-electric/20 to-pulse/20 border-electric/30 text-foreground px-3 py-1 rounded-lg shadow-lg text-sm">
-                              <Calendar className="w-4 h-4 mr-1" />
-                              {achievement.date}
-                            </Badge>
-                          </div>
-
-                          <p className="text-foreground-muted leading-relaxed group-hover/card:text-foreground transition-colors duration-300 mb-4">
-                            {achievement.description}
-                          </p>
-
-                          {/* Achievement Type Badge */}
-                          <div className="flex justify-end">
-                            <Badge
-                              variant="outline"
-                              className={`${achievement.type === 'internship'
-                                ? 'border-blue-500/30 text-blue-600 bg-blue-500/10'
-                                : 'border-yellow-500/30 text-yellow-600 bg-yellow-500/10'
-                                } px-3 py-1 rounded-lg font-medium`}
-                            >
-                              {achievement.type === 'internship' ? '💼 Internship' : '🏆 Award'}
-                            </Badge>
-                          </div>
+                <div className="grid md:grid-cols-2 gap-12">
+                  {/* Work Experience */}
+                  <div className="space-y-8">
+                    <h3 className="text-2xl font-bold flex items-center mb-6">
+                      <Briefcase className="w-6 h-6 mr-3 text-primary" />
+                      Work History
+                    </h3>
+                    {portfolioData.work_experience && portfolioData.work_experience.map((job: any, i: number) => (
+                      <Card key={i} className="p-6 border-l-4 border-l-primary shadow-sm hover:shadow-md transition-shadow">
+                        <h4 className="text-xl font-bold">{job.position}</h4>
+                        <div className="flex justify-between text-sm text-foreground-muted mb-2">
+                          <span className="font-medium text-primary">{job.company}</span>
+                          <span>{job.duration}</span>
                         </div>
+                        <p className="text-sm text-foreground-muted">{job.description}</p>
                       </Card>
                     ))}
                   </div>
-                </div>
 
-                {/* Desktop Timeline Layout */}
-                <div className="hidden md:block relative">
-                  {/* Animated Timeline Line */}
-                  <div className="absolute left-8 top-0 bottom-0 w-1 bg-gradient-primary rounded-full glow-primary animate-slide-in-up" />
-
-                  <div className="space-y-12">
-                    {portfolioData.achievements.map((achievement, index) => (
-                      <div
-                        key={index}
-                        className="relative flex items-start animate-slide-in-right group"
-                        style={{ animationDelay: `${index * 300}ms` }}
-                      >
-                        {/* Timeline Marker */}
-                        <div className="relative z-10 mr-8">
-                          <div className="w-16 h-16 bg-gradient-primary rounded-2xl flex items-center justify-center shadow-2xl hover:shadow-xl transition-all duration-500 transform hover:scale-105 border-4 border-white/30 dark:border-slate-800/30">
-                            {achievement.type === 'internship' ?
-                              <Briefcase className="w-8 h-8 text-white" /> :
-                              <Trophy className="w-8 h-8 text-white" />
-                            }
+                  {/* Achievements */}
+                  <div className="space-y-8">
+                    <h3 className="text-2xl font-bold flex items-center mb-6">
+                      <Trophy className="w-6 h-6 mr-3 text-primary" />
+                      Key Milestones
+                    </h3>
+                    <div className="space-y-6">
+                      {portfolioData.achievements.map((achievement, index) => (
+                        <div key={index} className="flex items-start">
+                          <div className="mr-4 mt-1 bg-primary/10 p-2 rounded-full">
+                            <Award className="w-5 h-5 text-primary" />
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-lg">{achievement.title}</h4>
+                            <p className="text-sm text-foreground-muted mb-1">{achievement.issuer} • {achievement.date}</p>
+                            <p className="text-sm text-foreground-muted">{achievement.description}</p>
                           </div>
                         </div>
-
-                        {/* Achievement Card */}
-                        <Card className="flex-1 glass-card group/card hover:glow-primary transition-all duration-700 border-electric/20 hover:border-electric/40 tilt overflow-hidden">
-                          {/* Hover Background Effect */}
-                          <div className="absolute inset-0 bg-gradient-to-r from-electric/5 via-pulse/5 to-accent/5 opacity-0 group-hover/card:opacity-100 transition-all duration-500 rounded-xl" />
-
-                          <div className="relative z-10 p-8">
-                            <div className="flex items-start justify-between mb-4">
-                              <div className="flex-1">
-                                <h3 className="text-2xl font-bold text-foreground group-hover/card:text-gradient-primary transition-all duration-300 mb-2">
-                                  {achievement.title}
-                                </h3>
-                                <div className="flex items-center space-x-3">
-                                  <div className="flex items-center space-x-2 text-accent font-semibold">
-                                    <Building className="w-4 h-4" />
-                                    <span>{achievement.issuer}</span>
-                                  </div>
-                                </div>
-                              </div>
-
-                              <Badge className="bg-gradient-to-r from-electric/20 to-pulse/20 border-electric/30 text-foreground px-4 py-2 rounded-xl shadow-lg">
-                                <Calendar className="w-4 h-4 mr-2" />
-                                {achievement.date}
-                              </Badge>
-                            </div>
-
-                            <p className="text-foreground-muted leading-relaxed group-hover/card:text-foreground transition-colors duration-300">
-                              {achievement.description}
-                            </p>
-
-                            {/* Achievement Type Badge */}
-                            <div className="mt-6 flex justify-end">
-                              <Badge
-                                variant="outline"
-                                className={`${achievement.type === 'internship'
-                                  ? 'border-blue-500/30 text-blue-600 bg-blue-500/10'
-                                  : 'border-yellow-500/30 text-yellow-600 bg-yellow-500/10'
-                                  } px-3 py-1 rounded-lg font-medium`}
-                              >
-                                {achievement.type === 'internship' ? '💼 Internship' : '🏆 Award'}
-                              </Badge>
-                            </div>
-                          </div>
-                        </Card>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
             </section>
 
-            {/* Enhanced Certificates Section */}
-            <section className="py-16 px-6 relative pb-0">
-              <div className="max-w-6xl mx-auto">
-                <div className="text-center mb-8">
-                  <h2 className="text-4xl font-black text-gradient-primary mb-4">Certifications</h2>
-                  <div className="w-24 h-1 bg-gradient-primary mx-auto rounded-full mb-4" />
-                  <p className="text-lg text-foreground-muted max-w-2xl mx-auto">
-                    Professional certifications and continuous learning achievements
-                  </p>
-                </div>
+            {/* New Contact Section */}
+            <ContactSection
+              username={portfolioData.username || ""}
+              email={portfolioData.email}
+              github={portfolioData.github}
+              linkedin={portfolioData.linkedin}
+              resumeUrl={portfolioData.resume}
+            />
 
-                <div className="grid md:grid-cols-2 gap-8">
-                  {portfolioData.certificates.map((cert, index) => (
-                    <Card
-                      key={index}
-                      className="glass-card group hover:glow-accent transition-all duration-500 border-accent/20 hover:border-accent/40 overflow-hidden"
-                    >
-                      {/* Animated Background */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-accent/5 via-pulse/5 to-electric/5 opacity-0 group-hover:opacity-100 transition-all duration-500" />
-
-                      <div className="relative z-10 p-8">
-                        <div className="flex items-start justify-between mb-6">
-                          {/* Icon Box */}
-                          <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center shadow-lg">
-                            <Award className="w-6 h-6 text-white" />
-                            {/* Or text-primary-foreground if your theme uses white here */}
-                          </div>
-
-                          {/* Date Badge */}
-                          <Badge className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800">
-                            <Calendar className="w-3 h-3 mr-2" />
-                            {cert.date}
-                          </Badge>
-                        </div>
-
-
-                        <div className="space-y-4">
-                          <div>
-                            <h3 className="text-2xl font-bold text-foreground group-hover:text-gradient-accent transition-all duration-300 mb-2">
-                              {cert.title}
-                            </h3>
-                            <p className="text-accent font-semibold text-lg">
-                              {cert.issuer}
-                            </p>
-                          </div>
-
-                          <div className="space-y-2">
-                            <div className="flex items-center justify-between text-sm">
-                              <span className="text-foreground-muted">Credential ID:</span>
-                              <span className="font-mono text-foreground bg-secondary px-2 py-1 rounded">
-                                {cert.credentialId}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-
-                        <Button
-                          variant="outline"
-                          className="w-full border-2 border-electric/50 text-electric hover:bg-electric/20 rounded-xl font-bold transition-all duration-300"
-                        >
-                          <ExternalLink className="w-4 h-4 mr-2" />
-                          View Certificate
-                        </Button>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-            </section>
           </div>
         )}
 
@@ -704,8 +578,9 @@ const MainPortfolio = ({ portfolioData: propData, isPublicView = false }: MainPo
         {currentTemplate === 'creative' && (
           <div className="relative bg-gradient-to-br from-orange-50 via-white to-red-50 dark:from-slate-900 dark:via-orange-950 dark:to-slate-900">
 
+
             {/* Elegant Hero Section */}
-            <section className="relative flex items-center justify-center overflow-hidden pt-6 pb-12">
+            <section id="home" className="relative flex items-center justify-center overflow-hidden pt-6 pb-12">
               {/* Sophisticated Background */}
               <div className="absolute inset-0 opacity-30">
                 <div className="absolute top-0 left-0 w-96 h-96 bg-orange-500/20 rounded-full blur-3xl"></div>
@@ -860,7 +735,7 @@ const MainPortfolio = ({ portfolioData: propData, isPublicView = false }: MainPo
             </section>
 
             {/* Sophisticated Projects Grid */}
-            <section className="py-24 px-6 bg-slate-50 dark:bg-slate-900/50 relative">
+            <section id="projects" className="py-24 px-6 bg-slate-50 dark:bg-slate-900/50 relative">
               <div className="max-w-7xl mx-auto">
                 <div className="text-center mb-16">
                   <h2 className="text-4xl font-bold text-slate-900 dark:text-white mb-4">Featured Projects</h2>
@@ -940,7 +815,7 @@ const MainPortfolio = ({ portfolioData: propData, isPublicView = false }: MainPo
             </section>
 
             {/* Skills Section - Keep Similar */}
-            <section className="py-24 px-6 relative">
+            <section id="skills" className="py-24 px-6 relative">
               <div className="max-w-6xl mx-auto">
                 <div className="text-center mb-16">
                   <h2 className="text-4xl font-bold text-slate-900 dark:text-white mb-4">Technical Skills</h2>
@@ -986,8 +861,8 @@ const MainPortfolio = ({ portfolioData: propData, isPublicView = false }: MainPo
               </div>
             </section>
 
-            {/* Achievements Section - Responsive Layout */}
-            <section className="py-16 px-6 bg-slate-50 dark:bg-slate-900/50 relative">
+            {/* Enhanced Achievements Section */}
+            <section id="experience" className="py-16 px-6 relative">
               <div className="max-w-6xl mx-auto">
                 <div className="text-center mb-12">
                   <h2 className="text-4xl font-bold text-slate-900 dark:text-white mb-4">Key Achievements</h2>
@@ -1093,6 +968,15 @@ const MainPortfolio = ({ portfolioData: propData, isPublicView = false }: MainPo
                 </div>
               </div>
             </section>
+
+            {/* New Contact Section */}
+            <ContactSection
+              username={portfolioData.username || ""}
+              email={portfolioData.email}
+              github={portfolioData.github}
+              linkedin={portfolioData.linkedin}
+              resumeUrl={portfolioData.resume}
+            />
           </div>
         )}
 
@@ -1126,7 +1010,7 @@ const MainPortfolio = ({ portfolioData: propData, isPublicView = false }: MainPo
             </div>
 
             {/* Enhanced About Section - Moved to Top */}
-            <section className="relative flex items-center justify-center px-6 pt-20 pb-16">
+            <section id="about" className="relative flex items-center justify-center px-6 pt-20 pb-16">
               <div className="max-w-6xl mx-auto">
                 <div className="text-center mb-20">
                   <h2 className="text-6xl font-black text-gradient-primary mb-6">About Me</h2>
@@ -1241,7 +1125,7 @@ const MainPortfolio = ({ portfolioData: propData, isPublicView = false }: MainPo
             </section>
 
             {/* Enhanced Projects Section */}
-            <section className="py-16 px-6 relative">
+            <section id="projects" className="py-16 px-6 relative">
               <div className="max-w-7xl mx-auto">
                 <div className="text-center mb-8">
                   <h2 className="text-4xl font-black text-gradient-primary mb-4">Projects</h2>
@@ -1320,7 +1204,7 @@ const MainPortfolio = ({ portfolioData: propData, isPublicView = false }: MainPo
             </section>
 
             {/* Enhanced Skills Section */}
-            <section className="py-16 px-6 relative">
+            <section id="skills" className="py-16 px-6 relative">
               <div className="max-w-6xl mx-auto">
                 <div className="text-center mb-8">
                   <h2 className="text-4xl font-black text-gradient-primary mb-4">Skills</h2>
@@ -1371,7 +1255,7 @@ const MainPortfolio = ({ portfolioData: propData, isPublicView = false }: MainPo
             </section>
 
             {/* Enhanced Achievements Section */}
-            <section className="py-16 px-6 relative">
+            <section id="experience" className="py-16 px-6 relative">
               <div className="max-w-6xl mx-auto">
                 <div className="text-center mb-8">
                   <h2 className="text-4xl font-black text-gradient-primary mb-4">Achievements</h2>
@@ -1424,6 +1308,15 @@ const MainPortfolio = ({ portfolioData: propData, isPublicView = false }: MainPo
                 </div>
               </div>
             </section>
+
+            {/* New Contact Section */}
+            <ContactSection
+              username={portfolioData.username || ""}
+              email={portfolioData.email}
+              github={portfolioData.github}
+              linkedin={portfolioData.linkedin}
+              resumeUrl={portfolioData.resume}
+            />
           </div>
         )}
 
