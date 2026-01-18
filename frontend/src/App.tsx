@@ -12,7 +12,7 @@ import Dashboard from "./pages/Dashboard";
 import Projects from "./pages/Projects";
 import Achievements from "./pages/Achievements";
 import Skills from "./pages/Skills";
-import Portfolio from "./pages/Portfolio";
+import PortfolioEditor from "./pages/PortfolioEditor";
 import DummyPortfolio from "./pages/DummyPortfolio";
 import Export from "./pages/Export";
 import Profile from "./pages/Profile";
@@ -39,7 +39,7 @@ const AppContent = () => {
         <Route path="/projects" element={<PrivateRoute><Projects /></PrivateRoute>} />
         <Route path="/achievements" element={<PrivateRoute><Achievements /></PrivateRoute>} />
         <Route path="/skills" element={<PrivateRoute><Skills /></PrivateRoute>} />
-        <Route path="/portfolio" element={<PrivateRoute><Portfolio /></PrivateRoute>} />
+        <Route path="/portfolio" element={<PrivateRoute><PortfolioEditor /></PrivateRoute>} />
         <Route path="/dummy-portfolio" element={<DummyPortfolio />} />
 
         {/* Dynamic public portfolio route */}
