@@ -1,5 +1,4 @@
-# app/models/user.py
-from sqlalchemy import Column, Integer, String, Boolean
+from sqlalchemy import Column, Integer, String, Boolean, DateTime
 from app.utils.database import Base
 from sqlalchemy.orm import relationship
 
@@ -16,6 +15,16 @@ class User(Base):
     is_public = Column(Boolean, default=True, nullable=False)
     theme_preference = Column(String, default="classic", nullable=True)
     analytics_enabled = Column(Boolean, default=False, nullable=False)
+
+    # Password reset fields
+    reset_token = Column(String, nullable=True, index=True)
+    reset_token_expires = Column(DateTime, nullable=True)
+
+    # Email verification fields
+    is_verified = Column(Boolean, default=False, nullable=False)
+    otp_code = Column(String, nullable=True)
+    otp_expires = Column(DateTime, nullable=True)
+    google_id = Column(String, nullable=True)
 
     projects = relationship("Project", back_populates="owner")
     work_experiences = relationship("WorkExperience", back_populates="owner")

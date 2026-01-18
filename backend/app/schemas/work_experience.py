@@ -1,5 +1,6 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 from typing import Optional, List
+from app.utils.security import sanitize_html
 
 class WorkExperienceBase(BaseModel):
     title: str
@@ -9,6 +10,16 @@ class WorkExperienceBase(BaseModel):
     description: Optional[str] = None
     skills: Optional[List[str]] = None
     status: Optional[str] = None
+
+    @validator('title', 'organization', 'duration', 'location', 'description', 'status')
+    def sanitize_strings(cls, v):
+        return sanitize_html(v)
+
+    @validator('skills')
+    def sanitize_lists(cls, v):
+        if v:
+            return [sanitize_html(item) for item in v]
+        return v
 
 class WorkExperienceCreate(WorkExperienceBase):
     pass

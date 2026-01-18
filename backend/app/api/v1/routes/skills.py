@@ -9,6 +9,7 @@ from app.models.skills import Skill as SkillModel
 from app.schemas.skills import Skill as SkillSchema
 from app.models.user import User  # Import User explicitly
 from app.schemas.skills import SkillCreate, SkillUpdate # or from app import schemas
+from app.utils.security import validate_csrf
 
 router = APIRouter(
     prefix="/skills",
@@ -16,7 +17,7 @@ router = APIRouter(
     dependencies=[Depends(get_current_user)],
 )
 
-@router.post("/", response_model=SkillSchema, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=SkillSchema, status_code=status.HTTP_201_CREATED, dependencies=[Depends(validate_csrf)])
 def create_skill(
     skill_in: SkillCreate,
     db: Session = Depends(get_db),
@@ -36,7 +37,7 @@ def read_skills(
     skills = db.query(SkillModel).filter(SkillModel.user_id == current_user.id).all()
     return skills
 
-@router.put("/{skill_id}", response_model=SkillSchema)
+@router.put("/{skill_id}", response_model=SkillSchema, dependencies=[Depends(validate_csrf)])
 def update_skill(
     skill_id: int,
     skill_in: SkillUpdate,
@@ -52,7 +53,7 @@ def update_skill(
     db.refresh(skill)
     return skill
 
-@router.delete("/{skill_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{skill_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(validate_csrf)])
 def delete_skill(
     skill_id: int,
     db: Session = Depends(get_db),
