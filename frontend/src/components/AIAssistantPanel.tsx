@@ -1,6 +1,9 @@
-import { Sparkles, Briefcase, FileText } from 'lucide-react';
+import { useState } from 'react';
+import { Sparkles, Briefcase, FileText, X } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import {
     Select,
     SelectContent,
@@ -11,6 +14,10 @@ import {
 import { Card } from '@/components/ui/card';
 
 export default function AIAssistantPanel() {
+    const [role, setRole] = useState('full-stack');
+    const [customRole, setCustomRole] = useState('');
+    const [jd, setJd] = useState('');
+
     return (
         <div className="h-full flex flex-col">
             {/* STICKY HEADER - Always visible */}
@@ -35,7 +42,7 @@ export default function AIAssistantPanel() {
                             <Briefcase className="w-4 h-4" />
                             Target Role
                         </Label>
-                        <Select defaultValue="full-stack">
+                        <Select value={role} onValueChange={setRole}>
                             <SelectTrigger id="role-select" className="w-full">
                                 <SelectValue placeholder="Select target role" />
                             </SelectTrigger>
@@ -50,16 +57,43 @@ export default function AIAssistantPanel() {
                                 <SelectItem value="custom">Custom Role</SelectItem>
                             </SelectContent>
                         </Select>
+
+                        {role === 'custom' && (
+                            <div className="animate-in fade-in slide-in-from-top-2 pt-1">
+                                <Input
+                                    placeholder="Enter your custom role..."
+                                    value={customRole}
+                                    onChange={(e) => setCustomRole(e.target.value)}
+                                    className="bg-background"
+                                    autoFocus
+                                />
+                            </div>
+                        )}
                     </div>
 
                     {/* Job Description Input */}
                     <div className="space-y-2">
-                        <Label htmlFor="jd-input" className="flex items-center gap-2">
-                            <FileText className="w-4 h-4" />
-                            Job Description <span className="text-xs text-muted-foreground">(Optional)</span>
-                        </Label>
+                        <div className="flex items-center justify-between">
+                            <Label htmlFor="jd-input" className="flex items-center gap-2">
+                                <FileText className="w-4 h-4" />
+                                Job Description <span className="text-xs text-muted-foreground">(Optional)</span>
+                            </Label>
+                            {jd && (
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-6 px-2 text-xs text-muted-foreground hover:text-destructive"
+                                    onClick={() => setJd('')}
+                                >
+                                    <X className="w-3 h-3 mr-1" />
+                                    Clear
+                                </Button>
+                            )}
+                        </div>
                         <Textarea
                             id="jd-input"
+                            value={jd}
+                            onChange={(e) => setJd(e.target.value)}
                             placeholder="Paste job description here to get tailored suggestions..."
                             className="min-h-[120px] text-sm resize-none"
                             rows={6}

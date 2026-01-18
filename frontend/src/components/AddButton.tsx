@@ -1,25 +1,31 @@
+import React, { forwardRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-interface AddButtonProps {
-    onClick: () => void;
+interface AddButtonProps extends React.ComponentProps<typeof Button> {
     label: string;
-    className?: string;
-    size?: 'sm' | 'lg' | 'default';
 }
 
-export function AddButton({ onClick, label, className = '', size = 'lg' }: AddButtonProps) {
-    return (
-        <div className={`flex justify-center ${className}`}>
+export const AddButton = forwardRef<HTMLButtonElement, AddButtonProps>(
+    ({ onClick, label, className, size = 'lg', ...props }, ref) => {
+        return (
             <Button
+                ref={ref}
                 variant="outline"
                 size={size}
                 onClick={onClick}
-                className="group hover:bg-primary hover:text-primary-foreground transition-all"
+                className={cn(
+                    "group hover:bg-primary hover:text-primary-foreground transition-all mx-auto flex",
+                    className
+                )}
+                {...props}
             >
                 <Plus className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
                 {label}
             </Button>
-        </div>
-    );
-}
+        );
+    }
+);
+
+AddButton.displayName = 'AddButton';
