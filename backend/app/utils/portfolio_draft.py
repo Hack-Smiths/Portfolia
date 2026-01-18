@@ -80,8 +80,8 @@ def get_portfolio_snapshot(db: Session, user_id: int) -> Dict[str, Any]:
                 "organization": w.organization,
                 "duration": w.duration,
                 "description": w.description or "",
-                "skills_used": getattr(w, 'skills_used', None),
-                "status": getattr(w, 'status', None)
+                "skills": w.skills or [],
+                "status": w.status or ""
             }
             for w in work_experiences
         ],
@@ -256,8 +256,8 @@ def publish_draft(db: Session, user_id: int) -> None:
             organization=we_data.get("organization"),
             duration=we_data.get("duration"),
             description=we_data.get("description"),
-            skills_used=we_data.get("skills_used"),
-            status=we_data.get("status")
+            skills=we_data.get("skills", []),
+            status=we_data.get("status", "")
         )
         db.add(work_exp)
     

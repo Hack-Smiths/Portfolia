@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -49,7 +49,7 @@ import AIAssistant from "@/components/AIAssistant";
 import AIEditAssistant from "@/components/AIEditAssistant";
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useToast } from "@/components/ui/use-toast";
-import { getPortfolioPreview } from "@/utils/api";
+import { getEditorDraft, saveDraft, publishPortfolio } from "@/utils/api";
 
 interface Skill {
   name: string;
@@ -84,6 +84,16 @@ interface Certificate {
   credentialId: string;
 }
 
+interface WorkExperience {
+  title: string;
+  organization: string;
+  duration: string;
+  location?: string;
+  description: string;
+  skills: string[];
+  status: string;
+}
+
 interface PortfolioData {
   username: string;
   name: string;
@@ -98,7 +108,7 @@ interface PortfolioData {
   theme_preference: string;
   projects: Project[];
   skills: Skill[];
-  achievements: Achievement[];
+  achievements: Achievement[];  // Contains BOTH work experiences and awards
   certificates: Certificate[];
 }
 
@@ -116,47 +126,11 @@ const PortfolioEditor = () => {
   const [categorySkills, setCategorySkills] = useState<{ name: string; level: number }[]>([]);
   const [skills, setSkills] = useState<{ name: string; level: number }[]>([]);
   const [showTemplateSelector, setShowTemplateSelector] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<'saving' | 'saved' | 'unsaved'>('saved');
+  const [error, setError] = useState<string | null>(null);
+  const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const handlePublish = () => {
-    // TODO: Wire to POST /api/portfolio/publish in future task
-    toast({
-      title: "Publish Feature Coming Soon",
-      description: "Publish will be wired to backend in a later task.",
-    });
-  };
-
-  const handleViewMode = () => {
-    // Use authenticated user's username from auth context
-    if (user?.username) {
-      navigate(`/portfolio/${user.username}`);
-    } else {
-      // Fallback to portfolioData if user context not available
-      if (portfolioData?.username) {
-        navigate(`/portfolio/${portfolioData.username}`);
-      }
-    }
-  };
-  useEffect(() => {
-    async function fetchPortfolio() {
-      try {
-        const data = await getPortfolioPreview(); // Call backend
-        setPortfolioData(data);
-        if (data.theme_preference && templates[data.theme_preference as TemplateType]) {
-          setCurrentTemplate(data.theme_preference as TemplateType);
-        }
-      } catch (error) {
-        console.error("Error fetching portfolio preview:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    fetchPortfolio();
-  }, []);
-
-  if (loading || isLoading) return <p>Loading...</p>;
-
-  if (!portfolioData) return <p>No portfolio data found</p>;
-
+  // Templates configuration - defined before useEffect to avoid initialization errors
   const templates = {
     classic: {
       name: 'Classic Pro',
@@ -180,6 +154,141 @@ const PortfolioEditor = () => {
       }
     }
   };
+
+  const handlePublish = async () => {
+    const confirmed = window.confirm(
+      'Publish working changes to your live portfolio?'
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setSaveStatus('saving');
+      const result = await publishPortfolio();
+
+      toast({
+        title: 'Success',
+        description: result.message || 'Portfolio published successfully!',
+        variant: 'default',
+      });
+      setSaveStatus('saved');
+    } catch (err: any) {
+      toast({
+        title: 'Error',
+        description: err?.response?.data?.detail || 'Failed to publish',
+        variant: 'destructive',
+      });
+      setSaveStatus('unsaved');
+    }
+  };
+
+  const handleViewMode = () => {
+    // Use authenticated user's username from auth context
+    if (user?.username) {
+      navigate(`/portfolio/${user.username}`);
+    } else {
+      // Fallback to portfolioData if user context not available
+      if (portfolioData?.username) {
+        navigate(`/portfolio/${portfolioData.username}`);
+      }
+    }
+  };
+  useEffect(() => {
+    const loadDraft = async () => {
+      try {
+        setIsLoading(true);
+        const response = await getEditorDraft();
+
+
+        // Transform nested draft structure to flat structure expected by component
+        const flatData = {
+          username: response.data.profile?.username || '',
+          name: response.data.profile?.name || '',
+          title: response.data.profile?.title || '',
+          tagline: response.data.profile?.tagline || '',
+          email: response.data.profile?.email || '',
+          location: response.data.profile?.location || '',
+          about: response.data.profile?.about || '',
+          github: response.data.profile?.github || '',
+          linkedin: response.data.profile?.linkedin || '',
+          website: response.data.profile?.website || '',
+          avatar: response.data.profile?.avatar || '',
+
+          // Transform projects to match frontend interface
+          projects: (response.data.projects || []).map((p: any) => ({
+            id: String(p.id || ''),
+            title: p.title || '',
+            description: p.description || '',
+            tech: p.technologies || p.tech || [],
+            features: p.features || [],
+            demo: p.demo_url || p.demo || '',
+            repo: p.github_url || p.repo || '',
+            stars: p.stars || 0,
+            featured: p.featured || false
+          })),
+
+          // Transform skills to ensure consistent structure
+          skills: (response.data.skills || []).map((s: any) => ({
+            name: s.name || s.skill_name || '',
+            level: s.level || s.proficiency || 0,
+            category: s.category || s.type || 'Other'
+          })),
+
+          // Transform achievements/awards to ensure consistent structure
+          // Backend uses "awards" key, but we normalize to "achievements"
+          // IMPORTANT: Combine work_experiences AND awards into achievements array
+          achievements: [
+            // Add work experiences as achievements with type 'internship'
+            ...(response.data.work_experiences || []).map((w: any) => ({
+              title: w.title || '',
+              issuer: w.organization || '',
+              date: w.duration || '',
+              description: w.description || '',
+              type: 'internship' as const
+            })),
+            // Add awards as achievements with type 'award'
+            ...(response.data.awards || []).map((a: any) => ({
+              title: a.title || '',
+              issuer: a.issuer || a.organization || '',
+              date: a.date || a.year || a.awarded_date || '',
+              description: a.description || '',
+              type: a.type || a.category || 'award' as const
+            }))
+          ],
+
+          // Transform certificates to ensure consistent structure
+          certificates: (response.data.certificates || []).map((c: any) => ({
+            title: c.title || c.name || '',
+            issuer: c.issuer || c.organization || '',
+            date: c.date || c.issued_date || '',
+            credentialId: c.credentialId || c.credential_id || c.id || ''
+          })),
+
+          theme_preference: response.data.settings?.theme_preference || 'classic',
+        };
+
+
+        setPortfolioData(flatData as any);
+        setSaveStatus('saved');
+
+        // Set template from flattened data
+        if (flatData.theme_preference && templates[flatData.theme_preference as TemplateType]) {
+          setCurrentTemplate(flatData.theme_preference as TemplateType);
+        }
+      } catch (err: any) {
+        setError(err?.response?.data?.detail || 'Failed to load portfolio');
+        console.error('Error loading draft:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadDraft();
+  }, []);
+
+  if (loading || isLoading) return <p>Loading...</p>;
+
+  if (!portfolioData) return <p>No portfolio data found</p>;
 
   const handleTemplateChange = (templateKey: TemplateType) => {
     setCurrentTemplate(templateKey);
@@ -257,6 +366,29 @@ const PortfolioEditor = () => {
                 <Palette className="w-4 h-4 mr-2" />
                 Templates
               </Button>
+
+              {/* Save Status Indicator */}
+              <div className="hidden md:flex items-center text-sm px-3 py-1.5 rounded-md bg-muted/50">
+                {saveStatus === 'saved' && (
+                  <span className="flex items-center text-green-600 dark:text-green-400">
+                    <CheckCircle className="w-4 h-4 mr-1.5" />
+                    All changes saved
+                  </span>
+                )}
+                {saveStatus === 'saving' && (
+                  <span className="flex items-center text-blue-600 dark:text-blue-400">
+                    <Activity className="w-4 h-4 mr-1.5 animate-pulse" />
+                    Saving...
+                  </span>
+                )}
+                {saveStatus === 'unsaved' && (
+                  <span className="flex items-center text-orange-600 dark:text-orange-400">
+                    <span className="w-2 h-2 rounded-full bg-orange-500 mr-2" />
+                    Unsaved changes
+                  </span>
+                )}
+              </div>
+
               <Button
                 variant="default"
                 size="sm"
