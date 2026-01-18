@@ -197,11 +197,16 @@ def publish_draft(db: Session, user_id: int) -> None:
             detail="No draft found to publish. Save a draft first."
         )
     
+    print(f"DEBUG: Draft found for user {user_id}")
     data = draft.data
+    print(f"DEBUG: Draft data keys: {data.keys() if data else 'None'}")
+    
     user = db.query(User).filter(User.id == user_id).first()
     
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
+    
+    print(f"DEBUG: User found: {user.username}")
     
     # Delete existing portfolio data (destructive operation)
     db.query(Project).filter(Project.owner_id == user_id).delete()
@@ -215,25 +220,47 @@ def publish_draft(db: Session, user_id: int) -> None:
     profile_data = data.get("profile", {})
     
     if profile:
-        # Update existing profile
-        for key, value in profile_data.items():
-            if hasattr(profile, key):
-                setattr(profile, key, value)
+        # Update existing profile - only update fields that exist in Profile model
+        profile.name = profile_data.get("name", profile.name)
+        profile.email = profile_data.get("email", profile.email)
+        profile.title = profile_data.get("title", profile.title)
+        profile.location = profile_data.get("location", profile.location)
+        profile.bio = profile_data.get("about", profile_data.get("bio", profile.bio))  # Map 'about' to 'bio'
+        profile.github = profile_data.get("github", profile.github)
+        profile.linkedin = profile_data.get("linkedin", profile.linkedin)
+        profile.website = profile_data.get("website", profile.website)
+        profile.avatar = profile_data.get("avatar", profile.avatar)
     else:
         # Create new profile
         profile = Profile(
             user_id=user_id,
-            **profile_data
+            name=profile_data.get("name", ""),
+            email=profile_data.get("email", ""),
+            title=profile_data.get("title", ""),
+            location=profile_data.get("location", ""),
+            bio=profile_data.get("about", profile_data.get("bio", "")),  # Map 'about' to 'bio'
+            github=profile_data.get("github", ""),
+            linkedin=profile_data.get("linkedin", ""),
+            website=profile_data.get("website", ""),
+            avatar=profile_data.get("avatar", "")
         )
         db.add(profile)
     
     # Recreate projects
     for proj_data in data.get("projects", []):
-        # Remove 'id' from proj_data to avoid conflicts
-        proj_data_copy = {k: v for k, v in proj_data.items() if k != 'id'}
         project = Project(
             owner_id=user_id,
-            **proj_data_copy
+            title=proj_data.get("title", ""),
+            description=proj_data.get("description", ""),
+            type=proj_data.get("type", "others"),
+            stack=proj_data.get("stack", []),
+            features=proj_data.get("features", []),
+            link=proj_data.get("link", ""),
+            stars=proj_data.get("stars", 0),
+            forks=proj_data.get("forks", 0),
+            imported=proj_data.get("imported", False),
+            ai_summary=proj_data.get("ai_summary", False),
+            saved=proj_data.get("saved", True)
         )
         db.add(project)
     
@@ -244,7 +271,7 @@ def publish_draft(db: Session, user_id: int) -> None:
             name=skill_data.get("name"),
             level=skill_data.get("level"),
             category=skill_data.get("category"),
-            experience=skill_data.get("experience")
+            experience=skill_data.get("experience", "")  # Default to empty string if not provided
         )
         db.add(skill)
     
@@ -255,6 +282,7 @@ def publish_draft(db: Session, user_id: int) -> None:
             title=we_data.get("title"),
             organization=we_data.get("organization"),
             duration=we_data.get("duration"),
+            location=we_data.get("location", ""),
             description=we_data.get("description"),
             skills=we_data.get("skills", []),
             status=we_data.get("status", "")
@@ -269,7 +297,8 @@ def publish_draft(db: Session, user_id: int) -> None:
             issuer=cert_data.get("issuer"),
             year=cert_data.get("year"),
             credential_id=cert_data.get("credential_id"),
-            description=cert_data.get("description")
+            description=cert_data.get("description"),
+            status=cert_data.get("status", "")
         )
         db.add(cert)
     

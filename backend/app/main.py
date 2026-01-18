@@ -19,10 +19,11 @@ origins = [
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,  # or ["*"] temporarily
+    allow_origins=origins,  # Use specific origins list when credentials are enabled
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"]
 )
 app.include_router(cron.router)
 app.include_router(summary.router, tags=["GitHub Summary"])
