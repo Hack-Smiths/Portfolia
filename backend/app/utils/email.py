@@ -68,3 +68,59 @@ async def send_reset_email(email: str, token: str):
     except Exception as e:
         print(f"Error sending email: {e}")
         return False
+
+async def send_otp_email(email: str, otp: str):
+    """
+    Sends an email verification OTP to the user.
+    """
+    SMTP_HOST = os.getenv("SMTP_HOST", "smtp.gmail.com")
+    SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
+    SMTP_USER = os.getenv("SMTP_USER", "")
+    SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
+
+    subject = "Verify Your PortFolia Account"
+    body = f"""
+    Hi,
+    
+    Thank you for signing up for PortFolia!
+    
+    Your verification code is: {otp}
+    
+    This code will expire in 10 minutes. Please enter it on the signup page to complete your registration.
+    
+    If you didn't create an account, please ignore this email.
+    
+    Best,
+    The PortFolia Team
+    """
+    
+    if not SMTP_USER or not SMTP_PASSWORD:
+        print("\n" + "="*50)
+        print("DEVELOPMENT MODE: SMTP settings missing.")
+        print(f"To: {email}")
+        print(f"Subject: {subject}")
+        print(f"Body: {body}")
+        print("="*50 + "\n")
+        return True
+
+    message = MIMEMultipart()
+    message["From"] = SMTP_USER
+    message["To"] = email
+    message["Subject"] = subject
+    message.attach(MIMEText(body, "plain"))
+
+    try:
+        await aiosmtplib.send(
+            message,
+            hostname=SMTP_HOST,
+            port=SMTP_PORT,
+            username=SMTP_USER,
+            password=SMTP_PASSWORD,
+            use_tls=SMTP_PORT == 465,
+            start_tls=SMTP_PORT == 587,
+        )
+        print(f"Successfully sent OTP email to {email}")
+        return True
+    except Exception as e:
+        print(f"Error sending OTP email: {e}")
+        return False

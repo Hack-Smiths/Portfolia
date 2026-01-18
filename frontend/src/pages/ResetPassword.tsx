@@ -4,14 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Lock, Loader2, AlertCircle, CheckCircle } from 'lucide-react';
+import { Lock, Loader2, AlertCircle, CheckCircle, Check, X } from 'lucide-react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import API from '@/api/axios';
 
 const ResetPassword = () => {
     const [searchParams] = useSearchParams();
     const token = searchParams.get('token');
-
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -22,6 +21,13 @@ const ResetPassword = () => {
 
     const { toast } = useToast();
     const navigate = useNavigate();
+
+    const [passwordValidation, setPasswordValidation] = useState({
+        length: false,
+        upper: false,
+        number: false,
+        symbol: false
+    });
 
     useEffect(() => {
         const validateToken = async () => {
@@ -50,22 +56,31 @@ const ResetPassword = () => {
         validateToken();
     }, [token]);
 
+    useEffect(() => {
+        setPasswordValidation({
+            length: password.length >= 8,
+            upper: /[A-Z]/.test(password),
+            number: /[0-9]/.test(password),
+            symbol: /[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]/.test(password)
+        });
+    }, [password]);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (password !== confirmPassword) {
+        if (!Object.values(passwordValidation).every(v => v)) {
             toast({
-                title: "Passwords don't match",
-                description: "Please make sure your passwords match.",
+                title: "Weak Password",
+                description: "Please satisfy all password complexity requirements.",
                 variant: "destructive",
             });
             return;
         }
 
-        if (password.length < 8) {
+        if (password !== confirmPassword) {
             toast({
-                title: "Password too short",
-                description: "Password must be at least 8 characters long.",
+                title: "Passwords don't match",
+                description: "Please make sure your passwords match.",
                 variant: "destructive",
             });
             return;
@@ -154,6 +169,13 @@ const ResetPassword = () => {
         );
     }
 
+    const ValidationItem = ({ label, isValid }: { label: string, isValid: boolean }) => (
+        <div className={`flex items-center gap-2 text-xs transition-colors ${isValid ? 'text-green-500' : 'text-foreground-muted'}`}>
+            {isValid ? <CheckCircle className="w-3 h-3" /> : <AlertCircle className="w-3 h-3" />}
+            <span>{label}</span>
+        </div>
+    );
+
     return (
         <div className="min-h-screen flex items-center justify-center bg-gradient-soft px-4">
             <Card className="max-w-md w-full p-8 glass-card animate-slide-in-up">
@@ -175,24 +197,42 @@ const ResetPassword = () => {
                         <Input
                             id="password"
                             type="password"
-                            placeholder="At least 8 characters"
+                            placeholder="••••••••"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
                             className="bg-background/50"
                         />
+                        {/* Password Complexity Checklist */}
+                        <div className="grid grid-cols-2 gap-1 px-1 mt-2">
+                            <ValidationItem label="8+ characters" isValid={passwordValidation.length} />
+                            <ValidationItem label="1 Uppercase" isValid={passwordValidation.upper} />
+                            <ValidationItem label="1 Number" isValid={passwordValidation.number} />
+                            <ValidationItem label="1 Special Symbol" isValid={passwordValidation.symbol} />
+                        </div>
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                        <Input
-                            id="confirmPassword"
-                            type="password"
-                            placeholder="Repeat new password"
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                            required
-                            className="bg-background/50"
-                        />
+                        <div className="relative">
+                            <Input
+                                id="confirmPassword"
+                                type="password"
+                                placeholder="Repeat new password"
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                required
+                                className="bg-background/50 pr-10"
+                            />
+                            <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                                {confirmPassword && (
+                                    password === confirmPassword ? (
+                                        <Check className="w-4 h-4 text-green-500" />
+                                    ) : (
+                                        <X className="w-4 h-4 text-red-500" />
+                                    )
+                                )}
+                            </div>
+                        </div>
                     </div>
 
                     <Button type="submit" className="w-full btn-primary mt-6" disabled={isLoading}>

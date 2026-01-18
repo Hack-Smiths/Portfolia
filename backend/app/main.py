@@ -67,7 +67,7 @@ app.include_router(cron.router)
 app.include_router(summary.router, tags=["GitHub Summary"])
 
 # app.include_router(github.router, prefix="/api/v1/github", tags=["GitHub"])
-app.include_router(auth.router, tags=['Auth'])
+app.include_router(auth.router, prefix="/api/v1/auth", tags=['Auth'])
 app.include_router(user.router, tags=['Auth'])
 app.include_router(project.router, prefix="/projects", tags=["Projects"])
 app.include_router(achievements.router)
