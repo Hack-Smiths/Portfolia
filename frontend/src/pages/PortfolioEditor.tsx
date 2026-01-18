@@ -42,15 +42,25 @@ import {
   User,
   BookOpen,
   Layers,
-  Send
+  Send,
+  Trash2,
+  Plus,
+  ShieldCheck,
+  Pencil
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import AIAssistant from "@/components/AIAssistant";
 import AIEditAssistant from "@/components/AIEditAssistant";
 import AIAssistantPanel from "@/components/AIAssistantPanel";
 import { useAuthContext } from '@/contexts/AuthContext';
+import { EditableText } from "@/components/editable/EditableText";
+import { EditableTextarea } from "@/components/editable/EditableTextarea";
+import { EditableChipList } from "@/components/editable/EditableChipList";
+import { ProjectForm } from '@/components/forms/ProjectForm';
+import EditAchievementDialog, { Achievement as AchievementType } from '@/components/EditAchievementDialog';
 import { useToast } from "@/components/ui/use-toast";
-import { getEditorDraft, saveDraft, publishPortfolio } from "@/utils/api";
+import { getEditorDraft, saveDraft, publishPortfolio, updateProject as updateProjectAPI, updateAchievementAPI } from "@/utils/api";
+import { useDebounce } from "@/hooks/useDebounce";
 
 interface Skill {
   name: string;
@@ -71,11 +81,13 @@ interface Project {
 }
 
 interface Achievement {
+  id?: string | number;
   title: string;
   issuer: string;
+  organization?: string;
   date: string;
   description: string;
-  type: 'internship' | 'award';
+  type: 'internship' | 'award' | string;
 }
 
 interface Certificate {
@@ -83,6 +95,8 @@ interface Certificate {
   issuer: string;
   date: string;
   credentialId: string;
+  description?: string;
+  status?: string;
 }
 
 interface WorkExperience {
@@ -130,6 +144,49 @@ const PortfolioEditor = () => {
   const [saveStatus, setSaveStatus] = useState<'saving' | 'saved' | 'unsaved'>('saved');
   const [error, setError] = useState<string | null>(null);
   const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Edit Modals State
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [editingAchievement, setEditingAchievement] = useState<{
+    item: AchievementType | null;
+    type: 'internship' | 'certificate' | 'award';
+    isOpen: boolean;
+  }>({ item: null, type: 'internship', isOpen: false });
+
+  // Handlers for reusing edit forms
+  const handleSaveProject = async (updatedProject: Project) => {
+    if (!portfolioData) return;
+
+    // Update local state
+    const newProjects = portfolioData.projects.map(p =>
+      p.id === updatedProject.id ? updatedProject : p
+    );
+
+    const newPortfolioData = { ...portfolioData, projects: newProjects };
+    setPortfolioData(newPortfolioData);
+  };
+
+  const handleSaveAchievement = async (updatedAchievement: AchievementType) => {
+    if (!portfolioData) return;
+
+    const { type } = editingAchievement;
+    let newPortfolioData = { ...portfolioData };
+
+    if (type === 'internship' || type === 'award') {
+      newPortfolioData = {
+        ...newPortfolioData,
+        achievements: portfolioData.achievements.map(a =>
+          (String(a.id) === String(updatedAchievement.id) || a.title === updatedAchievement.title) ? { ...a, ...updatedAchievement } : a
+        )
+      };
+    } else if (type === 'certificate') {
+      // Certificates logic if needed, currently certificates are in portfolioData.certificates
+      // But the AchievementType might not match perfectly. Assuming specific mapping if strictly needed.
+    }
+
+    setPortfolioData(newPortfolioData);
+    setEditingAchievement(prev => ({ ...prev, isOpen: false }));
+  };
 
   // Templates configuration - defined before useEffect to avoid initialization errors
   const templates = {
@@ -261,8 +318,10 @@ const PortfolioEditor = () => {
           certificates: (response.data.certificates || []).map((c: any) => ({
             title: c.title || c.name || '',
             issuer: c.issuer || c.organization || '',
-            date: c.date || c.issued_date || '',
-            credentialId: c.credentialId || c.credential_id || c.id || ''
+            date: c.year || c.date || c.issued_date || '',  // Map 'year' to 'date'
+            credentialId: c.credentialId || c.credential_id || c.id || '',
+            description: c.description || '',
+            status: c.status || ''
           })),
 
           theme_preference: response.data.settings?.theme_preference || 'classic',
@@ -286,6 +345,98 @@ const PortfolioEditor = () => {
 
     loadDraft();
   }, []);
+
+  // Auto-save functionality
+  const debouncedPortfolioData = useDebounce(portfolioData, 2000); // Wait 2s after last change
+
+  // Track if initial load is complete preventing save on mount
+  const isLoaded = useRef(false);
+
+  useEffect(() => {
+    if (!isLoading && portfolioData) {
+      isLoaded.current = true;
+    }
+  }, [isLoading, portfolioData]);
+
+  useEffect(() => {
+    const saveData = async () => {
+      if (!debouncedPortfolioData || !isLoaded.current) return;
+
+      try {
+        setSaveStatus('saving');
+        // Transform flat data back to nested draft structure expected by backend API
+        const payload = {
+          profile: {
+            username: debouncedPortfolioData.username,
+            name: debouncedPortfolioData.name,
+            title: debouncedPortfolioData.title,
+            tagline: debouncedPortfolioData.tagline,
+            location: debouncedPortfolioData.location,
+            email: debouncedPortfolioData.email,
+            github: debouncedPortfolioData.github,
+            linkedin: debouncedPortfolioData.linkedin,
+            about: debouncedPortfolioData.about,
+            avatar: debouncedPortfolioData.avatar
+          },
+          projects: debouncedPortfolioData.projects.map(p => ({
+            ...p,
+            stack: p.tech || [],
+            link: p.demo || p.repo || '',
+            type: (p.repo && p.repo.includes('github')) ? 'github' : 'others'
+          })),
+          skills: debouncedPortfolioData.skills,
+          certificates: debouncedPortfolioData.certificates.map(c => ({
+            title: c.title,
+            issuer: c.issuer,
+            year: c.date || '',  // Map 'date' to 'year'
+            credential_id: c.credentialId || '',  // Map 'credentialId' to 'credential_id'
+            description: c.description || '',
+            status: c.status || ''
+          })),
+
+          work_experiences: debouncedPortfolioData.achievements
+            .filter(a => a.type === 'internship')
+            .map(w => ({
+              title: w.title,
+              organization: w.issuer,
+              duration: w.date,
+              description: w.description,
+              status: 'completed',
+              skills: []
+            })),
+
+          awards: debouncedPortfolioData.achievements
+            .filter(a => a.type !== 'internship')
+            .map(a => ({
+              title: a.title,
+              organization: a.issuer,
+              year: a.date,
+              description: a.description,
+              category: a.type
+            })),
+
+          settings: {
+            theme_preference: debouncedPortfolioData.theme_preference
+          }
+        };
+
+        await saveDraft(payload);
+        setSaveStatus('saved');
+      } catch (error) {
+        console.error("Auto-save failed:", error);
+        setSaveStatus('unsaved');
+        toast({
+          title: "Auto-save failed",
+          description: "Your changes couldn't be saved. Please check your connection.",
+          variant: "destructive"
+        });
+      }
+    };
+
+    saveData();
+  }, [debouncedPortfolioData]);
+
+
 
   if (loading || isLoading) return <p>Loading...</p>;
 
@@ -485,26 +636,60 @@ const PortfolioEditor = () => {
                         <div className="flex-1 text-center lg:text-left space-y-6">
                           <div className="space-y-4">
                             <h1 className="text-5xl lg:text-7xl font-bold text-foreground leading-tight">
-                              {portfolioData.name}
+                              <EditableText
+                                value={portfolioData.name}
+                                onSave={(val) => {
+                                  const newData = { ...portfolioData };
+                                  newData.name = val;
+                                  setPortfolioData(newData);
+                                }}
+                                placeholder="Your Name"
+                              />
                             </h1>
 
                             <div className="space-y-2">
-                              <p className="text-2xl lg:text-3xl font-medium text-muted-foreground">
-                                {portfolioData.title}
-                              </p>
+                              <div className="text-2xl lg:text-3xl font-medium text-muted-foreground">
+                                <EditableText
+                                  value={portfolioData.title}
+                                  onSave={(val) => {
+                                    const newData = { ...portfolioData };
+                                    newData.title = val;
+                                    setPortfolioData(newData);
+                                  }}
+                                  placeholder="Professional Title"
+                                />
+                              </div>
                               <div className="w-24 h-1 bg-primary mx-auto lg:mx-0 rounded-full" />
                             </div>
 
-                            <p className="text-lg text-muted-foreground max-w-2xl mx-auto lg:mx-0 leading-relaxed">
-                              {portfolioData.tagline}
-                            </p>
+                            <div className="text-lg text-muted-foreground max-w-2xl mx-auto lg:mx-0 leading-relaxed block">
+                              <EditableTextarea
+                                value={portfolioData.tagline || ''}
+                                onSave={(val) => {
+                                  const newData = { ...portfolioData };
+                                  newData.tagline = val;
+                                  setPortfolioData(newData);
+                                }}
+                                placeholder="Brief tagline or intro..."
+                                className="min-h-[3rem]"
+                              />
+                            </div>
                           </div>
 
                           {/* Clean Contact Info */}
                           <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
                             <div className="bg-card border border-border px-4 py-2 rounded-lg flex items-center space-x-2 shadow-sm">
                               <MapPin className="w-4 h-4 text-muted-foreground" />
-                              <span className="text-foreground">{portfolioData.location}</span>
+                              <EditableText
+                                value={portfolioData.location}
+                                onSave={(val) => {
+                                  const newData = { ...portfolioData };
+                                  newData.location = val;
+                                  setPortfolioData(newData);
+                                }}
+                                placeholder="City, Country"
+                                className="font-medium"
+                              />
                             </div>
                             <a
                               href={`mailto:${portfolioData.email}`}
@@ -641,8 +826,50 @@ const PortfolioEditor = () => {
                         {portfolioData.projects.map((project, index) => (
                           <Card
                             key={project.id}
-                            className="bg-card border border-border shadow-lg hover:shadow-xl transition-all duration-300 group"
+                            className="bg-card border border-border shadow-lg hover:shadow-xl transition-all duration-300 group relative"
                           >
+                            {/* Action Bar */}
+                            <div className="absolute top-4 right-4 flex items-center gap-1 z-20">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toast({
+                                    title: "AI Enhance",
+                                    description: "AI enhancement features coming soon!",
+                                  });
+                                }}
+                                className="p-2 text-purple-400/70 hover:text-purple-500 transition-colors"
+                                title="Enhance with AI"
+                              >
+                                <Sparkles className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setEditingProject(project);
+                                }}
+                                className="p-2 text-muted-foreground/50 hover:text-primary transition-colors"
+                                title="Edit project"
+                              >
+                                <Edit3 className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const newData = { ...portfolioData };
+                                  newData.projects = newData.projects.filter((_, i) => i !== index);
+                                  setPortfolioData(newData);
+                                  toast({
+                                    title: "Project deleted",
+                                    description: "Project removed."
+                                  });
+                                }}
+                                className="p-2 text-muted-foreground/40 hover:text-destructive transition-colors"
+                                title="Delete project"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
                             <div className="p-6">
                               <div className="flex items-start justify-between mb-4">
                                 <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
@@ -785,20 +1012,56 @@ const PortfolioEditor = () => {
                                   return (
                                     <div
                                       key={skillIndex}
-                                      className="flex items-center justify-between p-3 bg-secondary/50 rounded-lg"
+                                      className="group flex items-center justify-between p-3 bg-secondary/50 rounded-lg"
                                     >
-                                      <span className="font-medium text-foreground">{skill.name}</span>
+                                      <EditableText
+                                        value={skill.name}
+                                        onSave={(val) => {
+                                          const newData = { ...portfolioData };
+                                          const realIndex = portfolioData.skills.indexOf(skill);
+                                          if (realIndex !== -1) {
+                                            newData.skills[realIndex].name = val;
+                                            setPortfolioData(newData);
+                                          }
+                                        }}
+                                        className="font-medium text-foreground flex-1 mr-2 min-w-0 truncate"
+                                      />
                                       <div className="flex items-center space-x-1">
                                         {[...Array(3)].map((_, i) => (
                                           <Star
                                             key={i}
-                                            className={`w-4 h-4 ${i < starCount
-                                              ? 'text-primary fill-primary'
-                                              : 'text-muted-foreground'
+                                            className={`w-3 h-3 flex-shrink-0 ${i < starCount
+                                              ? 'text-yellow-500 fill-yellow-500'
+                                              : 'text-muted-foreground/30'
                                               }`}
                                           />
                                         ))}
                                       </div>
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                        }}
+                                        className="text-muted-foreground/50 hover:text-primary transition-colors p-1 opacity-0 group-hover:opacity-100"
+                                        title="Edit skill"
+                                      >
+                                        <Edit3 className="w-4 h-4" />
+                                      </button>
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          const newData = { ...portfolioData };
+                                          const realIndex = portfolioData.skills.indexOf(skill);
+                                          if (realIndex !== -1) {
+                                            newData.skills.splice(realIndex, 1);
+                                            setPortfolioData(newData);
+                                          }
+                                          toast({ title: "Skill deleted", description: "Skill removed from portfolio." });
+                                        }}
+                                        className="text-muted-foreground/50 hover:text-destructive transition-colors p-1"
+                                        title="Delete skill"
+                                      >
+                                        <Trash2 className="w-3 h-3" />
+                                      </button>
                                     </div>
                                   );
                                 })}
@@ -835,9 +1098,55 @@ const PortfolioEditor = () => {
                             {portfolioData.achievements.map((achievement, index) => (
                               <Card
                                 key={index}
-                                className="bg-card border border-border shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden animate-fade-in"
+                                className="bg-card border border-border shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden animate-fade-in relative"
                                 style={{ animationDelay: `${index * 200}ms` }}
                               >
+                                {/* Action Bar */}
+                                <div className="absolute top-4 right-4 flex items-center gap-1 z-20">
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      toast({
+                                        title: "AI Enhance",
+                                        description: "AI enhancement benefits coming soon!"
+                                      });
+                                    }}
+                                    className="p-2 text-purple-400/70 hover:text-purple-500 transition-colors"
+                                    title="Enhance with AI"
+                                  >
+                                    <Sparkles className="w-4 h-4" />
+                                  </button>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setEditingAchievement({
+                                        item: achievement as unknown as AchievementType,
+                                        type: achievement.type as 'internship' | 'award',
+                                        isOpen: true
+                                      });
+                                    }}
+                                    className="p-2 text-muted-foreground/50 hover:text-primary transition-colors"
+                                    title="Edit achievement"
+                                  >
+                                    <Edit3 className="w-4 h-4" />
+                                  </button>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      const newData = { ...portfolioData };
+                                      newData.achievements = newData.achievements.filter((_, i) => i !== index);
+                                      setPortfolioData(newData);
+                                      toast({
+                                        title: "Achievement deleted",
+                                        description: "Removed from achievements."
+                                      });
+                                    }}
+                                    className="p-2 text-muted-foreground/40 hover:text-destructive transition-colors"
+                                    title="Delete achievement"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </div>
                                 <div className="relative z-10 p-6">
                                   <div className="flex items-start space-x-4 mb-4">
                                     {/* Icon */}
@@ -909,7 +1218,53 @@ const PortfolioEditor = () => {
                                 </div>
 
                                 {/* Achievement Card */}
-                                <Card className="flex-1 bg-card border border-border shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
+                                <Card className="flex-1 bg-card border border-border shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden relative">
+                                  {/* Action Bar */}
+                                  <div className="absolute top-4 right-4 flex items-center gap-1 z-20">
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        toast({
+                                          title: "AI Enhance",
+                                          description: "AI features coming soon!"
+                                        });
+                                      }}
+                                      className="p-2 text-purple-400/70 hover:text-purple-500 transition-colors"
+                                      title="Enhance with AI"
+                                    >
+                                      <Sparkles className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setEditingAchievement({
+                                          item: achievement as unknown as AchievementType,
+                                          type: achievement.type as 'internship' | 'award',
+                                          isOpen: true
+                                        });
+                                      }}
+                                      className="p-2 text-muted-foreground/50 hover:text-primary transition-colors"
+                                      title="Edit achievement"
+                                    >
+                                      <Edit3 className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        const newData = { ...portfolioData };
+                                        newData.achievements = newData.achievements.filter((_, i) => i !== index);
+                                        setPortfolioData(newData);
+                                        toast({
+                                          title: "Achievement deleted",
+                                          description: "Removed from achievements."
+                                        });
+                                      }}
+                                      className="p-2 text-muted-foreground/40 hover:text-destructive transition-colors"
+                                      title="Delete achievement"
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </button>
+                                  </div>
                                   <div className="relative z-10 p-8">
                                     <div className="flex items-start justify-between mb-4">
                                       <div className="flex-1">
@@ -966,7 +1321,53 @@ const PortfolioEditor = () => {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative">
                         <EditButton section="Certificates" />
                         {portfolioData.certificates.map((cert, index) => (
-                          <Card key={index} className="bg-card border border-border shadow-lg hover:shadow-xl transition-all duration-300 p-6">
+                          <Card key={index} className="bg-card border border-border shadow-lg hover:shadow-xl transition-all duration-300 p-6 relative">
+                            {/* Action Bar */}
+                            <div className="absolute top-2 right-2 flex items-center gap-1 z-20">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toast({
+                                    title: "AI Enhance",
+                                    description: "AI features coming soon!"
+                                  });
+                                }}
+                                className="p-2 text-purple-400/70 hover:text-purple-500 transition-colors"
+                                title="Enhance with AI"
+                              >
+                                <Sparkles className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setEditingAchievement({
+                                    item: { ...cert, id: index } as any,
+                                    type: 'certificate',
+                                    isOpen: true
+                                  });
+                                }}
+                                className="p-2 text-muted-foreground/50 hover:text-primary transition-colors"
+                                title="Edit certificate"
+                              >
+                                <Edit3 className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const newData = { ...portfolioData };
+                                  newData.certificates = newData.certificates.filter((_, i) => i !== index);
+                                  setPortfolioData(newData);
+                                  toast({
+                                    title: "Certificate deleted",
+                                    description: "Certificate removed."
+                                  });
+                                }}
+                                className="p-2 text-muted-foreground/40 hover:text-destructive transition-colors"
+                                title="Delete certificate"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
                             <div className="flex items-start justify-between mb-4">
                               <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center">
                                 <GraduationCap className="w-6 h-6 text-primary-foreground" />
@@ -1196,9 +1597,44 @@ const PortfolioEditor = () => {
                       </div>
 
                       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {portfolioData.projects.map((project) => (
+                        {portfolioData.projects.map((project, index) => (
                           <div key={project.id} className="group relative">
-                            <div className="bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-xl border border-slate-200 dark:border-slate-700 transition-all duration-500 hover:shadow-2xl hover:-translate-y-2">
+                            <div className="bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-xl border border-slate-200 dark:border-slate-700 transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 relative group">
+                              {/* Action Bar */}
+                              <div className="absolute top-4 right-4 flex items-center gap-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    toast({ title: "AI Enhance", description: "AI features coming soon!" });
+                                  }}
+                                  className="p-2 bg-purple-500/20 text-purple-600 dark:text-purple-300 rounded-lg hover:bg-purple-500/40 transition-colors"
+                                  title="Enhance with AI"
+                                >
+                                  <Sparkles className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditingProject(project);
+                                  }}
+                                  className="p-2 bg-blue-500/20 text-blue-600 dark:text-blue-300 rounded-lg hover:bg-blue-500/40 transition-colors"
+                                  title="Edit project"
+                                >
+                                  <Edit3 className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    const newData = { ...portfolioData };
+                                    newData.projects = newData.projects.filter((_, i) => i !== index);
+                                    setPortfolioData(newData);
+                                  }}
+                                  className="p-2 bg-red-500/20 text-red-600 dark:text-red-300 rounded-lg hover:bg-red-500/40 transition-colors"
+                                  title="Delete project"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
 
                               {/* Project Content */}
                               <div className="p-6">
@@ -1278,7 +1714,20 @@ const PortfolioEditor = () => {
 
                       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {Object.entries(skillsByCategory).map(([category, skills]) => (
-                          <div key={category} className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-xl border border-slate-200 dark:border-slate-700">
+                          <div key={category} className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-xl border border-slate-200 dark:border-slate-700 relative group">
+                            {/* Action Bar */}
+                            <div className="absolute top-4 right-4 flex items-center gap-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setEditingSection(`skills-${category}`);
+                                }}
+                                className="p-2 bg-blue-500/20 text-blue-600 dark:text-blue-300 rounded-lg hover:bg-blue-500/40 transition-colors"
+                                title="Edit category"
+                              >
+                                <Edit3 className="w-4 h-4" />
+                              </button>
+                            </div>
                             <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-6">{category}</h3>
                             <div className="space-y-4">
                               {skills.map((skill) => {
@@ -1328,7 +1777,24 @@ const PortfolioEditor = () => {
                       <div className="block lg:hidden">
                         <div className="grid md:grid-cols-2 gap-6">
                           {portfolioData.achievements.map((achievement, index) => (
-                            <div key={index} className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-xl border border-slate-200 dark:border-slate-700">
+                            <div key={index} className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-xl border border-slate-200 dark:border-slate-700 relative group">
+                              {/* Action Bar */}
+                              <div className="absolute top-4 right-4 flex items-center gap-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditingAchievement({
+                                      item: achievement as unknown as AchievementType,
+                                      type: achievement.type as 'internship' | 'award',
+                                      isOpen: true
+                                    });
+                                  }}
+                                  className="p-2 bg-blue-500/20 text-blue-600 dark:text-blue-300 rounded-lg hover:bg-blue-500/40 transition-colors"
+                                  title="Edit achievement"
+                                >
+                                  <Edit3 className="w-4 h-4" />
+                                </button>
+                              </div>
                               <div className="flex items-center justify-center mb-3">
                                 <Trophy className="w-5 h-5 text-yellow-500 mr-2" />
                                 <span className="text-sm font-medium text-orange-600 dark:text-orange-400">{achievement.date}</span>
@@ -1358,7 +1824,36 @@ const PortfolioEditor = () => {
                               {/* Content positioned left or right */}
                               <div className={`w-full flex ${index % 2 === 0 ? 'justify-start pr-8' : 'justify-end pl-8'}`}>
                                 <div className={`w-5/12 ${index % 2 === 0 ? 'text-right' : 'text-left'}`}>
-                                  <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-xl border border-slate-200 dark:border-slate-700">
+                                  <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-xl border border-slate-200 dark:border-slate-700 relative group">
+                                    {/* Action Bar */}
+                                    <div className="absolute top-4 right-4 flex items-center gap-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setEditingAchievement({
+                                            item: achievement as unknown as AchievementType,
+                                            type: achievement.type as 'internship' | 'award',
+                                            isOpen: true
+                                          });
+                                        }}
+                                        className="p-2 bg-blue-500/20 text-blue-600 dark:text-blue-300 rounded-lg hover:bg-blue-500/40 transition-colors"
+                                        title="Edit achievement"
+                                      >
+                                        <Edit3 className="w-4 h-4" />
+                                      </button>
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          const newData = { ...portfolioData };
+                                          newData.achievements = newData.achievements.filter((_, i) => i !== index);
+                                          setPortfolioData(newData);
+                                        }}
+                                        className="p-2 bg-red-500/20 text-red-600 dark:text-red-300 rounded-lg hover:bg-red-500/40 transition-colors"
+                                        title="Delete achievement"
+                                      >
+                                        <Trash2 className="w-4 h-4" />
+                                      </button>
+                                    </div>
                                     <div className="space-y-3">
                                       <div className="flex items-center justify-center">
                                         <span className="text-2xl font-bold text-orange-600 dark:text-orange-400">{achievement.date}</span>
@@ -1392,7 +1887,36 @@ const PortfolioEditor = () => {
 
                       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {portfolioData.certificates.map((cert, index) => (
-                          <div key={index} className="bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-xl border border-slate-200 dark:border-slate-700 hover:shadow-2xl transition-all duration-300 group">
+                          <div key={index} className="bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-xl border border-slate-200 dark:border-slate-700 hover:shadow-2xl transition-all duration-300 group relative">
+                            {/* Action Bar */}
+                            <div className="absolute top-4 right-4 flex items-center gap-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setEditingAchievement({
+                                    item: { ...cert, id: index } as any,
+                                    type: 'certificate',
+                                    isOpen: true
+                                  });
+                                }}
+                                className="p-2 bg-blue-500/20 text-blue-600 dark:text-blue-300 rounded-lg hover:bg-blue-500/40 transition-colors"
+                                title="Edit certificate"
+                              >
+                                <Edit3 className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const newData = { ...portfolioData };
+                                  newData.certificates = newData.certificates.filter((_, i) => i !== index);
+                                  setPortfolioData(newData);
+                                }}
+                                className="p-2 bg-red-500/20 text-red-600 dark:text-red-300 rounded-lg hover:bg-red-500/40 transition-colors"
+                                title="Delete certificate"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
                             <div className="text-center">
                               <div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-red-600 rounded-2xl mx-auto mb-6 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                                 <GraduationCap className="w-8 h-8 text-white" />
@@ -1455,6 +1979,7 @@ const PortfolioEditor = () => {
 
                   {/* Enhanced About Section - Moved to Top */}
                   <section className="relative flex items-center justify-center px-6 pt-20 pb-16">
+                    <EditButton section="about" />
                     <div className="max-w-6xl mx-auto">
                       <div className="text-center mb-20">
                         <h2 className="text-6xl font-black text-gradient-primary mb-6">About Me</h2>
@@ -1503,9 +2028,18 @@ const PortfolioEditor = () => {
                                 <h3 className="text-2xl font-bold text-white">Professional Profile</h3>
                               </div>
 
-                              <p className="text-lg text-white/80 leading-relaxed">
-                                {portfolioData.about}
-                              </p>
+                              <div className="text-lg text-white/80 leading-relaxed">
+                                <EditableTextarea
+                                  value={portfolioData.about}
+                                  onSave={(val) => {
+                                    const newData = { ...portfolioData };
+                                    newData.about = val;
+                                    setPortfolioData(newData);
+                                  }}
+                                  placeholder="Write a compelling bio about yourself..."
+                                  className="text-white/80"
+                                />
+                              </div>
 
                               <div className="grid md:grid-cols-2 gap-6 pt-6">
                                 <div className="space-y-4">
@@ -1570,6 +2104,7 @@ const PortfolioEditor = () => {
 
                   {/* Enhanced Projects Section */}
                   <section className="py-16 px-6 relative">
+                    <EditButton section="projects" />
                     <div className="max-w-7xl mx-auto">
                       <div className="text-center mb-8">
                         <h2 className="text-4xl font-black text-gradient-primary mb-4">Projects</h2>
@@ -1584,7 +2119,42 @@ const PortfolioEditor = () => {
                             className="group animate-fade-in h-full"
                             style={{ animationDelay: `${index * 200}ms` }}
                           >
-                            <div className="glass-card p-8 rounded-3xl border border-electric/20 shadow-2xl backdrop-blur-xl bg-white/5 hover:bg-white/10 transition-all duration-700 hover:scale-105 hover:shadow-electric/50 h-full flex flex-col">
+                            <div className="glass-card p-8 rounded-3xl border border-electric/20 shadow-2xl backdrop-blur-xl bg-white/5 hover:bg-white/10 transition-all duration-700 hover:scale-105 hover:shadow-electric/50 h-full flex flex-col relative group">
+                              {/* Action Bar */}
+                              <div className="absolute top-4 right-4 flex items-center gap-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    toast({ title: "AI Enhance", description: "AI features coming soon!" });
+                                  }}
+                                  className="p-2 bg-purple-500/20 text-purple-300 rounded-lg hover:bg-purple-500/40 transition-colors"
+                                  title="Enhance with AI"
+                                >
+                                  <Sparkles className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditingProject(project);
+                                  }}
+                                  className="p-2 bg-blue-500/20 text-blue-300 rounded-lg hover:bg-blue-500/40 transition-colors"
+                                  title="Edit project"
+                                >
+                                  <Edit3 className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    const newData = { ...portfolioData };
+                                    newData.projects = newData.projects.filter((_, i) => i !== index);
+                                    setPortfolioData(newData);
+                                  }}
+                                  className="p-2 bg-red-500/20 text-red-300 rounded-lg hover:bg-red-500/40 transition-colors"
+                                  title="Delete project"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
                               {/* Holographic Shimmer Effect */}
                               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-electric/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 pointer-events-none rounded-3xl"></div>
 
@@ -1650,6 +2220,7 @@ const PortfolioEditor = () => {
 
                   {/* Enhanced Skills Section */}
                   <section className="py-16 px-6 relative">
+                    <EditButton section="skills" />
                     <div className="max-w-6xl mx-auto">
                       <div className="text-center mb-8">
                         <h2 className="text-4xl font-black text-gradient-primary mb-4">Skills</h2>
@@ -1657,13 +2228,25 @@ const PortfolioEditor = () => {
                       </div>
 
                       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 relative">
-                        <EditButton section="Skills" />
                         {Object.entries(skillsByCategory).map(([category, categorySkills], categoryIndex) => (
                           <div
                             key={category}
-                            className="glass-card p-8 rounded-3xl border border-electric/20 shadow-2xl backdrop-blur-xl bg-white/5 hover:bg-white/10 transition-all duration-700 hover:scale-105 hover:shadow-electric/50 animate-fade-in"
+                            className="glass-card p-8 rounded-3xl border border-electric/20 shadow-2xl backdrop-blur-xl bg-white/5 hover:bg-white/10 transition-all duration-700 hover:scale-105 hover:shadow-electric/50 animate-fade-in relative group"
                             style={{ animationDelay: `${categoryIndex * 200}ms` }}
                           >
+                            {/* Action Bar */}
+                            <div className="absolute top-4 right-4 flex items-center gap-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setEditingSection(`skills-${category}`);
+                                }}
+                                className="p-2 bg-blue-500/20 text-blue-300 rounded-lg hover:bg-blue-500/40 transition-colors"
+                                title="Edit category"
+                              >
+                                <Edit3 className="w-4 h-4" />
+                              </button>
+                            </div>
                             {/* Category Header */}
                             <div className="flex items-center mb-6">
                               <div className="w-12 h-12 bg-gradient-primary rounded-xl flex items-center justify-center glow-primary mr-4">
@@ -1713,9 +2296,55 @@ const PortfolioEditor = () => {
                         {portfolioData.achievements.map((achievement, index) => (
                           <div
                             key={index}
-                            className="glass-card p-8 rounded-3xl border border-electric/20 shadow-2xl backdrop-blur-xl bg-white/5 hover:bg-white/10 transition-all duration-700 hover:scale-105 hover:shadow-lg animate-fade-in"
+                            className="glass-card p-8 rounded-3xl border border-electric/20 shadow-2xl backdrop-blur-xl bg-white/5 hover:bg-white/10 transition-all duration-700 hover:scale-105 hover:shadow-lg animate-fade-in relative group"
                             style={{ animationDelay: `${index * 200}ms` }}
                           >
+                            {/* Action Bar */}
+                            <div className="absolute top-4 right-4 flex items-center gap-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toast({
+                                    title: "AI Enhance",
+                                    description: "AI features coming soon!"
+                                  });
+                                }}
+                                className="p-2 bg-purple-500/20 text-purple-300 rounded-lg hover:bg-purple-500/40 transition-colors"
+                                title="Enhance with AI"
+                              >
+                                <Sparkles className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setEditingAchievement({
+                                    item: achievement as unknown as AchievementType,
+                                    type: achievement.type as 'internship' | 'award',
+                                    isOpen: true
+                                  });
+                                }}
+                                className="p-2 bg-blue-500/20 text-blue-300 rounded-lg hover:bg-blue-500/40 transition-colors"
+                                title="Edit achievement"
+                              >
+                                <Edit3 className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const newData = { ...portfolioData };
+                                  newData.achievements = newData.achievements.filter((_, i) => i !== index);
+                                  setPortfolioData(newData);
+                                  toast({
+                                    title: "Achievement deleted",
+                                    description: "Removed from achievements."
+                                  });
+                                }}
+                                className="p-2 bg-red-500/20 text-red-300 rounded-lg hover:bg-red-500/40 transition-colors"
+                                title="Delete achievement"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
                             <div className="space-y-6">
                               <div className="flex items-start justify-between">
                                 <div className="w-16 h-16 bg-gradient-primary rounded-2xl flex items-center justify-center glow-primary">
@@ -1770,9 +2399,55 @@ const PortfolioEditor = () => {
                         {portfolioData.certificates.map((cert, index) => (
                           <div
                             key={index}
-                            className="glass-card p-8 rounded-3xl border border-electric/20 shadow-2xl backdrop-blur-xl bg-white/5 hover:bg-white/10 transition-all duration-700 hover:scale-105 hover:shadow-lg animate-fade-in"
+                            className="glass-card p-8 rounded-3xl border border-electric/20 shadow-2xl backdrop-blur-xl bg-white/5 hover:bg-white/10 transition-all duration-700 hover:scale-105 hover:shadow-lg animate-fade-in relative group"
                             style={{ animationDelay: `${index * 200}ms` }}
                           >
+                            {/* Action Bar */}
+                            <div className="absolute top-4 right-4 flex items-center gap-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toast({
+                                    title: "AI Enhance",
+                                    description: "AI features coming soon!"
+                                  });
+                                }}
+                                className="p-2 bg-purple-500/20 text-purple-300 rounded-lg hover:bg-purple-500/40 transition-colors"
+                                title="Enhance with AI"
+                              >
+                                <Sparkles className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setEditingAchievement({
+                                    item: { ...cert, id: index } as any,
+                                    type: 'certificate',
+                                    isOpen: true
+                                  });
+                                }}
+                                className="p-2 bg-blue-500/20 text-blue-300 rounded-lg hover:bg-blue-500/40 transition-colors"
+                                title="Edit certificate"
+                              >
+                                <Edit3 className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const newData = { ...portfolioData };
+                                  newData.certificates = newData.certificates.filter((_, i) => i !== index);
+                                  setPortfolioData(newData);
+                                  toast({
+                                    title: "Certificate deleted",
+                                    description: "Certificate removed."
+                                  });
+                                }}
+                                className="p-2 bg-red-500/20 text-red-300 rounded-lg hover:bg-red-500/40 transition-colors"
+                                title="Delete certificate"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
                             <div className="space-y-6">
                               <div className="flex items-start justify-between">
                                 <div className="w-16 h-16 bg-gradient-primary rounded-2xl flex items-center justify-center glow-primary">
@@ -1830,13 +2505,63 @@ const PortfolioEditor = () => {
 
       {/* Keep AI Assistants for edit mode */}
       <AIAssistant />
-      {editingSection && (
-        <AIEditAssistant
-          isOpen={!!editingSection}
-          section={editingSection}
-          onClose={() => setEditingSection(null)}
+      {
+        editingSection && (
+          <AIEditAssistant
+            isOpen={!!editingSection}
+            section={editingSection}
+            onClose={() => setEditingSection(null)}
+          />
+        )
+      }
+
+      {/* Reusable Edit Modals */}
+      {editingProject && (
+        <Dialog open={!!editingProject} onOpenChange={(open) => !open && setEditingProject(null)}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Edit Project</DialogTitle>
+            </DialogHeader>
+            <ProjectForm
+              project={{
+                ...editingProject,
+                id: Number(editingProject.id) || 0, // Ensure ID number if needed
+                stack: editingProject.tech,
+                type: 'others',
+                link: editingProject.demo || editingProject.repo,
+                stars: editingProject.stars || 0,
+                forks: 0,
+                // Add any other required mappings
+              } as any}
+              onSave={async (updated) => {
+                // Remap back to local structure
+                const localProject: Project = {
+                  ...editingProject,
+                  title: updated.title,
+                  description: updated.description || '',
+                  tech: updated.stack,
+                  features: updated.features,
+                  demo: updated.link || editingProject.demo,
+                  // maintain other fields
+                };
+                await handleSaveProject(localProject);
+              }}
+              onClose={() => setEditingProject(null)}
+            />
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {editingAchievement.isOpen && (
+        <EditAchievementDialog
+          isOpen={editingAchievement.isOpen}
+          onClose={() => setEditingAchievement(prev => ({ ...prev, isOpen: false }))}
+          achievement={editingAchievement.item}
+          type={editingAchievement.type}
+          onSave={handleSaveAchievement}
         />
       )}
+
     </div>
   );
 };
