@@ -17,7 +17,7 @@ async def send_reset_email(email: str, token: str):
     SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
     SMTP_USER = os.getenv("SMTP_USER", "")
     SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
-    FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
+    FRONTEND_URL = os.getenv("FRONTEND_URL", "https://portfolia-ai.vercel.app/")
 
     reset_link = f"{FRONTEND_URL}/reset-password?token={token}"
     
