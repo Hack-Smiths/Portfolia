@@ -1,7 +1,7 @@
 
 
 from fastapi import FastAPI
-from app.api.v1.routes import summary, user, auth, project, achievements, skills, profile, preview, portfolio, cron, resume
+from app.api.v1.routes import summary, user, auth, project, achievements, skills, profile, preview, portfolio, cron, resume, ai
 from fastapi.middleware.cors import CORSMiddleware
 from app.models.user import User
 from app.models.project import Project  # This ensures both classes are registered
