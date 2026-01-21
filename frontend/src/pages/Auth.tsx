@@ -530,7 +530,7 @@ const Auth = () => {
                 disabled={loading || isGoogleLoading}
                 onClick={() => {
                   setIsGoogleLoading(true);
-                  window.location.href = `${API_URL}/api/v1/auth/google/login`;
+                  window.location.href = `${API_URL}/google/login`;
                 }}
               >
                 {isGoogleLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Chrome className="w-4 h-4 mr-2" />}
