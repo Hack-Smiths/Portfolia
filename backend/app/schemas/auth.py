@@ -8,6 +8,9 @@ class SignupUser(BaseModel):
     full_name: str | None = None
 
 class SignupResponse(BaseModel):
-    access_token: str
-    token_type: str
-    user: SignupUser
+    message: str
+    access_token: str | None = None
+    token_type: str | None = None
+    user: SignupUser | None = None
+    email: str | None = None
+    is_verified: bool = False

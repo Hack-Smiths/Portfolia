@@ -1,5 +1,3 @@
-# backend/app/routes/projects.py
-
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.models.project import Project
@@ -8,6 +6,7 @@ from app.dependencies.auth_user import get_current_user
 from app.models.user import User
 from pydantic import BaseModel
 from typing import List, Optional
+from app.utils.security import validate_csrf
 
 router = APIRouter()
 
@@ -31,7 +30,7 @@ class ProjectOut(ProjectCreate):
         orm_mode = True
 
 # Create a new project
-@router.post("/", response_model=ProjectOut)
+@router.post("/", response_model=ProjectOut, dependencies=[Depends(validate_csrf)])
 def create_project(project: ProjectCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     db_project = Project(**project.dict(), owner_id=current_user.id)
     db.add(db_project)
@@ -45,7 +44,7 @@ def get_projects(db: Session = Depends(get_db), current_user: User = Depends(get
     return db.query(Project).filter(Project.owner_id == current_user.id).all()
 
 # Delete a project
-@router.delete("/{project_id}")
+@router.delete("/{project_id}", dependencies=[Depends(validate_csrf)])
 def delete_project(project_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     project = db.query(Project).filter(Project.id == project_id, Project.owner_id == current_user.id).first()
     if not project:
@@ -55,7 +54,7 @@ def delete_project(project_id: int, db: Session = Depends(get_db), current_user:
     return {"detail": "Project deleted"}
 
 # Update a project
-@router.put("/{project_id}", response_model=ProjectOut)
+@router.put("/{project_id}", response_model=ProjectOut, dependencies=[Depends(validate_csrf)])
 def update_project(project_id: int, project_data: ProjectCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     project = db.query(Project).filter(Project.id == project_id, Project.owner_id == current_user.id).first()
     if not project:

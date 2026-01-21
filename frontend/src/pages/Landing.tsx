@@ -72,12 +72,12 @@ const Landing = () => {
         {/* Dynamic Gradient Base */}
         <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-purple-900/20 to-indigo-900/30 dark:from-slate-950 dark:via-purple-950/30 dark:to-indigo-950/40" />
         <div className="absolute inset-0 bg-gradient-to-tl from-purple-600/10 via-transparent to-indigo-600/10 animate-pulse" />
-        
+
         {/* Floating Orbs with Complex Motion */}
         <div className="absolute top-20 left-10 w-96 h-96 bg-gradient-to-r from-purple-500/20 to-indigo-500/20 rounded-full blur-3xl animate-float-slow opacity-60" />
         <div className="absolute bottom-20 right-10 w-80 h-80 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 rounded-full blur-3xl animate-float-reverse opacity-60" />
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[32rem] h-[32rem] bg-gradient-to-r from-purple-400/10 to-indigo-400/10 rounded-full blur-3xl animate-pulse-slow" />
-        
+
         {/* Neural Network Pattern */}
         <div className="absolute inset-0 opacity-30">
           {/* Connection Lines */}
@@ -89,14 +89,14 @@ const Landing = () => {
                 <stop offset="100%" stopColor="rgb(139, 92, 246)" stopOpacity="0.3" />
               </linearGradient>
             </defs>
-            
+
             {/* Animated Connection Lines */}
             <path d="M100,200 Q300,100 500,200 T900,200" stroke="url(#lineGradient)" strokeWidth="2" fill="none" className="animate-draw-line" />
             <path d="M200,600 Q400,500 600,600 T1000,600" stroke="url(#lineGradient)" strokeWidth="2" fill="none" className="animate-draw-line-reverse" />
             <path d="M150,100 Q350,350 550,100 T850,400" stroke="url(#lineGradient)" strokeWidth="1.5" fill="none" className="animate-draw-line-slow" />
             <path d="M50,400 Q250,200 450,400 T750,200" stroke="url(#lineGradient)" strokeWidth="1.5" fill="none" className="animate-draw-line-delayed" />
           </svg>
-          
+
           {/* Network Nodes */}
           <div className="absolute top-1/4 left-1/6 w-3 h-3 bg-purple-400 rounded-full animate-pulse glow-primary" />
           <div className="absolute top-1/3 right-1/4 w-2 h-2 bg-indigo-400 rounded-full animate-pulse glow-primary" style={{ animationDelay: '0.5s' }} />
@@ -104,7 +104,7 @@ const Landing = () => {
           <div className="absolute bottom-1/4 right-1/3 w-2.5 h-2.5 bg-indigo-500 rounded-full animate-pulse glow-primary" style={{ animationDelay: '1.5s' }} />
           <div className="absolute top-1/2 left-1/2 w-3 h-3 bg-purple-400 rounded-full animate-pulse glow-primary" style={{ animationDelay: '2s' }} />
         </div>
-        
+
         {/* Geometric Pattern Overlay */}
         <div className="absolute inset-0 opacity-20">
           {/* Hexagonal Grid */}
@@ -112,7 +112,7 @@ const Landing = () => {
           <div className="absolute top-20 right-20 w-16 h-16 border-2 border-indigo-400/40 rounded-full animate-pulse" />
           <div className="absolute bottom-20 left-20 w-24 h-24 border border-purple-300/25 transform rotate-12 animate-float" />
           <div className="absolute bottom-10 right-10 w-14 h-14 bg-gradient-to-r from-purple-400/20 to-indigo-400/20 transform rotate-45 animate-float-reverse" />
-          
+
           {/* Circuit Board Elements */}
           <div className="absolute top-1/3 left-1/4">
             <div className="w-8 h-2 bg-gradient-to-r from-purple-400/30 to-transparent animate-pulse" />
@@ -123,7 +123,7 @@ const Landing = () => {
             <div className="w-2 h-6 bg-gradient-to-b from-indigo-400/30 to-transparent animate-pulse mt-2" />
           </div>
         </div>
-        
+
         {/* Particle Effect */}
         <div className="absolute inset-0">
           <div className="absolute top-1/6 left-1/5 w-1 h-1 bg-purple-400 rounded-full animate-float opacity-60" />
@@ -132,7 +132,7 @@ const Landing = () => {
           <div className="absolute bottom-1/6 right-1/5 w-1.5 h-1.5 bg-indigo-300 rounded-full animate-float-reverse opacity-60" />
           <div className="absolute top-2/3 left-2/3 w-1 h-1 bg-purple-400 rounded-full animate-float opacity-60" />
         </div>
-        
+
         {/* Noise Texture Overlay */}
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.02] to-transparent opacity-50 animate-pulse-slow" />
       </div>
@@ -151,45 +151,45 @@ const Landing = () => {
                 <div className="absolute top-0 bottom-0 left-1/4 w-px bg-gradient-to-b from-transparent via-purple-500 to-transparent animate-pulse" style={{ animationDelay: '0.5s' }}></div>
                 <div className="absolute top-0 bottom-0 right-1/4 w-px bg-gradient-to-b from-transparent via-indigo-500 to-transparent animate-pulse" style={{ animationDelay: '1.5s' }}></div>
               </div>
-              
+
               {/* Animated Dots at Intersections */}
               <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-purple-500 rounded-full animate-pulse glow-primary"></div>
               <div className="absolute top-1/4 right-1/4 w-2 h-2 bg-indigo-500 rounded-full animate-pulse glow-primary" style={{ animationDelay: '0.5s' }}></div>
               <div className="absolute bottom-1/4 left-1/4 w-2 h-2 bg-indigo-500 rounded-full animate-pulse glow-primary" style={{ animationDelay: '1s' }}></div>
               <div className="absolute bottom-1/4 right-1/4 w-2 h-2 bg-purple-500 rounded-full animate-pulse glow-primary" style={{ animationDelay: '1.5s' }}></div>
-              
+
               {/* Geometric Corner Elements */}
               <div className="absolute top-8 left-8 w-16 h-16 border-2 border-purple-500/30 rotate-45 animate-pulse"></div>
               <div className="absolute top-8 right-8 w-12 h-12 border-2 border-indigo-500/30 rotate-12 animate-pulse" style={{ animationDelay: '0.7s' }}></div>
               <div className="absolute bottom-8 left-8 w-14 h-14 border border-purple-400/20 rounded-full animate-pulse" style={{ animationDelay: '1.2s' }}></div>
               <div className="absolute bottom-8 right-8 w-10 h-10 bg-gradient-primary/20 rotate-45 animate-pulse" style={{ animationDelay: '1.8s' }}></div>
             </div>
-            
+
             {/* Professional Main Heading with Better Background */}
             <div className="relative z-10 py-10 mt-10 pb-4">
-            <h1 className="text-6xl lg:text-7xl font-black leading-tight animate-fade-in mb-2">
-              <span className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 dark:from-white dark:via-gray-200 dark:to-white bg-clip-text text-transparent drop-shadow-sm font-black tracking-tight">
-                AI-Powered
-              </span>
-              <br />
-              <span className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-[#5B0E8D] via-[#6A0DAD] to-[#3D0075] bg-clip-text text-transparent mt-2 block tracking-wide">
-                Internship Portfolio Builder
-              </span>
-            </h1>
+              <h1 className="text-6xl lg:text-7xl font-black leading-tight animate-fade-in mb-2">
+                <span className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 dark:from-white dark:via-gray-200 dark:to-white bg-clip-text text-transparent drop-shadow-sm font-black tracking-tight">
+                  AI-Powered
+                </span>
+                <br />
+                <span className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-[#5B0E8D] via-[#6A0DAD] to-[#3D0075] bg-clip-text text-transparent mt-2 block tracking-wide">
+                  Internship Portfolio Builder
+                </span>
+              </h1>
+            </div>
           </div>
-        </div>
 
           {/* Enhanced Typewriter Effect */}
           <div className="h-8 mt-12 mb-3 flex items-center justify-center">
-              <span className="text-lg text-foreground-muted typewriter font-mono bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent font-semibold">
-                {typewriterText}
-              </span>
-            </div>
+            <span className="text-lg text-foreground-muted typewriter font-mono bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent font-semibold">
+              {typewriterText}
+            </span>
+          </div>
 
-            {/* Enhanced Tagline */}
-            <p className="text-xl lg:text-2xl text-foreground-muted max-w-3xl mx-auto mb-6 animate-slide-in-up font-medium leading-relaxed">
-              One platform. <span className="text-gradient-primary font-semibold">Infinite potential.</span> Build your professional identity — smarter.
-            </p>
+          {/* Enhanced Tagline */}
+          <p className="text-xl lg:text-2xl text-foreground-muted max-w-3xl mx-auto mb-6 animate-slide-in-up font-medium leading-relaxed">
+            One platform. <span className="text-gradient-primary font-semibold">Infinite potential.</span> Build your professional identity — smarter.
+          </p>
 
           {/* Enhanced CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center mt-0 items-center mb-10 animate-slide-in-up">

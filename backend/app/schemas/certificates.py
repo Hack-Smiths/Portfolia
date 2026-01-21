@@ -1,5 +1,6 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 from typing import Optional
+from app.utils.security import sanitize_html
 
 class CertificateBase(BaseModel):
     title: str
@@ -8,6 +9,10 @@ class CertificateBase(BaseModel):
     credential_id: Optional[str] = None
     description: Optional[str] = None
     status: Optional[str] = None
+
+    @validator('title', 'issuer', 'year', 'credential_id', 'description', 'status')
+    def sanitize_fields(cls, v):
+        return sanitize_html(v)
 
 class CertificateCreate(CertificateBase):
     pass

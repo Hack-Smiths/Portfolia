@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Sparkles, Loader2 } from 'lucide-react';
+import { Sparkles, Loader2, AlertCircle } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -57,9 +57,14 @@ export function AIEnhanceModal({ isOpen, onClose, project, onApply }: AIEnhanceM
     };
 
     const handleGenerate = async () => {
+        // If variants already exist, clear them (regenerate mode)
+        if (variants.length > 0) {
+            setVariants([]);
+            setSelectedVariantId(null);
+        }
+
         setLoading(true);
         setError(null);
-        setSelectedVariantId(null);
 
         try {
             const result = await enhanceProjectDescription({
@@ -86,6 +91,7 @@ export function AIEnhanceModal({ isOpen, onClose, project, onApply }: AIEnhanceM
                 }));
 
                 setVariants(processedVariants);
+                setSelectedVariantId(null);
             } else {
                 setError("No variants were generated. Please try again.");
             }
@@ -202,9 +208,15 @@ export function AIEnhanceModal({ isOpen, onClose, project, onApply }: AIEnhanceM
                     </div>
 
                     {/* Generate Button */}
+                    {tones.length === 0 && (
+                        <p className="text-xs text-destructive">Please select at least 1 tone</p>
+                    )}
+                    {!project.description.trim() && (
+                        <p className="text-xs text-destructive">Project description cannot be empty</p>
+                    )}
                     <Button
                         onClick={handleGenerate}
-                        disabled={!canGenerate}
+                        disabled={loading || tones.length === 0 || !project.description.trim()}
                         className="w-full btn-primary"
                     >
                         {loading ? (
@@ -222,8 +234,12 @@ export function AIEnhanceModal({ isOpen, onClose, project, onApply }: AIEnhanceM
 
                     {/* Error Display */}
                     {error && (
-                        <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20">
-                            <p className="text-sm text-destructive">{error}</p>
+                        <div className="flex items-center gap-2 p-3 bg-destructive/10 border border-destructive/30 rounded-md">
+                            <AlertCircle className="w-4 h-4 text-destructive flex-shrink-0" />
+                            <div className="flex-1">
+                                <p className="text-sm text-destructive font-medium">Error generating variants</p>
+                                <p className="text-xs text-destructive/80 mt-1">{error}</p>
+                            </div>
                         </div>
                     )}
 
@@ -242,8 +258,8 @@ export function AIEnhanceModal({ isOpen, onClose, project, onApply }: AIEnhanceM
                                         <div
                                             key={variant.id}
                                             className={`relative ${selectedVariantId === variant.id
-                                                    ? 'ring-2 ring-primary'
-                                                    : 'hover:bg-muted/50'
+                                                ? 'ring-2 ring-primary'
+                                                : 'hover:bg-muted/50'
                                                 } rounded-lg transition-all`}
                                         >
                                             <Card className="p-4 cursor-pointer">

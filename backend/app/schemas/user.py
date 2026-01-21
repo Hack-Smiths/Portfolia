@@ -6,7 +6,7 @@ class UserCreate(BaseModel):
     full_name: str
     username: str
     email: EmailStr
-    password: str
+    password: str | None = None
 
     @validator("username")
     def validate_username(cls, v):
@@ -16,6 +16,20 @@ class UserCreate(BaseModel):
             )
         if "__" in v or "--" in v or "-_" in v or "_-" in v:
             raise ValueError("No consecutive special characters")
+        return v
+
+    @validator("password")
+    def validate_password(cls, v):
+        if v is None:
+            return v
+        if len(v) < 8:
+            raise ValueError("Password must be at least 8 characters long")
+        if not any(char.isupper() for char in v):
+            raise ValueError("Password must contain at least one uppercase letter")
+        if not any(char.isdigit() for char in v):
+            raise ValueError("Password must contain at least one numeric digit")
+        if not any(char in "!@#$%^&*()_+-=[]{}|;:,.<>?" for char in v):
+            raise ValueError("Password must contain at least one special character")
         return v
 
 class UserLogin(BaseModel):

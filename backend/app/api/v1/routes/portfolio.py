@@ -1,5 +1,4 @@
-# app/api/v1/routes/portfolio.py
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from app.dependencies.auth_user import get_db, get_current_user
@@ -11,6 +10,7 @@ from app.models.certificates import Certificate
 from app.models.work_experience import WorkExperience
 from app.models.awards import Award
 from typing import Optional
+from app.utils.limiter import limiter
 
 router = APIRouter(prefix="/api/portfolio", tags=["Portfolio"])
 
@@ -25,8 +25,40 @@ RESERVED_USERNAMES = {
 }
 
 
+
+@router.put("/settings")
+async def update_portfolio_settings(
+    settings: dict,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Update authenticated user's portfolio settings:
+    - is_public
+    - theme_preference
+    - analytics_enabled
+    """
+    if "theme_preference" in settings:
+        if settings["theme_preference"] not in ["classic", "creative", "modern"]:
+            raise HTTPException(
+                status_code=400, 
+                detail="Invalid theme preference"
+            )
+        current_user.theme_preference = settings["theme_preference"]
+        
+    if "is_public" in settings:
+        current_user.is_public = settings["is_public"]
+        
+    if "analytics_enabled" in settings:
+        current_user.analytics_enabled = settings["analytics_enabled"]
+        
+    db.commit()
+    return {"message": "Settings updated successfully"}
+
+
 @router.get("/{username}")
-def get_portfolio_by_username(username: str, db: Session = Depends(get_db)):
+@limiter.limit("100/minute")
+def get_portfolio_by_username(request: Request, username: str, db: Session = Depends(get_db)):
     """
     Get complete portfolio data by username.
     Public endpoint - no authentication required.
@@ -143,7 +175,8 @@ def get_portfolio_by_username(username: str, db: Session = Depends(get_db)):
 
 
 @router.get("/{username}/public-check")
-def check_portfolio_public(username: str, db: Session = Depends(get_db)):
+@limiter.limit("100/minute")
+def check_portfolio_public(request: Request, username: str, db: Session = Depends(get_db)):
     """
     Quick check if a portfolio exists and is public.
     Used for routing decisions on frontend.

@@ -14,7 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useToast } from '@/hooks/use-toast';
-import { getPortfolioPreview } from '@/utils/api';
+import { getPortfolioPreview, updatePortfolioSettings } from '@/utils/api';
 import { ClassicResumePDF } from '@/components/pdf/ClassicResumePDF';
 import { ModernResumePDF } from '@/components/pdf/ModernResumePDF';
 import { mapPortfolioToResume, generatePDFFilename } from '@/utils/pdfMapper';
@@ -37,12 +37,6 @@ const PortfolioHeroPreview = ({ template, profile }) => {
     classic: 'text-gray-600',
     creative: 'text-gray-700',
     modern: 'text-gray-300'
-  };
-
-  const accentStyles = {
-    classic: 'bg-blue-600 text-white',
-    creative: 'bg-gradient-to-r from-orange-600 to-red-600 text-white',
-    modern: 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white'
   };
 
   // Get initials for avatar fallback
@@ -139,6 +133,7 @@ const Export = () => {
   const { toast } = useToast();
   const { user } = useAuthContext();
   const { selectedTemplate, setSelectedTemplate, projects, skills, achievements, profile } = usePortfolio();
+  const [savedTemplate, setSavedTemplate] = useState('');
 
   const [exportSettings, setExportSettings] = useState({
     includeContact: true,
@@ -202,6 +197,10 @@ const Export = () => {
       try {
         const data = await getPortfolioPreview();
         setPortfolioData(data);
+        if (data.theme_preference) {
+          setSelectedTemplate(data.theme_preference);
+          setSavedTemplate(data.theme_preference);
+        }
       } catch (error) {
         console.error('Error fetching portfolio data:', error);
       } finally {
@@ -327,6 +326,24 @@ const Export = () => {
     }
   };
 
+  const handleSaveTheme = async () => {
+    try {
+      await updatePortfolioSettings({ theme_preference: selectedTemplate });
+      setSavedTemplate(selectedTemplate);
+      toast({
+        title: "Theme Saved",
+        description: "Your portfolio theme has been updated successfully.",
+      });
+    } catch (error) {
+      console.error("Failed to save theme:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save theme preference.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const resetQrSettings = () => {
     setQrSettings({
       size: '200',
@@ -351,135 +368,93 @@ const Export = () => {
 
   return (
     <div className="min-h-screen pt-16 bg-gradient-soft">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="mb-8 animate-fade-in">
-          <h1 className="text-3xl lg:text-4xl font-space font-bold text-gradient-primary mb-2">
-            Export & Share
-          </h1>
-          <p className="text-foreground-muted">
-            Customize your portfolio and share it with the world
-          </p>
+      <div className="container mx-auto px-4 py-4">
+        {/* Header & Share Row */}
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 mb-6 animate-fade-in">
+          <div>
+            <h1 className="text-2xl lg:text-3xl font-space font-bold text-gradient-primary mb-1">
+              Export & Share
+            </h1>
+            <p className="text-sm text-foreground-muted">
+              Customize your portfolio and share it with the world
+            </p>
+          </div>
+
+          {/* Integrated Share Section within Header */}
+          <Card className="glass-card p-3 flex flex-col gap-3 shadow-sm border-primary/20 bg-white/50 w-full lg:w-auto min-w-[320px] lg:min-w-[450px]">
+            <div className="flex items-center space-x-2">
+              <Input value={portfolioUrl} readOnly className="flex-1 bg-white h-8 text-xs" />
+              <Button onClick={handleCopyLink} size="icon" variant="outline" className="h-8 w-8 shrink-0">
+                <Copy className="w-3.5 h-3.5" />
+              </Button>
+              <Button variant="outline" size="sm" className="h-8 text-xs shrink-0" onClick={handleViewMainPortfolio}>
+                <Eye className="w-3.5 h-3.5 mr-1" />
+                Public View
+              </Button>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-medium text-foreground-muted mr-2">Quick Share:</span>
+              <div className="flex space-x-1">
+                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleShare('twitter')}>
+                  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg>
+                </Button>
+                <Button variant="ghost" size="icon" className="h-7 w-7 text-[#0A66C2]" onClick={() => handleShare('linkedin')}><Linkedin className="w-3.5 h-3.5" /></Button>
+                <Button variant="ghost" size="icon" className="h-7 w-7 text-[#25D366]" onClick={() => handleShare('whatsapp')}><MessageCircle className="w-3.5 h-3.5" /></Button>
+                <Button variant="ghost" size="icon" className="h-7 w-7 text-[#1877F2]" onClick={() => handleShare('facebook')}><Facebook className="w-3.5 h-3.5" /></Button>
+                <Button variant="ghost" size="icon" className="h-7 w-7 text-primary" onClick={() => handleShare('email')}><Mail className="w-3.5 h-3.5" /></Button>
+              </div>
+            </div>
+          </Card>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Left Side - Settings */}
-          <div className="space-y-6">
-            {/* Template Selection */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          {/* Left Column */}
+          <div className="space-y-4">
+            {/* 1. PDF Resume Export */}
             <Card className="glass-card animate-slide-in-up">
-              <div className="flex items-center space-x-2 mb-6">
-                <Palette className="w-5 h-5 text-primary" />
-                <h2 className="text-xl font-semibold">Choose Template</h2>
+              <div className="flex items-center space-x-2 mb-4">
+                <FileText className="w-4 h-4 text-primary" />
+                <h2 className="text-base font-semibold">Resume PDF Export</h2>
               </div>
-
-              <div className="grid grid-cols-1 gap-4">
-                {templates.map((template) => (
-                  <div
-                    key={template.id}
-                    className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${selectedTemplate === template.id
-                      ? 'border-primary bg-primary/5'
-                      : 'border-border hover:border-primary/50'
-                      }`}
-                    onClick={() => setSelectedTemplate(template.id)}
-                  >
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-12 h-8 rounded ${template.preview}`} />
-                      <div className="flex-1">
-                        <h3 className="font-medium">{template.name}</h3>
-                        <p className="text-sm text-foreground-muted">{template.description}</p>
-                      </div>
-                      {selectedTemplate === template.id && (
-                        <CheckCircle className="w-5 h-5 text-primary" />
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </Card>
-
-            {/* Export Settings */}
-            <Card className="glass-card animate-slide-in-up">
-              <h2 className="text-xl font-semibold mb-6">Export Settings</h2>
 
               <div className="space-y-4">
-                {Object.entries({
-                  includeContact: 'Contact Information',
-                  includeProjects: 'Projects Section',
-                  includeAchievements: 'Achievements & Experience',
-                  includeSkills: 'Skills Section'
-                }).map(([key, label]) => (
-                  <div key={key} className="flex items-center justify-between">
-                    <Label htmlFor={key} className="text-sm font-medium cursor-pointer">
-                      {label}
-                    </Label>
-                    <Switch
-                      id={key}
-                      checked={exportSettings[key]}
-                      onCheckedChange={(checked) =>
-                        setExportSettings(prev => ({ ...prev, [key]: checked }))
-                      }
-                    />
-                  </div>
-                ))}
-              </div>
-            </Card>
-
-            {/* PDF Export Section */}
-            <Card className="glass-card animate-slide-in-up">
-              <div className="flex items-center space-x-2 mb-6">
-                <FileText className="w-5 h-5 text-primary" />
-                <h2 className="text-xl font-semibold">PDF Resume Export</h2>
-              </div>
-
-              <div className="space-y-6">
-                {/* PDF Template Selector */}
+                {/* PDF Template Selector (Compact Row) */}
                 <div>
-                  <Label className="text-sm font-medium mb-3 block">Choose PDF Template</Label>
-                  <RadioGroup value={pdfTemplate} onValueChange={(value: 'classic' | 'modern') => setPdfTemplate(value)}>
-                    <div className="space-y-3">
-                      <div className={`flex items-center space-x-3 p-3 rounded-lg border-2 cursor-pointer transition-all ${pdfTemplate === 'classic' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
-                        }`} onClick={() => setPdfTemplate('classic')}>
-                        <RadioGroupItem value="classic" id="pdf-classic" />
-                        <div className="flex-1">
-                          <Label htmlFor="pdf-classic" className="font-medium cursor-pointer">Classic Resume</Label>
-                          <p className="text-xs text-foreground-muted">Single column, ATS-optimized, black & white</p>
-                        </div>
-                      </div>
-
-                      <div className={`flex items-center space-x-3 p-3 rounded-lg border-2 cursor-pointer transition-all ${pdfTemplate === 'modern' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
-                        }`} onClick={() => setPdfTemplate('modern')}>
-                        <RadioGroupItem value="modern" id="pdf-modern" />
-                        <div className="flex-1">
-                          <Label htmlFor="pdf-modern" className="font-medium cursor-pointer">Modern Resume</Label>
-                          <p className="text-xs text-foreground-muted">Two-column layout, subtle colors, visual</p>
-                        </div>
-                      </div>
+                  <Label className="text-xs font-medium mb-2 block">Choose PDF Template</Label>
+                  <RadioGroup value={pdfTemplate} onValueChange={(value: 'classic' | 'modern') => setPdfTemplate(value)} className="flex gap-4">
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="classic" id="pdf-classic" className="scale-90" />
+                      <Label htmlFor="pdf-classic" className="text-xs cursor-pointer">Classic</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="modern" id="pdf-modern" className="scale-90" />
+                      <Label htmlFor="pdf-modern" className="text-xs cursor-pointer">Modern</Label>
                     </div>
                   </RadioGroup>
                 </div>
 
-                {/* Section Selection */}
+                {/* Section Selection (Compact Grid) */}
                 <div>
-                  <Label className="text-sm font-medium mb-3 block">Include Sections</Label>
-                  <div className="space-y-3">
+                  <Label className="text-xs font-medium mb-2 block">Include Sections</Label>
+                  <div className="grid grid-cols-2 lg:grid-cols-3 gap-y-1.5 gap-x-2">
                     {Object.entries({
-                      includeAbout: 'Professional Summary',
+                      includeAbout: 'Summary',
                       includeSkills: 'Skills',
-                      includeExperience: 'Experience',
+                      includeExperience: 'Expr.',
                       includeProjects: 'Projects',
-                      includeCertificates: 'Certifications'
+                      includeCertificates: 'Certs'
                     }).map(([key, label]) => (
-                      <div key={key} className="flex items-center justify-between">
-                        <Label htmlFor={`pdf-${key}`} className="text-sm font-medium cursor-pointer">
-                          {label}
-                        </Label>
+                      <div key={key} className="flex items-center space-x-1.5">
                         <Switch
                           id={`pdf-${key}`}
+                          className="scale-[0.6] origin-left"
                           checked={pdfSections[key]}
                           onCheckedChange={(checked) =>
                             setPdfSections(prev => ({ ...prev, [key]: checked }))
                           }
                         />
+                        <Label htmlFor={`pdf-${key}`} className="text-[10px] cursor-pointer whitespace-nowrap">{label}</Label>
                       </div>
                     ))}
                   </div>
@@ -488,13 +463,14 @@ const Export = () => {
                 {/* Download Button */}
                 <Button
                   className="w-full btn-primary"
+                  size="sm"
                   onClick={handleDownloadPDF}
                   disabled={isGeneratingPDF || isLoadingPortfolio}
                 >
                   {isGeneratingPDF ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Generating PDF...
+                      Generating...
                     </>
                   ) : (
                     <>
@@ -503,157 +479,234 @@ const Export = () => {
                     </>
                   )}
                 </Button>
-
-                <p className="text-xs text-center text-foreground-muted">
-                  PDF will be ATS-friendly and ready for job applications
-                </p>
               </div>
             </Card>
 
-            {/* Share Options */}
-            <Card className="glass-card animate-slide-in-up">
-              <div className="flex items-center space-x-2 mb-6">
-                <Share2 className="w-5 h-5 text-primary" />
-                <h2 className="text-xl font-semibold">Share Options</h2>
-              </div>
+            {/* 2. QR Code Section (Split Column) */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* QR Preview (Left Sub-column) */}
+              <Card className="glass-card animate-slide-in-up flex flex-col items-center justify-center p-4 bg-white/50">
+                <h3 className="text-xs font-semibold mb-3 text-foreground-muted flex items-center">
+                  <QrCode className="w-3 h-3 mr-2" />
+                  Live Preview
+                </h3>
+                <div className="p-3 bg-white rounded-xl shadow-sm border border-border/50 mb-3">
+                  <img
+                    src={qrCodeUrl}
+                    alt="Portfolio QR Code"
+                    className="w-auto h-auto transition-all duration-300"
+                    style={{ maxWidth: '140px', maxHeight: '140px' }}
+                    onError={(e) => {
+                      console.error('QR code failed to load');
+                    }}
+                  />
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full h-8 text-xs"
+                  onClick={handleDownloadQR}
+                >
+                  <Download className="w-3 h-3 mr-2" />
+                  Save PNG
+                </Button>
+              </Card>
 
-              <Tabs defaultValue="link" className="w-full">
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="link">Share Link</TabsTrigger>
-                  <TabsTrigger value="download">Download</TabsTrigger>
-                </TabsList>
+              {/* QR Options (Right Sub-column) */}
+              <Card className="glass-card animate-slide-in-up">
+                <h3 className="text-sm font-semibold mb-3">Customize QR</h3>
+                <div className="space-y-3">
+                  <div>
+                    <Label htmlFor="qr-size" className="text-xs font-medium mb-1 block">Size</Label>
+                    <Select
+                      value={qrSettings.size}
+                      onValueChange={(value) => setQrSettings(prev => ({ ...prev, size: value }))}
+                    >
+                      <SelectTrigger id="qr-size" className="h-8 text-xs">
+                        <SelectValue placeholder="Size" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="150">Small (150px)</SelectItem>
+                        <SelectItem value="200">Medium (200px)</SelectItem>
+                        <SelectItem value="300">Large (300px)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-                <TabsContent value="link" className="space-y-4">
-                  <div className="space-y-3">
+                  <div>
+                    <Label className="text-xs font-medium mb-1.5 block">Colors</Label>
                     <div className="flex space-x-2">
-                      <Input
-                        value={portfolioUrl}
-                        readOnly
-                        className="flex-1"
+                      <div className="flex-1">
+                        <Label htmlFor="qr-fg" className="text-[10px] text-foreground-muted mb-1 block">Foreground</Label>
+                        <div className="flex items-center space-x-1">
+                          <Input
+                            id="qr-fg"
+                            type="color"
+                            value={`#${qrSettings.fgColor}`}
+                            onChange={(e) => handleColorChange('fg', e.target.value)}
+                            className="w-8 h-8 p-0 border-0 overflow-hidden rounded cursor-pointer"
+                          />
+                          <Input
+                            value={`#${qrSettings.fgColor}`}
+                            readOnly
+                            className="h-8 text-xs font-mono px-2"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex space-x-2 mt-2">
+                      <div className="flex-1">
+                        <Label htmlFor="qr-bg" className="text-[10px] text-foreground-muted mb-1 block">Background</Label>
+                        <div className="flex items-center space-x-1">
+                          <Input
+                            id="qr-bg"
+                            type="color"
+                            value={`#${qrSettings.bgColor}`}
+                            onChange={(e) => handleColorChange('bg', e.target.value)}
+                            className="w-8 h-8 p-0 border-0 overflow-hidden rounded cursor-pointer"
+                          />
+                          <Input
+                            value={`#${qrSettings.bgColor}`}
+                            readOnly
+                            className="h-8 text-xs font-mono px-2"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={resetQrSettings}
+                    className="w-full text-xs h-8"
+                  >
+                    Reset Defaults
+                  </Button>
+                </div>
+              </Card>
+            </div>
+
+
+            {/* 3. Export Settings & Analytics */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Card className="glass-card animate-slide-in-up">
+                <h2 className="text-base font-semibold mb-3">Export Settings</h2>
+                <div className="space-y-2">
+                  {Object.entries({
+                    includeContact: 'Contact Info',
+                    includeProjects: 'Projects',
+                    includeAchievements: 'Experience',
+                    includeSkills: 'Skills'
+                  }).map(([key, label]) => (
+                    <div key={key} className="flex items-center justify-between">
+                      <Label htmlFor={key} className="text-xs font-medium cursor-pointer">
+                        {label}
+                      </Label>
+                      <Switch
+                        id={key}
+                        className="scale-75 origin-right"
+                        checked={exportSettings[key]}
+                        onCheckedChange={(checked) =>
+                          setExportSettings(prev => ({ ...prev, [key]: checked }))
+                        }
                       />
-                      <Button onClick={handleCopyLink}>
-                        <Copy className="w-4 h-4" />
-                      </Button>
                     </div>
-
-                    <Button
-                      className="w-full btn-primary"
-                      onClick={handleViewMainPortfolio}
-                    >
-                      <Eye className="w-4 h-4 mr-2" />
-                      View Main Portfolio
-                    </Button>
-
-                    <div className="grid grid-cols-3 gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleShare('twitter')}
-                        className="flex items-center justify-center"
-                      >
-                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-                        </svg>
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleShare('linkedin')}
-                        className="flex items-center justify-center"
-                      >
-                        <Linkedin className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleShare('whatsapp')}
-                        className="flex items-center justify-center"
-                      >
-                        <MessageCircle className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleShare('facebook')}
-                        className="flex items-center justify-center"
-                      >
-                        <Facebook className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleShare('email')}
-                        className="flex items-center justify-center col-span-2"
-                      >
-                        <Mail className="w-4 h-4 mr-2" />
-                        Email
-                      </Button>
-                    </div>
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="download" className="space-y-4">
-                  <div className="space-y-3">
-                    <Button
-                      className="w-full btn-primary"
-                      onClick={handleDownloadPDF}
-                    >
-                      <Download className="w-4 h-4 mr-2" />
-                      Download PDF
-                    </Button>
-
-                    <div className="text-center">
-                      <Button
-                        variant="outline"
-                        className="w-full"
-                        onClick={handleDownloadQR}
-                      >
-                        <QrCode className="w-4 h-4 mr-2" />
-                        Download QR Code
-                      </Button>
-                    </div>
-                  </div>
-                </TabsContent>
-              </Tabs>
-            </Card>
-
-            {/* Analytics */}
-            <Card className="glass-card animate-slide-in-up">
-              <h2 className="text-xl font-semibold mb-4">Portfolio Analytics</h2>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="text-center p-3 bg-muted/50 rounded-lg">
-                  <div className="text-2xl font-bold text-primary">{projects.length}</div>
-                  <div className="text-xs text-foreground-muted">Projects</div>
+                  ))}
                 </div>
-                <div className="text-center p-3 bg-muted/50 rounded-lg">
-                  <div className="text-2xl font-bold text-electric">{skills.length}</div>
-                  <div className="text-xs text-foreground-muted">Skills</div>
+              </Card>
+
+              <Card className="glass-card animate-slide-in-up">
+                <h2 className="text-base font-semibold mb-3">Analytics</h2>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="text-center p-2 bg-muted/50 rounded-lg">
+                    <div className="text-xl font-bold text-primary">{projects.length}</div>
+                    <div className="text-[10px] text-foreground-muted uppercase tracking-wider">Projects</div>
+                  </div>
+                  <div className="text-center p-2 bg-muted/50 rounded-lg">
+                    <div className="text-xl font-bold text-electric">{skills.length}</div>
+                    <div className="text-[10px] text-foreground-muted uppercase tracking-wider">Skills</div>
+                  </div>
                 </div>
-              </div>
-            </Card>
+              </Card>
+            </div>
           </div>
 
-          {/* Right Side - Preview */}
-          <div className="space-y-6">
+          {/* Right Column */}
+          <div className="space-y-4">
+            {/* 1. Theme Selection (Compact Square Grid - RESTORED TO TOP) */}
             <Card className="glass-card animate-slide-in-right">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold flex items-center">
-                  <Eye className="w-5 h-5 mr-2 text-primary" />
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center space-x-2">
+                  <Palette className="w-4 h-4 text-primary" />
+                  <h2 className="text-base font-semibold">Theme Selection</h2>
+                </div>
+                {/* Save Button integrated in header */}
+                <Button
+                  size="sm"
+                  className={`transition-all duration-300 ${selectedTemplate === savedTemplate
+                    ? 'bg-muted text-foreground-muted cursor-default border border-border'
+                    : 'btn-primary shadow-lg'
+                    }`}
+                  onClick={handleSaveTheme}
+                  disabled={selectedTemplate === savedTemplate}
+                >
+                  {selectedTemplate === savedTemplate ? (
+                    <>
+                      <CheckCircle className="w-3 h-3 mr-1.5" />
+                      Saved
+                    </>
+                  ) : (
+                    'Save Changes'
+                  )}
+                </Button>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                {templates.map((template) => (
+                  <div
+                    key={template.id}
+                    className={`relative rounded-md border shadow-sm cursor-pointer transition-all duration-200 flex items-center justify-center py-2.5 px-2 ${selectedTemplate === template.id
+                      ? 'border-primary bg-primary/10 text-primary ring-1 ring-primary/20'
+                      : 'border-border hover:border-primary/50 hover:bg-muted/50 text-foreground-muted hover:text-foreground'
+                      }`}
+                    onClick={() => setSelectedTemplate(template.id)}
+                  >
+                    <span className="font-semibold text-sm text-center truncate z-10">
+                      {template.name.split(' ')[0]}
+                    </span>
+
+                    {selectedTemplate === template.id && (
+                      <div className="absolute top-1 right-1 text-primary">
+                        <CheckCircle className="w-2 h-2" />
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </Card>
+
+            {/* 2. Live Preview (RESTORED TO BELOW THEME) */}
+            <Card className="glass-card animate-slide-in-right">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-base font-semibold flex items-center">
+                  <Eye className="w-4 h-4 mr-2 text-primary" />
                   Live Preview
                 </h2>
-                <Badge className="bg-success/10 text-success">
+                <Badge className="bg-success/10 text-success text-xs px-2 py-0.5">
                   <Globe className="w-3 h-3 mr-1" />
                   Live
                 </Badge>
               </div>
 
               {/* Portfolio Hero Section Preview */}
-              <div className="mb-4">
-                <h3 className="text-sm font-medium mb-3 text-foreground-muted">Hero Section Preview</h3>
+              <div className="mb-2">
                 {isLoadingPortfolio ? (
-                  <div className="p-6 bg-muted/50 rounded-lg flex items-center justify-center">
-                    <p className="text-sm text-foreground-muted">Loading portfolio data...</p>
+                  <div className="p-6 bg-muted/50 rounded-lg flex items-center justify-center h-[200px]">
+                    <p className="text-sm text-foreground-muted flex items-center">
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Loading...
+                    </p>
                   </div>
                 ) : (
                   <PortfolioHeroPreview
@@ -661,139 +714,6 @@ const Export = () => {
                     profile={portfolioData || profile}
                   />
                 )}
-              </div>
-
-              {/* Preview Actions */}
-              <div className="mt-4 space-y-3">
-                <Button className="w-full btn-primary" onClick={handleOpenFullPreview}>
-                  <Eye className="w-4 h-4 mr-2" />
-                  Open Full Preview
-                </Button>
-
-                <div className="grid grid-cols-2 gap-2">
-                  <Button variant="outline" onClick={handleDownloadPDF}>
-                    <Download className="w-4 h-4 mr-2" />
-                    Export PDF
-                  </Button>
-                  <Button variant="outline" onClick={handleCopyLink}>
-                    <Link2 className="w-4 h-4 mr-2" />
-                    Copy Link
-                  </Button>
-                </div>
-              </div>
-            </Card>
-
-            {/* QR Code Display */}
-            <Card className="glass-card animate-slide-in-right">
-              <h3 className="text-lg font-semibold mb-4 flex items-center">
-                <QrCode className="w-5 h-5 mr-2 text-primary" />
-                QR Code
-              </h3>
-
-              <div className="flex justify-center mb-4">
-                <div className="p-4 bg-white rounded-lg shadow-md">
-                  <img
-                    src={qrCodeUrl}
-                    alt="Portfolio QR Code"
-                    className="w-auto h-auto"
-                    style={{ maxWidth: `${qrSettings.size}px`, maxHeight: `${qrSettings.size}px` }}
-                    onError={(e) => {
-                      console.error('QR code failed to load');
-                      toast({
-                        title: "QR Code Error",
-                        description: "Failed to generate QR code",
-                        variant: "destructive",
-                      });
-                    }}
-                  />
-                </div>
-              </div>
-
-              <p className="text-center text-sm text-foreground-muted mb-4">
-                Scan to view portfolio on mobile
-              </p>
-
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={handleDownloadQR}
-              >
-                <Download className="w-4 h-4 mr-2" />
-                Download QR Code
-              </Button>
-            </Card>
-
-            {/* QR Code Customization */}
-            <Card className="glass-card animate-slide-in-right">
-              <h3 className="text-lg font-semibold mb-4">Customize QR Code</h3>
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="qr-size" className="text-sm font-medium mb-2 block">
-                    Size
-                  </Label>
-                  <Select
-                    value={qrSettings.size}
-                    onValueChange={(value) => setQrSettings(prev => ({ ...prev, size: value }))}
-                  >
-                    <SelectTrigger id="qr-size">
-                      <SelectValue placeholder="Select size" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="150">Small (150x150)</SelectItem>
-                      <SelectItem value="200">Medium (200x200)</SelectItem>
-                      <SelectItem value="300">Large (300x300)</SelectItem>
-                      <SelectItem value="500">XLarge (500x500)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label htmlFor="qr-fg-color" className="text-sm font-medium mb-2 block">
-                    Foreground Color
-                  </Label>
-                  <div className="flex space-x-2">
-                    <Input
-                      id="qr-fg-color"
-                      type="color"
-                      value={`#${qrSettings.fgColor}`}
-                      onChange={(e) => handleColorChange('fg', e.target.value)}
-                      className="w-20 h-10"
-                    />
-                    <Input
-                      value={`#${qrSettings.fgColor}`}
-                      readOnly
-                      className="flex-1"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <Label htmlFor="qr-bg-color" className="text-sm font-medium mb-2 block">
-                    Background Color
-                  </Label>
-                  <div className="flex space-x-2">
-                    <Input
-                      id="qr-bg-color"
-                      type="color"
-                      value={`#${qrSettings.bgColor}`}
-                      onChange={(e) => handleColorChange('bg', e.target.value)}
-                      className="w-20 h-10"
-                    />
-                    <Input
-                      value={`#${qrSettings.bgColor}`}
-                      readOnly
-                      className="flex-1"
-                    />
-                  </div>
-                </div>
-
-                <Button
-                  variant="outline"
-                  onClick={resetQrSettings}
-                  className="w-full"
-                >
-                  Reset to Defaults
-                </Button>
               </div>
             </Card>
           </div>
