@@ -1,26 +1,81 @@
-
-
-from fastapi import FastAPI
-from app.api.v1.routes import summary, user, auth, project, achievements, skills, profile, preview, portfolio, cron, resume, ai
-from fastapi.middleware.cors import CORSMiddleware
-from app.models.user import User
-from app.models.project import Project  # This ensures both classes are registered
-
-
 from fastapi import FastAPI, Request, Response
-from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 from fastapi.responses import JSONResponse
 from slowapi.errors import RateLimitExceeded
 from app.utils.limiter import limiter
 import os
 
-from fastapi_csrf_protect.exceptions import CsrfProtectError
+# Routers
+from app.api.v1.routes import (
+    summary,
+    user,
+    auth,
+    project,
+    achievements,
+    skills,
+    profile,
+    preview,
+    portfolio,
+    cron,
+    resume,
+    ai,
+    contact,
+)
 
+# Models (force registration)
+from app.models.user import User
+from app.models.project import Project
+
+# ─────────────────────────────────────────────
+# CREATE APP (ONLY ONCE)
+# ─────────────────────────────────────────────
 app = FastAPI()
 app.state.limiter = limiter
 
-# Security Headers Middleware
+# ─────────────────────────────────────────────
+# TRUSTED HOSTS (FIXES INVALID HOST HEADER)
+# ─────────────────────────────────────────────
+app.add_middleware(
+    TrustedHostMiddleware,
+    allowed_hosts=[
+        "localhost",
+        "127.0.0.1",
+        "portfolia-awd7.onrender.com",
+        "*.onrender.com",
+        "portfolia-ai.vercel.app",
+    ],
+)
+
+# ─────────────────────────────────────────────
+# CORS
+# ─────────────────────────────────────────────
+origins = [
+    "https://portfolia-ai.vercel.app",
+    "http://localhost:8080",
+    "http://127.0.0.1:8080",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# ─────────────────────────────────────────────
+# HTTPS REDIRECT (PRODUCTION ONLY)
+# ─────────────────────────────────────────────
+if os.getenv("ENV") == "production":
+    app.add_middleware(HTTPSRedirectMiddleware)
+
+# ─────────────────────────────────────────────
+# SECURITY HEADERS
+# ─────────────────────────────────────────────
 @app.middleware("http")
 async def add_security_headers(request: Request, call_next):
     response: Response = await call_next(request)
@@ -28,47 +83,25 @@ async def add_security_headers(request: Request, call_next):
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-XSS-Protection"] = "1; mode=block"
-    response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://api.qrserver.com;"
     return response
 
-# Enforce HTTPS in production
-if os.getenv("ENV") == "production":
-    app.add_middleware(HTTPSRedirectMiddleware)
-
-# Trusted Host Middleware
-app.add_middleware(
-    TrustedHostMiddleware, 
-    allowed_hosts=["portfolia-ai.vercel.app", "localhost", "127.0.0.1", "*.railway.app", "*.render.com"]
-)
-
+# ─────────────────────────────────────────────
+# RATE LIMIT HANDLER
+# ─────────────────────────────────────────────
 @app.exception_handler(RateLimitExceeded)
-async def custom_rate_limit_handler(request: Request, exc: RateLimitExceeded):
+async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
     return JSONResponse(
         status_code=429,
-        content={"detail": "Too many requests. Please try again later to ensure the security of your account."},
+        content={"detail": "Too many requests. Please try again later."},
     )
 
-origins = [
-    "https://portfolia-ai.vercel.app",  # your deployed frontend
-    "http://localhost:8080",             # local frontend (localhost)
-    "http://127.0.0.1:8080",            # local frontend (127.0.0.1)
-    "http://localhost:5173",            # vite default port
-    "http://127.0.0.1:5173",            # vite default port (127.0.0.1)
-]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,  # or ["*"] temporarily
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# ─────────────────────────────────────────────
+# ROUTERS
+# ─────────────────────────────────────────────
 app.include_router(cron.router)
 app.include_router(summary.router, tags=["GitHub Summary"])
-
-# app.include_router(github.router, prefix="/api/v1/github", tags=["GitHub"])
-app.include_router(auth.router, prefix="/api/v1/auth", tags=['Auth'])
-app.include_router(user.router, tags=['Auth'])
+app.include_router(auth.router, prefix="/api/v1/auth", tags=["Auth"])
+app.include_router(user.router, tags=["Auth"])
 app.include_router(project.router, prefix="/projects", tags=["Projects"])
 app.include_router(achievements.router)
 app.include_router(skills.router)
@@ -76,5 +109,4 @@ app.include_router(profile.router)
 app.include_router(preview.router)
 app.include_router(portfolio.router)
 app.include_router(resume.router, tags=["Resumes"])
-from app.api.v1.routes import contact
 app.include_router(contact.router)
