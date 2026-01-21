@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import API from '@/api/axios';
+import { API_URL } from '@/utils/api';
 
 const Auth = () => {
   const { toast } = useToast();
@@ -529,7 +530,7 @@ const Auth = () => {
                 disabled={loading || isGoogleLoading}
                 onClick={() => {
                   setIsGoogleLoading(true);
-                  window.location.href = 'http://127.0.0.1:8000/api/v1/auth/google/login';
+                  window.location.href = `${API_URL}/api/v1/auth/google/login`;
                 }}
               >
                 {isGoogleLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Chrome className="w-4 h-4 mr-2" />}

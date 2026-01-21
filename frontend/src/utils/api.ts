@@ -432,6 +432,35 @@ export async function getDraftResume() {
   return await res.json();
 }
 
+export async function getExistingPortfolioData() {
+  const [projects, skills, workExperiences, certifications, awards] = await Promise.all([
+    getUserProjects().catch(() => []),
+    getSkills().catch(() => []),
+    getAchievementsAPI('work-experience').catch(() => []),
+    getAchievementsAPI('certificates').catch(() => []),
+    getAchievementsAPI('awards').catch(() => [])
+  ]);
+
+  return {
+    projects,
+    skills,
+    work_experience: workExperiences.map((w: any) => ({
+      ...w,
+      company: w.organization,
+    })),
+    certifications: certifications.map((c: any) => ({
+      ...c,
+      name: c.title,
+    })),
+    achievements: awards.map((a: any) => ({
+      ...a,
+      issuer: a.organization,
+      date: a.year,
+      type: a.category || 'award',
+    }))
+  };
+}
+
 export async function confirmResume(resumeId: number, approvedData: any) {
   const token = localStorage.getItem("token");
   if (!token) throw new Error("No token found");
