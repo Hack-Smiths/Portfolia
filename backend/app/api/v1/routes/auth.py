@@ -254,6 +254,11 @@ async def google_login():
     """Redirects user to Google Login"""
     client_id = os.getenv("GOOGLE_CLIENT_ID")
     redirect_uri = os.getenv("GOOGLE_REDIRECT_URI")
+
+    # Force HTTPS in production
+    if os.getenv("ENV") == "production" and redirect_uri and redirect_uri.startswith("http://"):
+        redirect_uri = redirect_uri.replace("http://", "https://")
+
     scope = "openid email profile"
     url = f"https://accounts.google.com/o/oauth2/v2/auth?client_id={client_id}&redirect_uri={redirect_uri}&response_type=code&scope={scope}&access_type=offline&prompt=consent"
     return RedirectResponse(url)
@@ -264,6 +269,10 @@ async def google_callback(code: str, db: Session = Depends(get_db)):
     client_id = os.getenv("GOOGLE_CLIENT_ID")
     client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
     redirect_uri = os.getenv("GOOGLE_REDIRECT_URI")
+
+    # Force HTTPS in production
+    if os.getenv("ENV") == "production" and redirect_uri and redirect_uri.startswith("http://"):
+        redirect_uri = redirect_uri.replace("http://", "https://")
 
     # 1. Exchange code for access token
     async with httpx.AsyncClient() as client:

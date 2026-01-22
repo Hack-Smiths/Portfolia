@@ -96,7 +96,7 @@ const Auth = () => {
     // Fetch CSRF token on mount to ensure cookie is set
     const initCSRF = async () => {
       try {
-        await API.get('/csrf');
+        await API.get('/api/v1/auth/csrf');
       } catch (err) {
         console.error('Initial CSRF fetch failed:', err);
       }
@@ -110,7 +110,7 @@ const Auth = () => {
       }
       setCheckingUsername(true);
       try {
-        const res = await API.get(`/check-username/${signupForm.name}`);
+        const res = await API.get(`/api/v1/auth/check-username/${signupForm.name}`);
         setUsernameAvailable(res.data.available);
       } catch (err) {
         setUsernameAvailable(null);
@@ -128,7 +128,7 @@ const Auth = () => {
     setLoginError('');
     setLoading(true);
     try {
-      const res = await API.post('/login', {
+      const res = await API.post('/api/v1/auth/login', {
         email: loginForm.email,
         password: loginForm.password,
       });
@@ -169,7 +169,7 @@ const Auth = () => {
 
     setLoading(true);
     try {
-      const res = await API.post('/signup', {
+      const res = await API.post('/api/v1/auth/signup', {
         full_name: signupForm.fullname,
         username: signupForm.name,
         email: signupForm.email,
@@ -194,7 +194,7 @@ const Auth = () => {
     setOtpError('');
     setIsVerifying(true);
     try {
-      const res = await API.post('/verify-otp', {
+      const res = await API.post('/api/v1/auth/verify-otp', {
         email: verifyingEmail,
         otp_code: otpCode
       });
@@ -210,7 +210,7 @@ const Auth = () => {
   const handleResendOTP = async () => {
     setResendStatus('Sending...');
     try {
-      await API.post('/resend-otp', { email: verifyingEmail });
+      await API.post('/api/v1/auth/resend-otp', { email: verifyingEmail });
       setResendStatus('New code sent!');
       setTimeout(() => setResendStatus(''), 3000);
     } catch (err) {
@@ -530,7 +530,7 @@ const Auth = () => {
                 disabled={loading || isGoogleLoading}
                 onClick={() => {
                   setIsGoogleLoading(true);
-                  window.location.href = `${API_URL}/google/login`;
+                  window.location.href = `${API_URL}/api/v1/auth/google/login`;
                 }}
               >
                 {isGoogleLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Chrome className="w-4 h-4 mr-2" />}

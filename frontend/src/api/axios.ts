@@ -37,7 +37,7 @@ API.interceptors.response.use(
     // If we get a 401/403 related to CSRF, we might want to refresh it
     if (error.response?.status === 403 && error.response?.data?.detail?.includes("CSRF")) {
       try {
-        const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/csrf`, { withCredentials: true });
+        const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/v1/auth/csrf`, { withCredentials: true });
         csrfToken = res.headers["x-csrf-token"];
         // Retry the original request with the new token
         error.config.headers["X-CSRF-Token"] = csrfToken;
